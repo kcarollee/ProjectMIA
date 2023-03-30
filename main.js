@@ -15,7 +15,6 @@ function main(){
 	const near = 0.1;
 	const far = 1000;
 	const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-	camera.layers.enable(0);
 	camera.position.set(0, 0, 10);
 
 // SCENES AND GAME MODES
@@ -85,7 +84,7 @@ function main(){
 			this.materialArr = [];	
 			*/
 			// TEMPORARY CITY MODELING
-			this.buildingNum = 0;
+			this.buildingNum = 50;
 			this.meshGroup = new THREE.Group();
 			this.meshMaterial = new THREE.MeshNormalMaterial(); // TEMP MATERIAL
 			this.playerPosition = new THREE.Vector3(0, 0.1, 0);
@@ -114,7 +113,7 @@ function main(){
 
 			this.meshGroup.add(this.stageRoadMesh.getMeshGroup())
 		
-			this.meshGroup.layers.enable(1);
+
 
 			this.stageState = {
 				score: 0,
@@ -183,6 +182,7 @@ function main(){
 	let raycasterIntersects;
 	const pointer = new THREE.Vector2();
 	const fontLoader = new FontLoader();
+	let titleTextMesh, playButtonMesh;
 	fontLoader.load('assets/fonts/font_1.json', function(font){
 		const titleGeometry = new TextGeometry('PROJECT MIA', {
 			font: font,
@@ -197,7 +197,7 @@ function main(){
 		});
 
 		titleGeometry.computeBoundingBox();
-		const titleTextMesh = new THREE.Mesh(titleGeometry, new THREE.MeshNormalMaterial());
+		titleTextMesh = new THREE.Mesh(titleGeometry, new THREE.MeshNormalMaterial());
 		titleTextMesh.position.set(-10.0, 3.0, .0);
 		titleTextMesh.name = "TITLE_MESH";
 		currentScene.add(titleTextMesh);
@@ -215,7 +215,7 @@ function main(){
 		});
 
 		playButtonGeometry.computeBoundingBox();
-		const playButtonMesh = new THREE.Mesh(playButtonGeometry, new THREE.MeshNormalMaterial());
+		playButtonMesh = new THREE.Mesh(playButtonGeometry, new THREE.MeshNormalMaterial());
 		playButtonMesh.position.set(-8.5, -3.0, .0);
 		playButtonMesh.name = "PLAY_MESH";
 		currentScene.add(playButtonMesh);
@@ -225,6 +225,21 @@ function main(){
 		time *= 0.001;
 		updateRaycaster();
 		if (gameMode == "MAIN_GAME") renderOntoRenderTarget(renderer, currentScene, minimapRenderTarget, minimapCamera);
+		else if (gameMode == "STAGE_SELECT"){
+
+		}
+		else if (gameMode == "TITLE_SCREEN" && titleTextMesh != undefined){
+			
+			if (titleTextMesh != undefined){
+				titleTextMesh.rotateX(Math.sin(time) * 0.0003);
+				titleTextMesh.rotateY(Math.cos(time) * 0.00005);
+			}
+
+			if (playButtonMesh != undefined){
+				playButtonMesh.rotateX(Math.cos(time) * 0.0005);
+				playButtonMesh.rotateY(Math.sin(time) * 0.0003);
+			}
+		}
 		
 		if (resizeRenderToDisplaySize(renderer)){
 			const canvas = renderer.domElement;
@@ -239,7 +254,6 @@ function main(){
 
 		// update fps controls
 		firstPersonControls.update(clock.getDelta());
-		//console.log(camera.position, camera.rotation);
 	}
 
 	function map(value, min1, max1, min2, max2) {
@@ -253,6 +267,8 @@ function main(){
 	
 		pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 		pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+		
 	
 	}
 
