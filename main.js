@@ -84,35 +84,36 @@ function main(){
 			this.materialArr = [];	
 			*/
 			// TEMPORARY CITY MODELING
-			this.buildingNum = 50;
+
 			this.meshGroup = new THREE.Group();
+
+			this.stageRoadMesh = new WFCFloorMesh(20, 0.5, 0.5, 'assets/tiles/crosswalk/', '.png');
+			let buildingTransform = this.stageRoadMesh.waveFunctionCollapseFullCycle();
+			this.stageRoadMesh.buildMesh();
+
+			this.meshGroup.add(this.stageRoadMesh.getMeshGroup())
+
+			this.buildingNum = buildingTransform.length;
+
 			this.meshMaterial = new THREE.MeshNormalMaterial(); // TEMP MATERIAL
 			this.playerPosition = new THREE.Vector3(0, 0.1, 0);
+
 			for (let i = 0; i < this.buildingNum; i++){
 				// buildings will be spread across the XZ axis
 				// the Y axis determines the height of the building. if height = h yPos = h * 0.5
-				let width = Math.random() + .2;
-				let depth = Math.random() + .2;
-				let height = Math.random() + .2;
-				let radius = Math.random();
-		        this.cityRadius = 5 * Math.random();
+				let width = buildingTransform[i][2];
+				let depth = buildingTransform[i][3];
+				let height = Math.random() + .5;
 
-				let posx = this.cityRadius * Math.cos(radius * Math.PI * 2.0);
-				let posz = this.cityRadius * Math.sin(radius * Math.PI * 2.0);
+				let posx = buildingTransform[i][0] - 5;
+				let posz = buildingTransform[i][1] - 5;
 				let posy = height * 0.5 + 0.01;
-
+				
 				let buildingGeom =  new THREE.BoxGeometry(width, height, depth);
 				let buildingMesh = new THREE.Mesh(buildingGeom, this.meshMaterial);
 				buildingMesh.position.set(posx, posy, posz);
 				this.meshGroup.add(buildingMesh);
 			}
-
-			this.stageRoadMesh = new WFCFloorMesh(20, 0.5, 0.5, 'assets/tiles/crosswalk/', '.png');
-			this.stageRoadMesh.waveFunctionCollapseFullCycle();
-			this.stageRoadMesh.buildMesh();
-
-			this.meshGroup.add(this.stageRoadMesh.getMeshGroup())
-		
 
 
 			this.stageState = {
@@ -137,7 +138,7 @@ function main(){
 
 	const titleScreenModel = new StageModel();
 	titleScreenModel.meshGroup.scale.set(0.75, 0.75, 0.75);
-	titleScreenModel.meshGroup.rotation.set(0.5, 0.5, 0.5);
+	titleScreenModel.meshGroup.rotation.set(Math.PI * 0.5, 0, 0);
 	titleScreenModel.meshGroup.position.set(4, .0, .0);
 	titleScreenModel.addToScene(currentScene);
 
