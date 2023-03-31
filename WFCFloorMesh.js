@@ -3,7 +3,6 @@ import Tile from './Tile.js';
 import Cell from './Cell.js';
 
 
-
 export default class WFCFloorMesh {
     // 20, 'assets/tiles/crosswalk/', '.png'
     constructor(dim, cellWidth, cellHeight, urlString, formatString,
@@ -257,7 +256,7 @@ export default class WFCFloorMesh {
         this.grid = nextGrid;
     }
 
-    calcBuildingSpace(){
+    calcBuildingTransform(){
         let buildingTransform = [];
         let visited = new Array(this.DIM * this.DIM).fill().map(() => false);
 
@@ -266,59 +265,40 @@ export default class WFCFloorMesh {
 
                 let index = i + j * this.DIM;
                 let gridCnt = [0, 0];
+                let buildingPos = [0, 0];
                 let buildingSpace = [0, 0];
 
                 // 방문안한 타일이면 방문한다 했으면 스킵
                 if(visited[index]) continue;
 
-
-                // 방문 안했으면 다시 해야지
-                // 오른쪽이랑 아래만 검사하면 됨 맨 윗줄과 왼쪽줄에 잘린건 상관 없음
-                // 만약 오른쪽이 꽉 차있으면
-
-                ///
-                /// this.grid[index]는 안된다 얘는 Cell이고 Tile이 아니다
-                ///
-
                 if(this.tiles[this.grid[index].options[0]].buildingSpace[1] === this.r0){
                     let insideIndex = index;
                     do{
                         if(insideIndex > (j + 1) * this.DIM) break;
-
                         gridCnt[0]++;
-                        // 왼쪽 오른쪽 두개 더한 합을 너비에 더해준다.
                         buildingSpace[0] += this.tiles[this.grid[insideIndex].options[0]].buildingSpace[1]
                                           + this.tiles[this.grid[insideIndex].options[0]].buildingSpace[3];
                     }while(this.tiles[this.grid[insideIndex++].options[0]].buildingSpace[1] === this.r0);
                 }
-
-                // 오른쪽이 막혀있는 경우
                 else{
                     buildingSpace[0] = this.tiles[this.grid[index].options[0]].buildingSpace[1]
                                      + this.tiles[this.grid[index].options[0]].buildingSpace[3];
                 }
-
-                // 만약 아래가 꽉 차있으면
                 if(this.tiles[this.grid[index].options[0]].buildingSpace[2] === this.u0){
                     let insideIndex = index - this.DIM;
                     do{
                         insideIndex += this.DIM;
                         if(insideIndex >= this.DIM * this.DIM) break;
-
                         gridCnt[1]++;
-                        // 위 아래 두개 더한 합을 너비에 더해준다.
                         buildingSpace[1] += this.tiles[this.grid[insideIndex].options[0]].buildingSpace[0]
                                           + this.tiles[this.grid[insideIndex].options[0]].buildingSpace[2];
                     }while(this.tiles[this.grid[insideIndex].options[0]].buildingSpace[2] === this.u0);
                 }
-
-                // 아래가 막혀있는 경우
                 else{
                     buildingSpace[1] = this.tiles[this.grid[index].options[0]].buildingSpace[0]
                                      + this.tiles[this.grid[index].options[0]].buildingSpace[2];
                 }
 
-                // gridCnt가 1이상이면 네모칸 전부 방문해줘야함
                 if(gridCnt[0] > 0 || gridCnt[1] > 0){
                     let iMax = Math.max(1, gridCnt[0]);
                     let jMax = Math.max(1, gridCnt[1]);
@@ -327,20 +307,27 @@ export default class WFCFloorMesh {
                             visited[(i + ii) + (j + jj) * this.DIM] = true;
                         }
                     }
+                    buildingPos = [(i - 1) * this.cellWidth + 0.5 * this.cellWidth - this.tiles[this.grid[index].options[0]].buildingSpace[3] + buildingSpace[0] * 0.5,
+                                   (j - 1) * this.cellHeight + 0.5 * this.cellHeight - this.tiles[this.grid[index].options[0]].buildingSpace[0] + buildingSpace[1] * 0.5];
+                }
+                else{
+                    buildingPos = [(i - 1) * this.cellWidth + 0.5 * this.cellWidth,
+                                   (j - 1) * this.cellHeight + 0.5 * this.cellHeight];
                 }
 
-                // 크기는 맞췄음
-                buildingTransform.push(buildingSpace);
+
+                buildingTransform.push([buildingPos[0],buildingPos[1],buildingSpace[0],buildingSpace[1]]);
             }
         }
         console.log(buildingTransform);
+        return buildingTransform;
     }
 
     waveFunctionCollapseFullCycle(){
         while (this.wfcIterCount !== this.DIM * this.DIM) this.waveFunctionCollapseSingleIteration();
 
         // 생성 완료 된 후에 건물 부지 측정
-        this.calcBuildingSpace();
+        return this.calcBuildingTransform();
     }
 
     buildMesh(){
