@@ -65,7 +65,7 @@ function main(){
 	const minimapPlaneMat = new THREE.MeshBasicMaterial({
 		map: minimapRenderTarget.texture,
 		side: THREE.DoubleSide,
-		depthTest: false,
+		//depthTest: false,
 	})
 
 	const minimapMesh = new THREE.Mesh(minimapPlaneGeom, minimapPlaneMat);
@@ -112,9 +112,9 @@ function main(){
 				let depth = buildingTransform[i][3];
 				let height = Math.random() + .5;
 
-				let posx = buildingTransform[i][0] - this.WFCDim * this.WFCWidth * 0.5 + 0.5;
-				let posz = buildingTransform[i][1] - this.WFCDim * this.WFCHeight * 0.5 + 0.5;
-				let posy = height * 0.5 + 0.01;
+				let posx = buildingTransform[i][0] - this.WFCDim * this.WFCWidth * 0.5 + this.WFCWidth;
+				let posz = buildingTransform[i][1] - this.WFCDim * this.WFCHeight * 0.5 + this.WFCHeight;
+				let posy = height * 0.5;
 				
 				let buildingGeom =  new THREE.BoxGeometry(width, height, depth);
 				let buildingMesh = new THREE.Mesh(buildingGeom, this.meshMaterial);
@@ -165,7 +165,6 @@ function main(){
 		mesh.position.set(-9 + i * 2.0, 0, 0);
 		mesh.unlocked = stageUnlockedStatus[i];
 		stageSelectScene.add(mesh);
-
 	}
 
 // UI ELEMENT
@@ -173,7 +172,7 @@ function main(){
 	let raycasterIntersects;
 	const pointer = new THREE.Vector2();
 	const fontLoader = new FontLoader();
-	let titleTextMesh, playButtonMesh;
+	let titleTextMesh, playButtonMesh, stageSelectMesh;
 	fontLoader.load('assets/fonts/font_1.json', function(font){
 		const titleGeometry = new TextGeometry('PROJECT MIA', {
 			font: font,
@@ -210,6 +209,24 @@ function main(){
 		playButtonMesh.position.set(-8.5, -3.0, .0);
 		playButtonMesh.name = "PLAY_MESH";
 		currentScene.add(playButtonMesh);
+
+		const stageSelectGeometry = new TextGeometry('STAGE SELECT', {
+			font: font,
+			size: 0.75,
+			height: 0.25,
+			curveSegments: 12,
+			bevelEnabled: true,
+			bevelThickness: 0.01,
+			bevelSize: 0.01,
+			bevelOffset: 0,
+			bevelSegments: 5
+		});
+
+		stageSelectGeometry.computeBoundingBox();
+		stageSelectMesh = new THREE.Mesh(stageSelectGeometry, new THREE.MeshNormalMaterial());
+		stageSelectMesh.position.set(-6, 5, 0);
+		stageSelectMesh.name = "PLAY_MESH";
+		stageSelectScene.add(stageSelectMesh);
 	});
 
 	function render(time){
@@ -269,6 +286,7 @@ function main(){
 					console.log("STAGE SELECT ACTIVATED");
 					gameMode = "STAGE_SELECT";
 					currentScene = stageSelectScene;
+					
 					raycasterIntersects = [];
 					break;
 				}
