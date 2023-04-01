@@ -274,7 +274,7 @@ export default class WFCFloorMesh {
                 if(this.tiles[this.grid[index].options[0]].buildingSpace[1] === this.r0){
                     let insideIndex = index;
                     do{
-                        if(insideIndex > (j + 1) * this.DIM) break;
+                        if(insideIndex >= (j + 1) * this.DIM) break;
                         gridCnt[0]++;
                         buildingSpace[0] += this.tiles[this.grid[insideIndex].options[0]].buildingSpace[1]
                                           + this.tiles[this.grid[insideIndex].options[0]].buildingSpace[3];

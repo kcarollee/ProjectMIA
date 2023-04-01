@@ -105,8 +105,8 @@ function main(){
 				let depth = buildingTransform[i][3];
 				let height = Math.random() + .5;
 
-				let posx = buildingTransform[i][0] - 5;
-				let posz = buildingTransform[i][1] - 5;
+				let posx = buildingTransform[i][0] - 4.75;
+				let posz = buildingTransform[i][1] - 4.75;
 				let posy = height * 0.5 + 0.01;
 				
 				let buildingGeom =  new THREE.BoxGeometry(width, height, depth);
