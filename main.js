@@ -90,7 +90,7 @@ function main(){
 			// TEMPORARY CITY MODELING
 			this.meshGroup = new THREE.Group();
 
-			this.WFCDim = 30;
+			this.WFCDim = 20;
 			this.WFCWidth = 0.5;
 			this.WFCHeight = 0.5;
 
