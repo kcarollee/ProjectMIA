@@ -3,6 +3,7 @@ import Tile from './Tile.js';
 import Cell from './Cell.js';
 
 
+
 export default class WFCFloorMesh {
     // 20, 'assets/tiles/crosswalk/', '.png'
     constructor(dim, cellWidth, cellHeight, urlString, formatString,
@@ -24,6 +25,8 @@ export default class WFCFloorMesh {
             )
             this.tileImages.push(tex);
         }
+
+        this.roadTileTexture = new THREE.TextureLoader().load(urlString + 'roadTileTexture' + formatString);
 
         this.tiles = [];
         this.DIM = dim;
@@ -132,8 +135,8 @@ export default class WFCFloorMesh {
         this.wfcIterCount = 0;
         this.selectedArr = [];
 
-        let xOffset = this.cellWidth * this.DIM * 0.5;
-        let yOffset = this.cellHeight * this.DIM * 0.5;
+        let xOffset = this.cellWidth * this.DIM * 0.5 - this.cellWidth * 0.5;
+        let yOffset = this.cellHeight * this.DIM * 0.5 - this.cellHeight * 0.5;
         // Create cell for each spot on the grid
         for (let i = 0; i < this.DIM * this.DIM; i++) {
             this.grid[i] = new Cell(this.tiles.length, this.cellWidth, this.cellHeight);
@@ -274,7 +277,7 @@ export default class WFCFloorMesh {
                 if(this.tiles[this.grid[index].options[0]].buildingSpace[1] === this.r0){
                     let insideIndex = index;
                     do{
-                        if(insideIndex > (j + 1) * this.DIM) break;
+                        if(insideIndex >= (j + 1) * this.DIM) break;
                         gridCnt[0]++;
                         buildingSpace[0] += this.tiles[this.grid[insideIndex].options[0]].buildingSpace[1]
                                           + this.tiles[this.grid[insideIndex].options[0]].buildingSpace[3];
@@ -330,6 +333,13 @@ export default class WFCFloorMesh {
         return this.calcBuildingTransform();
     }
 
+    waveFunctionCollapseFullCycle(){
+        while (this.wfcIterCount !== this.DIM * this.DIM) this.waveFunctionCollapseSingleIteration();
+
+        // 생성 완료 된 후에 건물 부지 측정
+        return this.calcBuildingTransform();
+    }
+
     buildMesh(){
         //console.log(selectedArr);
         for (let i = 0; i < this.selectedArr.length; i++){
@@ -341,6 +351,9 @@ export default class WFCFloorMesh {
             let currentCellTileRotation = currentCellTile.imageRotationNum;
             //console.log(currentCellTileRotation);
             currentCell.setTexture(currentCellTile.img);
+
+            // 도로 텍스쳐 타일은 따로 세팅해줘야함 -> 같이 회전시켜주면 seamless texture가 쓸모없게 됨
+            currentCell.setRoadTexture(this.roadTileTexture);
             currentCell.setRotationNum(currentCellTileRotation);
             currentCell.buildMesh();
 

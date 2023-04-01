@@ -9,6 +9,7 @@ function compareEdge(a,b){
 }
 
 export default class Tile {
+    static size = [0,0];
     constructor(img, edges, buildingSpace, imageRotationNum = 0) {
         this.img = img;
         this.edges = edges;

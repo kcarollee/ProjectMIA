@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
-import WFCFloorMesh from './WFCFloorMesh.js';
+import WFCFloorMesh from './js/WFCFloorMesh.js';
+
 
 function main(){
 	const canvas = document.querySelector('#c');
@@ -16,6 +16,8 @@ function main(){
 	const far = 1000;
 	const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 	camera.position.set(0, 0, 10);
+	//camera.lookAt(new THREE.Vector3(0, 0, 0));
+	
 
 // SCENES AND GAME MODES
 	let currentScene;
@@ -29,31 +31,28 @@ function main(){
 
 	const mainGameScene = new THREE.Scene();
 	mainGameScene.background = new THREE.Color(backgroundColor);
-
 	currentScene = titleScene;
-	
 	renderer.render(currentScene, camera);
 
-	/* 
-	const orbitControls = new OrbitControls(camera, renderer.domElement);
-    orbitControls.target.copy(currentScene.position);
-    orbitControls.update();
-	*/
+	
+
 
 // CONTROLS
-	const firstPersonControls = new FirstPersonControls(camera, renderer.domElement);
-	const clock = new THREE.Clock();
-	firstPersonControls.movementSpeed = 0.1;
-	firstPersonControls.lookSpeed = 0.1;
-	firstPersonControls.enabled = false;
-	
+
+	const orbitControls = new OrbitControls(camera, renderer.domElement);
+	orbitControls.enableZoom = false;
+	orbitControls.enablePan = false;
+	//orbitControls.enableDamping = true;
+	orbitControls.rotateSpeed = - 0.25;
+	orbitControls.target.set(camera.position.x, camera.position.y, camera.position.z - 0.01);
+	orbitControls.enabled = false;
 
 // MINIMAP & MINIMAP CAMERA
 	const minimapCamera = new THREE.OrthographicCamera( -5, 5, 5, -5, 1, 1000);
 	const minimapRenderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
 	const minimapCameraLookAt = new THREE.Vector3(0, 0, 0);
 	
-	minimapCamera.position.set(0, 2, 0);
+	minimapCamera.position.set(0, 5, 0);
 	minimapCamera.lookAt(0, 0, 0);
 
 	function renderOntoRenderTarget(renderer, scene, renderTarget, camera){
@@ -66,14 +65,19 @@ function main(){
 	const minimapPlaneMat = new THREE.MeshBasicMaterial({
 		map: minimapRenderTarget.texture,
 		side: THREE.DoubleSide,
-		depthTest: false
+		depthTest: false,
 	})
 
 	const minimapMesh = new THREE.Mesh(minimapPlaneGeom, minimapPlaneMat);
 	// set renderOrder to higher than any other objects so it always renders on the top of the screen
 	minimapMesh.renderOrder = 1;
-	minimapMesh.position.set(5, -5);
-	mainGameScene.add(minimapMesh);
+	minimapMesh.scale.set(0.25, 0.25, 0.25);
+	minimapMesh.position.set(1, -1, -3);
+
+
+	
+
+
 
 // CITY MODEL
 	class StageModel {
@@ -84,10 +88,13 @@ function main(){
 			this.materialArr = [];	
 			*/
 			// TEMPORARY CITY MODELING
-
 			this.meshGroup = new THREE.Group();
 
-			this.stageRoadMesh = new WFCFloorMesh(20, 0.5, 0.5, 'assets/tiles/crosswalk/', '.png');
+			this.WFCDim = 30;
+			this.WFCWidth = 0.5;
+			this.WFCHeight = 0.5;
+
+			this.stageRoadMesh = new WFCFloorMesh(this.WFCDim, this.WFCWidth, this.WFCHeight, 'assets/tiles/set1/', '.png');
 			let buildingTransform = this.stageRoadMesh.waveFunctionCollapseFullCycle();
 			this.stageRoadMesh.buildMesh();
 
@@ -105,8 +112,8 @@ function main(){
 				let depth = buildingTransform[i][3];
 				let height = Math.random() + .5;
 
-				let posx = buildingTransform[i][0] - 5;
-				let posz = buildingTransform[i][1] - 5;
+				let posx = buildingTransform[i][0] - this.WFCDim * this.WFCWidth * 0.5 + 0.5;
+				let posz = buildingTransform[i][1] - this.WFCDim * this.WFCHeight * 0.5 + 0.5;
 				let posy = height * 0.5 + 0.01;
 				
 				let buildingGeom =  new THREE.BoxGeometry(width, height, depth);
@@ -114,7 +121,6 @@ function main(){
 				buildingMesh.position.set(posx, posy, posz);
 				this.meshGroup.add(buildingMesh);
 			}
-
 
 			this.stageState = {
 				score: 0,
@@ -162,22 +168,6 @@ function main(){
 
 	}
 
-
-
-
-
-
-
-	/*
-//GUI
-	const gui = new dat.GUI();
-	const controls = new function(){
-		this.outputObj = function(){
-			scene.children.forEach(c => console.log(c));
-		}
-	}
-	gui.add(controls, 'outputObj');
-	*/
 // UI ELEMENT
 	let raycaster = new THREE.Raycaster();
 	let raycasterIntersects;
@@ -254,7 +244,8 @@ function main(){
 		requestAnimationFrame(render);
 
 		// update fps controls
-		firstPersonControls.update(clock.getDelta());
+		//firstPersonControls.update(clock.getDelta());
+		orbitControls.update();
 	}
 
 	function map(value, min1, max1, min2, max2) {
@@ -268,10 +259,8 @@ function main(){
 	
 		pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 		pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-		
-	
 	}
+
 
 	function onPointerClick(event){
 		if (gameMode == "TITLE_SCREEN"){
@@ -289,8 +278,11 @@ function main(){
 			for (let i = 0; i < raycasterIntersects.length; i++){
 				if (raycasterIntersects[i].object.unlocked){
 					currentScene = mainGameScene;
+					camera.add(minimapMesh);
+					orbitControls.enabled = true;
+					currentScene.add(camera);
 					gameMode = "MAIN_GAME";
-					firstPersonControls.enabled = true;
+					//firstPersonControls.enabled = true;
 					raycasterIntersects = [];
 					generateStage();
 					break;
@@ -304,6 +296,7 @@ function main(){
 		const newStage = new StageModel();
 		newStage.addToScene(mainGameScene);
 		camera.position.copy(newStage.getPlayerPos());
+		orbitControls.target.set(camera.position.x, camera.position.y, camera.position.z + 0.01);
 		console.log(camera.position);
 		//console.log(mainGameScene.children);
 	}
@@ -334,8 +327,8 @@ function main(){
 			renderer.setSize(width, height, false);
 		}
 
-		firstPersonControls.handleResize();
-
+		//firstPersonControls.handleResize();
+		
 		return needResize;
 	}
 
