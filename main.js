@@ -3,6 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import WFCFloorMesh from './js/WFCFloorMesh.js';
+import WFC3D from "./js/WFC3D.js";
 
 
 function main(){
@@ -105,6 +106,28 @@ function main(){
 			this.meshMaterial = new THREE.MeshNormalMaterial(); // TEMP MATERIAL
 			this.playerPosition = new THREE.Vector3(0, 0.1, 0);
 
+
+			// WFC3D
+
+			this.rulebook = rulebook;
+
+
+			this.WFC3D = new WFC3D(
+				25, this.rulebook,
+				'assets/3Dtiles/Building/','.glb',
+			);
+
+			Promise.all(this.WFC3D.promises).then(() => {
+				console.log("ASDF");
+				let grid = this.WFC3D.createBuilding([3, 3, 3], [0.05, 0.05, 0.05]);
+				// this.WFC3D.addToSceneDebug(currentScene);
+				this.WFC3D.addToScene(currentScene, grid);
+
+				// this.WFC3D.addToScene(currentScene);
+				// let buildingMesh = this.WFC3D.getBuilding("x,y,z", "w,d,h");
+				// WFC3D
+			});
+
 			for (let i = 0; i < this.buildingNum; i++){
 				// buildings will be spread across the XZ axis
 				// the Y axis determines the height of the building. if height = h yPos = h * 0.5
@@ -162,7 +185,7 @@ function main(){
 		let mesh;
 		if (stageUnlockedStatus[i]) mesh = new THREE.Mesh(tileGeom, unlockedMaterial);
 		else mesh = new THREE.Mesh(tileGeom, lockedMaterial);
-		mesh.position.set(-9 + i * 2.0, 0, 0);
+		mesh.position.set(0 + i * 2.0, 0, 0);
 		mesh.unlocked = stageUnlockedStatus[i];
 		stageSelectScene.add(mesh);
 	}
