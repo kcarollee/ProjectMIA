@@ -119,9 +119,10 @@ function main(){
 
 			Promise.all(this.WFC3D.promises).then(() => {
 				console.log("ASDF");
-				let grid = this.WFC3D.createBuilding([3, 3, 3], [0.05, 0.05, 0.05]);
+				let dim = [5, 5, 5];
+				let grid = this.WFC3D.createBuilding(dim, [0.05, 0.05, 0.05]);
 				// this.WFC3D.addToSceneDebug(currentScene);
-				this.WFC3D.addToScene(currentScene, grid);
+				this.WFC3D.addToScene(currentScene, grid, dim);
 
 				// this.WFC3D.addToScene(currentScene);
 				// let buildingMesh = this.WFC3D.getBuilding("x,y,z", "w,d,h");

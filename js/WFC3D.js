@@ -80,6 +80,7 @@ export default class WFC3D {
                 }
             }
         }
+
         console.log("First", grid);
         grid = this.propagateOnce(grid);
         console.log(grid);
@@ -267,33 +268,97 @@ export default class WFC3D {
         }
         console.log(selectedArr);
 
-        return selectedArr;
+        // return selectedArr;
+        return grid;
     }
 
     // 수정 필요
-    addToScene(scene, grid) {
+    addToScene(scene, grid, dim) {
         Promise.all(this.promises).then(() => {
             let buildingMeshGroup = new THREE.Group();
-            for (let i = 0; i < grid.length; i++) {
-                let curMesh = this.tiles3D[grid[i].options[0]].mesh;
-                if (curMesh === "EMPTY MESH") continue;
-                curMesh = curMesh.clone();
-                curMesh.position.set(0.5 + grid[i].pos[0] * 0.15, grid[i].pos[1] * 0.15, 4 + grid[i].pos[2] * 0.15);
-                curMesh.scale.set(0.05, 0.05, 0.05);
-                let curMeshRotationNum = this.tiles3D[grid[i].options[0]].meshRotationNum;
-                curMesh.rotation.z = Math.PI * 0.5 * curMeshRotationNum;
 
-                buildingMeshGroup.add(curMesh);
+            for (let k = 0; k < grid.length; k++) {
+
+                for (let j = 0; j < grid[0].length; j++) {
+
+                    for (let i = 0; i < grid[0][0].length; i++) {
+                        let curMesh = this.tiles3D[grid[k][j][i].options[0]].mesh;
+                        if (curMesh === "EMPTY MESH") continue;
+                        curMesh = curMesh.clone();
+
+                        curMesh.position.set(
+                            i,
+                            dim[1] - j,
+                            k,
+                        );
+                        curMesh.scale.set(0.25, 0.25, 0.25);
+
+                        let curMeshRotationNum = this.tiles3D[grid[k][j][i].options[0]].meshRotationNum;
+                        curMesh.rotation.x = Math.PI * 0.5;
+                        curMesh.rotation.y = -Math.PI * 0.5 * curMeshRotationNum;
+
+                        curMesh.material = new THREE.MeshBasicMaterial({
+                            color: 0x00ff00,
+                            side: THREE.DoubleSide
+                        });
+
+                        buildingMeshGroup.add(curMesh);
+                    }
+                }
             }
+
             scene.add(buildingMeshGroup);
 
             function animate() {
                 requestAnimationFrame(animate);
+                buildingMeshGroup.rotation.x += 0.001;
+                buildingMeshGroup.rotation.y += 0.003;
+                buildingMeshGroup.rotation.z += 0.005;
             }
 
             animate();
         });
     }
+
+    // //selectedArr 로 하는거
+    // addToScene(scene, grid, dim) {
+    //     Promise.all(this.promises).then(() => {
+    //         let buildingMeshGroup = new THREE.Group();
+    //         for (let i = 0; i < grid.length; i++) {
+    //             let curMesh = this.tiles3D[grid[i].options[0]].mesh;
+    //             if (curMesh === "EMPTY MESH") continue;
+    //             curMesh = curMesh.clone();
+    //
+    //             curMesh.position.set(
+    //                 grid[i].pos[1],
+    //
+    //                 grid[i].pos[0],
+    //                 grid[i].pos[2],
+    //             );
+    //
+    //             curMesh.scale.set(0.25, 0.25, 0.25);
+    //
+    //             let curMeshRotationNum = this.tiles3D[grid[i].options[0]].meshRotationNum;
+    //             curMesh.rotation.x = Math.PI * 0.5;
+    //             curMesh.rotation.y = Math.PI * 0.5 * curMeshRotationNum;
+    //             curMesh.material = new THREE.MeshBasicMaterial({
+    //                 color: 0x00ff00,
+    //                 side: THREE.DoubleSide
+    //             });
+    //
+    //             buildingMeshGroup.add(curMesh);
+    //         }
+    //         scene.add(buildingMeshGroup);
+    //
+    //         function animate() {
+    //             requestAnimationFrame(animate);
+    //             buildingMeshGroup.rotation.x += 0.005;
+    //             buildingMeshGroup.rotation.z += 0.005;
+    //         }
+    //
+    //         animate();
+    //     });
+    // }
 
     // debug
     addToSceneDebug(scene) {
@@ -302,25 +367,37 @@ export default class WFC3D {
                 this.meshes[i] = gltf[i].scene.children[0].clone();
             }
 
+
+            this.meshes[0].position.set(1, 1, 1);
+            scene.add(this.meshes[0]);
+
             for (let i = 0; i < this.modelCount; i++) {
                 if (this.meshes[i] === undefined) {
                     console.log("Not loaded");
                     continue;
                 }
-                this.meshes[i].position.set(0.5 + (i % 5) * 0.25, parseInt(i / 5) * 0.25, 5);
-                this.meshes[i].scale.set(0.05, 0.05, 0.05);
-                scene.add(this.meshes[i]);
+                this.meshes[0].scale.set(0.25, 0.25, 0.25);
             }
 
             // animate
             let mc = this.modelCount;
             let me = this.meshes;
 
+            let cnt = 0;
+            let rotations = 0;
+
             function animate() {
                 requestAnimationFrame(animate);
-                for (let i = 0; i < mc; i++) {
-                    me[i].rotation.z = Math.PI * 0.01;
+                // for (let i = 0; i < mc; i++) {
+                me[0].rotation.x = Math.PI * 0.5;
+
+                if (cnt++ > 120 * (rotations + 1)) {
+                    me[0].rotation.y += Math.PI * 0.5;
+                    cnt = 0;
+                    rotations = (rotations + 1) % 4;
+                    console.log(rotations);
                 }
+                // }
             }
 
             animate();
