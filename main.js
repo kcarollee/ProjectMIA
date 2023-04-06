@@ -119,21 +119,27 @@ function main(){
 
 			Promise.all(this.WFC3D.promises).then(() => {
 				console.log("ASDF");
-				for(let i = 0; i < 2; i++){
-					let dim = [5, 5, 5];
-					let size = [Math.random(), Math.random(), Math.random()];
+				for(let i = 0; i < this.buildingNum; i++){
+					let dim = [3, 3, 3];
+					let tmp = 0.5
+					let size = [
+						tmp * buildingTransform[i][2],
+						tmp * Math.random(),
+						tmp * buildingTransform[i][3],
+					];
 					let buildingMesh = this.WFC3D.createBuilding(dim, size);
 
 					buildingMesh.position.set(
+						- this.WFCDim * this.WFCWidth * 0.5 + buildingTransform[i][0] * 0.95,
 						0,
-						0,
-						0);
-					currentScene.add(buildingMesh);
+						- this.WFCDim * this.WFCHeight * 0.5  + buildingTransform[i][1] * 0.95,
+						);
+					this.meshGroup.add(buildingMesh);
 
 					function animate(){
 						requestAnimationFrame(animate);
-						buildingMesh.rotation.x += 0.001 * (i + 1);
-						buildingMesh.rotation.y += 0.002 * (i + 1);
+						// buildingMesh.rotation.x += 0.001 * (i + 1);
+						// buildingMesh.rotation.y += 0.002 * (i + 1);
 					}
 					animate();
 				}
@@ -145,22 +151,24 @@ function main(){
 				// WFC3D
 			});
 
-			for (let i = 0; i < this.buildingNum; i++){
-				// buildings will be spread across the XZ axis
-				// the Y axis determines the height of the building. if height = h yPos = h * 0.5
-				let width = buildingTransform[i][2];
-				let depth = buildingTransform[i][3];
-				let height = Math.random() + .5;
 
-				let posx = buildingTransform[i][0] - this.WFCDim * this.WFCWidth * 0.5 + this.WFCWidth;
-				let posz = buildingTransform[i][1] - this.WFCDim * this.WFCHeight * 0.5 + this.WFCHeight;
-				let posy = height * 0.5;
 
-				let buildingGeom =  new THREE.BoxGeometry(width, height, depth);
-				let buildingMesh = new THREE.Mesh(buildingGeom, this.meshMaterial);
-				buildingMesh.position.set(posx, posy, posz);
-				this.meshGroup.add(buildingMesh);
-			}
+			// for (let i = 0; i < this.buildingNum; i++){
+			// 	// buildings will be spread across the XZ axis
+			// 	// the Y axis determines the height of the building. if height = h yPos = h * 0.5
+			// 	let width = buildingTransform[i][2];
+			// 	let depth = buildingTransform[i][3];
+			// 	let height = Math.random() + .5;
+			//
+			// 	let posx = buildingTransform[i][0] - this.WFCDim * this.WFCWidth * 0.5 + this.WFCWidth;
+			// 	let posz = buildingTransform[i][1] - this.WFCDim * this.WFCHeight * 0.5 + this.WFCHeight;
+			// 	let posy = height * 0.5;
+			//
+			// 	let buildingGeom =  new THREE.BoxGeometry(width, height, depth);
+			// 	let buildingMesh = new THREE.Mesh(buildingGeom, this.meshMaterial);
+			// 	buildingMesh.position.set(posx, posy, posz);
+			// 	this.meshGroup.add(buildingMesh);
+			// }
 
 			this.stageState = {
 				score: 0,

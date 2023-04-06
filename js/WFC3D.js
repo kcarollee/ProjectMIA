@@ -273,8 +273,9 @@ export default class WFC3D {
     }
 
     makeBuildingMesh(grid, size) {
-        let buildingMeshGroup = new THREE.Group();
+        let buildingMesh = new THREE.Group();
         Promise.all(this.promises).then(() => {
+            let tileMeshGroup = new THREE.Group();
             for (let k = 1; k < grid.length - 1; k++) {
                 for (let j = 1; j < grid[0].length - 1; j++) {
                     let y = grid[0].length - 2;
@@ -282,7 +283,7 @@ export default class WFC3D {
                         let curMesh = this.tiles3D[grid[k][j][i].options[0]].mesh;
                         if (curMesh === "EMPTY MESH") continue;
 
-                        let tmp = 1.05;
+                        let tmp = 1.00;
 
                         curMesh = curMesh.clone();
                         let curMeshRotationNum = this.tiles3D[grid[k][j][i].options[0]].meshRotationNum;
@@ -297,19 +298,19 @@ export default class WFC3D {
 
                         curMesh.scale.set(0.25, 0.25, 0.25);
 
-                        curMesh.material = new THREE.MeshBasicMaterial({
-                            color: 0x00ff00,
+                        curMesh.material = new THREE.MeshNormalMaterial({
                             side: THREE.DoubleSide
                         });
 
-                        buildingMeshGroup.add(curMesh);
+                        tileMeshGroup.add(curMesh);
                     }
                 }
             }
-            buildingMeshGroup.position.set(-2,0,2);
-            buildingMeshGroup.scale.set(size[0], size[1], size[2]);
+            tileMeshGroup.position.set(0,0,0);
+            tileMeshGroup.scale.set(size[0], size[1], size[2])
+            buildingMesh.add(tileMeshGroup);
         });
-        return buildingMeshGroup;
+        return buildingMesh;
     }
 
     addToScene(scene, grid) {
