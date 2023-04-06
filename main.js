@@ -3,6 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import WFCFloorMesh from './js/WFCFloorMesh.js';
+import WFC3D from "./js/WFC3D.js";
 
 
 function main(){
@@ -17,7 +18,7 @@ function main(){
 	const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 	camera.position.set(0, 0, 10);
 	//camera.lookAt(new THREE.Vector3(0, 0, 0));
-	
+
 
 // SCENES AND GAME MODES
 	let currentScene;
@@ -34,7 +35,7 @@ function main(){
 	currentScene = titleScene;
 	renderer.render(currentScene, camera);
 
-	
+
 
 
 // CONTROLS
@@ -51,7 +52,7 @@ function main(){
 	const minimapCamera = new THREE.OrthographicCamera( -5, 5, 5, -5, 1, 1000);
 	const minimapRenderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
 	const minimapCameraLookAt = new THREE.Vector3(0, 0, 0);
-	
+
 	minimapCamera.position.set(0, 5, 0);
 	minimapCamera.lookAt(0, 0, 0);
 
@@ -75,7 +76,7 @@ function main(){
 	minimapMesh.position.set(1, -1, -3);
 
 
-	
+
 
 
 
@@ -105,22 +106,69 @@ function main(){
 			this.meshMaterial = new THREE.MeshNormalMaterial(); // TEMP MATERIAL
 			this.playerPosition = new THREE.Vector3(0, 0.1, 0);
 
-			for (let i = 0; i < this.buildingNum; i++){
-				// buildings will be spread across the XZ axis
-				// the Y axis determines the height of the building. if height = h yPos = h * 0.5
-				let width = buildingTransform[i][2];
-				let depth = buildingTransform[i][3];
-				let height = Math.random() + .5;
 
-				let posx = buildingTransform[i][0] - this.WFCDim * this.WFCWidth * 0.5 + this.WFCWidth;
-				let posz = buildingTransform[i][1] - this.WFCDim * this.WFCHeight * 0.5 + this.WFCHeight;
-				let posy = height * 0.5;
-				
-				let buildingGeom =  new THREE.BoxGeometry(width, height, depth);
-				let buildingMesh = new THREE.Mesh(buildingGeom, this.meshMaterial);
-				buildingMesh.position.set(posx, posy, posz);
-				this.meshGroup.add(buildingMesh);
-			}
+			// WFC3D
+
+			this.rulebook = rulebook;
+
+
+			this.WFC3D = new WFC3D(
+				25, this.rulebook,
+				'assets/3Dtiles/Building/','.glb',
+			);
+
+			Promise.all(this.WFC3D.promises).then(() => {
+				console.log("ASDF");
+				for(let i = 0; i < this.buildingNum; i++){
+					let dim = [3, 3, 3];
+					let tmp = 0.5
+					let size = [
+						tmp * buildingTransform[i][2],
+						tmp * Math.random(),
+						tmp * buildingTransform[i][3],
+					];
+					let buildingMesh = this.WFC3D.createBuilding(dim, size);
+
+					buildingMesh.position.set(
+						- this.WFCDim * this.WFCWidth * 0.5 + buildingTransform[i][0] * 0.95,
+						0,
+						- this.WFCDim * this.WFCHeight * 0.5  + buildingTransform[i][1] * 0.95,
+						);
+					this.meshGroup.add(buildingMesh);
+
+					function animate(){
+						requestAnimationFrame(animate);
+						// buildingMesh.rotation.x += 0.001 * (i + 1);
+						// buildingMesh.rotation.y += 0.002 * (i + 1);
+					}
+					animate();
+				}
+				// this.WFC3D.addToSceneDebug(currentScene);
+				// this.WFC3D.addToScene(currentScene, grid, size);
+
+				// this.WFC3D.addToScene(currentScene);
+				// let buildingMesh = this.WFC3D.getBuilding("x,y,z", "w,d,h");
+				// WFC3D
+			});
+
+
+
+			// for (let i = 0; i < this.buildingNum; i++){
+			// 	// buildings will be spread across the XZ axis
+			// 	// the Y axis determines the height of the building. if height = h yPos = h * 0.5
+			// 	let width = buildingTransform[i][2];
+			// 	let depth = buildingTransform[i][3];
+			// 	let height = Math.random() + .5;
+			//
+			// 	let posx = buildingTransform[i][0] - this.WFCDim * this.WFCWidth * 0.5 + this.WFCWidth;
+			// 	let posz = buildingTransform[i][1] - this.WFCDim * this.WFCHeight * 0.5 + this.WFCHeight;
+			// 	let posy = height * 0.5;
+			//
+			// 	let buildingGeom =  new THREE.BoxGeometry(width, height, depth);
+			// 	let buildingMesh = new THREE.Mesh(buildingGeom, this.meshMaterial);
+			// 	buildingMesh.position.set(posx, posy, posz);
+			// 	this.meshGroup.add(buildingMesh);
+			// }
 
 			this.stageState = {
 				score: 0,
@@ -128,7 +176,7 @@ function main(){
 				unlocked: false
 			}
 		}
-		
+
 		addToScene(scene){
 			this.meshGroup.renderOrder = 0;
 			//this.stageRoadMesh.addToScene(scene);
@@ -148,7 +196,7 @@ function main(){
 	titleScreenModel.meshGroup.position.set(4, .0, .0);
 	titleScreenModel.addToScene(currentScene);
 
-	
+
 // STAGE SELECT
 	const stageUnlockedStatus = [
 		true, false, false, false, false, false, false, false, false,
@@ -158,11 +206,11 @@ function main(){
 
 	for (let i = 0; i < 9; i++){
 		let tileGeom = new THREE.PlaneGeometry(1, 1);
-		
+
 		let mesh;
 		if (stageUnlockedStatus[i]) mesh = new THREE.Mesh(tileGeom, unlockedMaterial);
 		else mesh = new THREE.Mesh(tileGeom, lockedMaterial);
-		mesh.position.set(-9 + i * 2.0, 0, 0);
+		mesh.position.set(0 + i * 2.0, 0, 0);
 		mesh.unlocked = stageUnlockedStatus[i];
 		stageSelectScene.add(mesh);
 	}
@@ -237,7 +285,7 @@ function main(){
 
 		}
 		else if (gameMode == "TITLE_SCREEN" && titleTextMesh != undefined){
-			
+
 			if (titleTextMesh != undefined){
 				titleTextMesh.rotateX(Math.sin(time) * 0.0003);
 				titleTextMesh.rotateY(Math.cos(time) * 0.00005);
@@ -248,7 +296,7 @@ function main(){
 				playButtonMesh.rotateY(Math.sin(time) * 0.0003);
 			}
 		}
-		
+
 		if (resizeRenderToDisplaySize(renderer)){
 			const canvas = renderer.domElement;
 			camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -273,7 +321,7 @@ function main(){
 		raycasterIntersects = raycaster.intersectObjects( currentScene.children );
 		// calculate pointer position in normalized device coordinates
 		// (-1 to +1) for both components
-	
+
 		pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 		pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 	}
@@ -286,7 +334,7 @@ function main(){
 					console.log("STAGE SELECT ACTIVATED");
 					gameMode = "STAGE_SELECT";
 					currentScene = stageSelectScene;
-					
+
 					raycasterIntersects = [];
 					break;
 				}
@@ -307,7 +355,7 @@ function main(){
 				}
 			}
 		}
-		
+
 	}
 
 	function generateStage(){
@@ -333,7 +381,7 @@ function main(){
 
 	}
 
-	
+
 
 	function resizeRenderToDisplaySize(renderer){
 		const canvas = renderer.domElement;
@@ -346,12 +394,12 @@ function main(){
 		}
 
 		//firstPersonControls.handleResize();
-		
+
 		return needResize;
 	}
 
-	
-	
+
+
 
 	window.addEventListener( 'pointermove', onPointerMove );
 	window.addEventListener('click', onPointerClick);
