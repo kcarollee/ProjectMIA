@@ -335,13 +335,6 @@ export default class WFCFloorMesh {
         return this.calcBuildingTransform();
     }
 
-    waveFunctionCollapseFullCycle(){
-        while (this.wfcIterCount !== this.DIM * this.DIM) this.waveFunctionCollapseSingleIteration();
-
-        // 생성 완료 된 후에 건물 부지 측정
-        return this.calcBuildingTransform();
-    }
-
     buildMesh(){
         //console.log(selectedArr);
         for (let i = 0; i < this.selectedArr.length; i++){

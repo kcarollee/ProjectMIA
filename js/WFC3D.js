@@ -307,7 +307,11 @@ export default class WFC3D {
                 }
             }
             tileMeshGroup.position.set(0,0,0);
-            tileMeshGroup.scale.set(size[0], size[1], size[2])
+            tileMeshGroup.scale.set(
+                3 / (grid[0][0].length - 2) * size[0],
+                3 / (grid[0].length - 2) * size[1],
+                3 / (grid.length - 2) * size[2],
+                );
             buildingMesh.add(tileMeshGroup);
         });
         return buildingMesh;

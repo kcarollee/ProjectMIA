@@ -120,7 +120,12 @@ function main(){
 			Promise.all(this.WFC3D.promises).then(() => {
 				console.log("ASDF");
 				for(let i = 0; i < this.buildingNum; i++){
-					let dim = [3, 3, 3];
+					// let dim = [
+					// 	Math.ceil(buildingTransform[i][2] * 8),
+					// 	Math.ceil(buildingTransform[i][3] * 8),
+					// 	Math.ceil((buildingTransform[i][2] * 8 + buildingTransform[i][3] * 8) * 0.5),
+					// ];
+					let dim = [4,4,4];
 					let tmp = 0.5
 					let size = [
 						tmp * buildingTransform[i][2],
