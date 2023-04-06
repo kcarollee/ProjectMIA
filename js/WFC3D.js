@@ -269,28 +269,61 @@ export default class WFC3D {
         console.log(selectedArr);
 
         // return selectedArr;
-        return grid;
+        return this.makeBuildingMesh(grid,size);
     }
 
-    // 수정 필요
-    addToScene(scene, grid, dim) {
+    makeBuildingMesh(grid, size) {
+        let buildingMeshGroup = new THREE.Group();
+        Promise.all(this.promises).then(() => {
+            for (let k = 1; k < grid.length - 1; k++) {
+                for (let j = 1; j < grid[0].length - 1; j++) {
+                    let y = grid[0].length - 2;
+                    for (let i = 1; i < grid[0][0].length - 1; i++) {
+                        let curMesh = this.tiles3D[grid[k][j][i].options[0]].mesh;
+                        if (curMesh === "EMPTY MESH") continue;
+
+                        let tmp = 1.05;
+
+                        curMesh = curMesh.clone();
+                        let curMeshRotationNum = this.tiles3D[grid[k][j][i].options[0]].meshRotationNum;
+                        curMesh.rotation.x = Math.PI * 0.5;
+                        curMesh.rotation.y = -Math.PI * 0.5 * curMeshRotationNum;
+
+                        curMesh.position.set(
+                            tmp * i,
+                            tmp * (y - j),
+                            tmp * k
+                        );
+
+                        curMesh.scale.set(0.25, 0.25, 0.25);
+
+                        curMesh.material = new THREE.MeshBasicMaterial({
+                            color: 0x00ff00,
+                            side: THREE.DoubleSide
+                        });
+
+                        buildingMeshGroup.add(curMesh);
+                    }
+                }
+            }
+            buildingMeshGroup.position.set(-2,0,2);
+            buildingMeshGroup.scale.set(size[0], size[1], size[2]);
+        });
+        return buildingMeshGroup;
+    }
+
+    addToScene(scene, grid) {
         Promise.all(this.promises).then(() => {
             let buildingMeshGroup = new THREE.Group();
 
             for (let k = 0; k < grid.length; k++) {
-
                 for (let j = 0; j < grid[0].length; j++) {
-
+                    let y = grid[0].length - 2;
                     for (let i = 0; i < grid[0][0].length; i++) {
                         let curMesh = this.tiles3D[grid[k][j][i].options[0]].mesh;
                         if (curMesh === "EMPTY MESH") continue;
                         curMesh = curMesh.clone();
-
-                        curMesh.position.set(
-                            i,
-                            dim[1] - j,
-                            k,
-                        );
+                        curMesh.position.set(i, y - j, k);
                         curMesh.scale.set(0.25, 0.25, 0.25);
 
                         let curMeshRotationNum = this.tiles3D[grid[k][j][i].options[0]].meshRotationNum;

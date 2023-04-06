@@ -18,7 +18,7 @@ function main(){
 	const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 	camera.position.set(0, 0, 10);
 	//camera.lookAt(new THREE.Vector3(0, 0, 0));
-	
+
 
 // SCENES AND GAME MODES
 	let currentScene;
@@ -35,7 +35,7 @@ function main(){
 	currentScene = titleScene;
 	renderer.render(currentScene, camera);
 
-	
+
 
 
 // CONTROLS
@@ -52,7 +52,7 @@ function main(){
 	const minimapCamera = new THREE.OrthographicCamera( -5, 5, 5, -5, 1, 1000);
 	const minimapRenderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
 	const minimapCameraLookAt = new THREE.Vector3(0, 0, 0);
-	
+
 	minimapCamera.position.set(0, 5, 0);
 	minimapCamera.lookAt(0, 0, 0);
 
@@ -76,7 +76,7 @@ function main(){
 	minimapMesh.position.set(1, -1, -3);
 
 
-	
+
 
 
 
@@ -119,10 +119,26 @@ function main(){
 
 			Promise.all(this.WFC3D.promises).then(() => {
 				console.log("ASDF");
-				let dim = [5, 5, 5];
-				let grid = this.WFC3D.createBuilding(dim, [0.05, 0.05, 0.05]);
+				for(let i = 0; i < 2; i++){
+					let dim = [5, 5, 5];
+					let size = [Math.random(), Math.random(), Math.random()];
+					let buildingMesh = this.WFC3D.createBuilding(dim, size);
+
+					buildingMesh.position.set(
+						0,
+						0,
+						0);
+					currentScene.add(buildingMesh);
+
+					function animate(){
+						requestAnimationFrame(animate);
+						buildingMesh.rotation.x += 0.001 * (i + 1);
+						buildingMesh.rotation.y += 0.002 * (i + 1);
+					}
+					animate();
+				}
 				// this.WFC3D.addToSceneDebug(currentScene);
-				this.WFC3D.addToScene(currentScene, grid, dim);
+				// this.WFC3D.addToScene(currentScene, grid, size);
 
 				// this.WFC3D.addToScene(currentScene);
 				// let buildingMesh = this.WFC3D.getBuilding("x,y,z", "w,d,h");
@@ -139,7 +155,7 @@ function main(){
 				let posx = buildingTransform[i][0] - this.WFCDim * this.WFCWidth * 0.5 + this.WFCWidth;
 				let posz = buildingTransform[i][1] - this.WFCDim * this.WFCHeight * 0.5 + this.WFCHeight;
 				let posy = height * 0.5;
-				
+
 				let buildingGeom =  new THREE.BoxGeometry(width, height, depth);
 				let buildingMesh = new THREE.Mesh(buildingGeom, this.meshMaterial);
 				buildingMesh.position.set(posx, posy, posz);
@@ -152,7 +168,7 @@ function main(){
 				unlocked: false
 			}
 		}
-		
+
 		addToScene(scene){
 			this.meshGroup.renderOrder = 0;
 			//this.stageRoadMesh.addToScene(scene);
@@ -172,7 +188,7 @@ function main(){
 	titleScreenModel.meshGroup.position.set(4, .0, .0);
 	titleScreenModel.addToScene(currentScene);
 
-	
+
 // STAGE SELECT
 	const stageUnlockedStatus = [
 		true, false, false, false, false, false, false, false, false,
@@ -182,7 +198,7 @@ function main(){
 
 	for (let i = 0; i < 9; i++){
 		let tileGeom = new THREE.PlaneGeometry(1, 1);
-		
+
 		let mesh;
 		if (stageUnlockedStatus[i]) mesh = new THREE.Mesh(tileGeom, unlockedMaterial);
 		else mesh = new THREE.Mesh(tileGeom, lockedMaterial);
@@ -261,7 +277,7 @@ function main(){
 
 		}
 		else if (gameMode == "TITLE_SCREEN" && titleTextMesh != undefined){
-			
+
 			if (titleTextMesh != undefined){
 				titleTextMesh.rotateX(Math.sin(time) * 0.0003);
 				titleTextMesh.rotateY(Math.cos(time) * 0.00005);
@@ -272,7 +288,7 @@ function main(){
 				playButtonMesh.rotateY(Math.sin(time) * 0.0003);
 			}
 		}
-		
+
 		if (resizeRenderToDisplaySize(renderer)){
 			const canvas = renderer.domElement;
 			camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -297,7 +313,7 @@ function main(){
 		raycasterIntersects = raycaster.intersectObjects( currentScene.children );
 		// calculate pointer position in normalized device coordinates
 		// (-1 to +1) for both components
-	
+
 		pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 		pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 	}
@@ -310,7 +326,7 @@ function main(){
 					console.log("STAGE SELECT ACTIVATED");
 					gameMode = "STAGE_SELECT";
 					currentScene = stageSelectScene;
-					
+
 					raycasterIntersects = [];
 					break;
 				}
@@ -331,7 +347,7 @@ function main(){
 				}
 			}
 		}
-		
+
 	}
 
 	function generateStage(){
@@ -357,7 +373,7 @@ function main(){
 
 	}
 
-	
+
 
 	function resizeRenderToDisplaySize(renderer){
 		const canvas = renderer.domElement;
@@ -370,12 +386,12 @@ function main(){
 		}
 
 		//firstPersonControls.handleResize();
-		
+
 		return needResize;
 	}
 
-	
-	
+
+
 
 	window.addEventListener( 'pointermove', onPointerMove );
 	window.addEventListener('click', onPointerClick);
