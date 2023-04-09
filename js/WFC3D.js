@@ -81,9 +81,8 @@ export default class WFC3D {
             }
         }
 
-        console.log("First", grid);
         grid = this.propagateOnce(grid);
-        console.log(grid);
+        // console.log(grid);
         return grid;
     }
 
@@ -252,7 +251,7 @@ export default class WFC3D {
 
     createBuilding(dim, size) {
         let grid = this.startOver(dim, size);
-        console.log("Grid", grid);
+        // console.log("Grid", grid);
         let wfc3dIterCnt = dim[0] * dim[1] * dim[2];
         let selectedArr = [];
 
@@ -266,7 +265,7 @@ export default class WFC3D {
                 console.log(wfc3dIterCnt);
             }
         }
-        console.log(selectedArr);
+        // console.log(selectedArr);
 
         // return selectedArr;
         return this.makeBuildingMesh(grid,size);
@@ -276,14 +275,18 @@ export default class WFC3D {
         let buildingMesh = new THREE.Group();
         Promise.all(this.promises).then(() => {
             let tileMeshGroup = new THREE.Group();
+            console.log("Start");
+            console.log(grid);
             for (let k = 1; k < grid.length - 1; k++) {
+
                 for (let j = 1; j < grid[0].length - 1; j++) {
+
                     let y = grid[0].length - 2;
+
                     for (let i = 1; i < grid[0][0].length - 1; i++) {
+
                         let curMesh = this.tiles3D[grid[k][j][i].options[0]].mesh;
                         if (curMesh === "EMPTY MESH") continue;
-
-                        let tmp = 1.00;
 
                         curMesh = curMesh.clone();
                         let curMeshRotationNum = this.tiles3D[grid[k][j][i].options[0]].meshRotationNum;
@@ -291,11 +294,12 @@ export default class WFC3D {
                         curMesh.rotation.y = -Math.PI * 0.5 * curMeshRotationNum;
 
                         curMesh.position.set(
-                            tmp * i,
-                            tmp * (y - j),
-                            tmp * k
+                            (i - 1) - ((grid[0][0].length - 3) / 2),
+                            y - (j - 1) - grid[0].length + 4,
+                            (k - 1) - ((grid.length - 3) / 2),
                         );
 
+                        console.log(curMesh.position);
                         curMesh.scale.set(0.25, 0.25, 0.25);
 
                         curMesh.material = new THREE.MeshNormalMaterial({
@@ -306,13 +310,15 @@ export default class WFC3D {
                     }
                 }
             }
-            tileMeshGroup.position.set(0,0,0);
+
             tileMeshGroup.scale.set(
                 3 / (grid[0][0].length - 2) * size[0],
                 3 / (grid[0].length - 2) * size[1],
                 3 / (grid.length - 2) * size[2],
                 );
+            console.log(tileMeshGroup.scale);
             buildingMesh.add(tileMeshGroup);
+
         });
         return buildingMesh;
     }

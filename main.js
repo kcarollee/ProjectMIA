@@ -91,9 +91,9 @@ function main(){
 			// TEMPORARY CITY MODELING
 			this.meshGroup = new THREE.Group();
 
-			this.WFCDim = 20;
-			this.WFCWidth = 0.5;
-			this.WFCHeight = 0.5;
+			this.WFCDim = 10;
+			this.WFCWidth = 1.5;
+			this.WFCHeight = 1.5;
 
 			this.stageRoadMesh = new WFCFloorMesh(this.WFCDim, this.WFCWidth, this.WFCHeight, 'assets/tiles/set1/', '.png');
 			let buildingTransform = this.stageRoadMesh.waveFunctionCollapseFullCycle();
@@ -125,7 +125,7 @@ function main(){
 					// 	Math.ceil(buildingTransform[i][3] * 8),
 					// 	Math.ceil((buildingTransform[i][2] * 8 + buildingTransform[i][3] * 8) * 0.5),
 					// ];
-					let dim = [4,4,4];
+					let dim = [3,3,3];
 					let tmp = 0.5
 					let size = [
 						tmp * buildingTransform[i][2],
@@ -134,11 +134,15 @@ function main(){
 					];
 					let buildingMesh = this.WFC3D.createBuilding(dim, size);
 
+					let ptmp = 1;
+
 					buildingMesh.position.set(
-						- this.WFCDim * this.WFCWidth * 0.5 + buildingTransform[i][0] * 0.95,
+						- (this.WFCDim - 2) * this.WFCWidth * 0.5 +
+						buildingTransform[i][0] * ptmp,
 						0,
-						- this.WFCDim * this.WFCHeight * 0.5  + buildingTransform[i][1] * 0.95,
-						);
+						- (this.WFCDim - 2) * this.WFCHeight * 0.5 +
+						buildingTransform[i][1] * ptmp,
+					);
 					this.meshGroup.add(buildingMesh);
 
 					function animate(){
