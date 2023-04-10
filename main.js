@@ -125,23 +125,20 @@ function main(){
 					// 	Math.ceil(buildingTransform[i][3] * 8),
 					// 	Math.ceil((buildingTransform[i][2] * 8 + buildingTransform[i][3] * 8) * 0.5),
 					// ];
-					let dim = [3,3,3];
-					let tmp = 0.5
+					let dim = [4,4,4];
 					let size = [
-						tmp * buildingTransform[i][2],
-						tmp * Math.random(),
-						tmp * buildingTransform[i][3],
+						buildingTransform[i][2],
+						Math.random(),
+						buildingTransform[i][3],
 					];
 					let buildingMesh = this.WFC3D.createBuilding(dim, size);
 
-					let ptmp = 1;
-
 					buildingMesh.position.set(
 						- (this.WFCDim - 2) * this.WFCWidth * 0.5 +
-						buildingTransform[i][0] * ptmp,
+						buildingTransform[i][0],
 						0,
 						- (this.WFCDim - 2) * this.WFCHeight * 0.5 +
-						buildingTransform[i][1] * ptmp,
+						buildingTransform[i][1],
 					);
 					this.meshGroup.add(buildingMesh);
 

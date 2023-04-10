@@ -295,7 +295,7 @@ export default class WFC3D {
 
                         curMesh.position.set(
                             (i - 1) - ((grid[0][0].length - 3) / 2),
-                            y - (j - 1) - grid[0].length + 4,
+                            y - (j - 1) - 1,
                             (k - 1) - ((grid.length - 3) / 2),
                         );
 
@@ -312,9 +312,9 @@ export default class WFC3D {
             }
 
             tileMeshGroup.scale.set(
-                3 / (grid[0][0].length - 2) * size[0],
-                3 / (grid[0].length - 2) * size[1],
-                3 / (grid.length - 2) * size[2],
+                1.5 / (grid[0][0].length - 2) * size[0],
+                1.5 / (grid[0].length - 2) * size[1],
+                1.5 / (grid.length - 2) * size[2],
                 );
             console.log(tileMeshGroup.scale);
             buildingMesh.add(tileMeshGroup);
