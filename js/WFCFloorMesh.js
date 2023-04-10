@@ -170,7 +170,8 @@ export default class WFCFloorMesh {
 
     waveFunctionCollapseSingleIteration(){
         this.wfcIterCount++;
-        //Pick cell with least entropy
+        // Pick cell with least entropy
+        // 그리드 분리 코드
         let gridCopy = this.grid.slice();
         gridCopy = gridCopy.filter((a) => !a.collapsed);
         gridCopy.sort(((a, b) => {
@@ -191,7 +192,7 @@ export default class WFCFloorMesh {
         }
         if (stopIndex > 0) gridCopy.splice(stopIndex);
 
-        // 기본 코드
+        // 선택 코드
         const cell = this.randomFromArray(gridCopy);
         this.selectedArr.push(cell);
         cell.collapsed = true;
@@ -207,7 +208,9 @@ export default class WFCFloorMesh {
         //image(tiles[cell.options[0]].img, cell.pos[0] * w, cell.pos[1] * h, w, h);
         // 일단 붕괴한 거의 주변 타일을 전부 고른다.
         // 붕괴한 주위 타일만 갱신함
+
         // 다음번 그리드 갱신하는 함수
+        // 다음번에 방문할 타일 작성
         const nextGrid = this.grid.slice();
         const toVisit = [];
         for (let j = 0; j < this.DIM; j++) {
@@ -215,16 +218,17 @@ export default class WFCFloorMesh {
                 for (let dir = 0; dir < 4; dir++) {
                     let pos = [i + WFCFloorMesh.dx[dir], j + WFCFloorMesh.dy[dir]];
                     let index = pos[0] + pos[1] * this.DIM;
-                    if (this.isInGrid(pos) && !nextGrid[index].collapsed && !toVisit[index]) {
+                    if (this.isInGrid(pos) && !nextGrid[index].collapsed && !toVisit.includes(index)) {
                         toVisit.push(index);
                     }
                 }
             }
         }
 
+        // 방문할 타일 전부 순회하면서 갱신
         for (let i = 0; i < toVisit.length; i++) {
             let cur = nextGrid[toVisit[i]];
-            let curPos = [cur.pos[0], cur.pos[1]];
+            let curPos = cur.pos;
             let curIndex = curPos[0] + curPos[1] * this.DIM;
 
             let options = new Array(this.tiles.length).fill(0).map((x, i) => i);
@@ -252,8 +256,6 @@ export default class WFCFloorMesh {
 
             // nextGrid[curIndex] = new Cell(options);
             nextGrid[curIndex].options = options;
-            // 각각의 셀이 자신의 인덱스를 포함함, 예전 자신의 위치를 가져오면 그걸 넣는것도 좋다.
-            nextGrid[curIndex].setPos(curPos);
             // 내부코드는 여기까지
         }
         this.grid = nextGrid;
@@ -324,13 +326,6 @@ export default class WFCFloorMesh {
         }
         console.log(buildingTransform);
         return buildingTransform;
-    }
-
-    waveFunctionCollapseFullCycle(){
-        while (this.wfcIterCount !== this.DIM * this.DIM) this.waveFunctionCollapseSingleIteration();
-
-        // 생성 완료 된 후에 건물 부지 측정
-        return this.calcBuildingTransform();
     }
 
     waveFunctionCollapseFullCycle(){
