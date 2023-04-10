@@ -1,9 +1,12 @@
 import * as THREE from 'three';
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import OrbitControls from './js/OrbitControls.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import {PointerLockControls} from 'three/addons/controls/PointerLockControls.js';
 import WFCFloorMesh from './js/WFCFloorMesh.js';
 import WFC3D from "./js/WFC3D.js";
+
+
 
 
 function main(){
@@ -35,23 +38,28 @@ function main(){
 	currentScene = titleScene;
 	renderer.render(currentScene, camera);
 
-
-
-
+	
 // CONTROLS
-
+	
 	const orbitControls = new OrbitControls(camera, renderer.domElement);
+	
 	orbitControls.enableZoom = false;
 	orbitControls.enablePan = false;
-	//orbitControls.enableDamping = true;
+	orbitControls.enableDamping = true;
 	orbitControls.rotateSpeed = - 0.25;
 	orbitControls.target.set(camera.position.x, camera.position.y, camera.position.z - 0.01);
 	orbitControls.enabled = false;
 
+	orbitControls.listenToKeyEvents(window);
+
+
+
+	
 // MINIMAP & MINIMAP CAMERA
 	const minimapCamera = new THREE.OrthographicCamera( -5, 5, 5, -5, 1, 1000);
 	const minimapRenderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
 	const minimapCameraLookAt = new THREE.Vector3(0, 0, 0);
+	let pointerIsInMiniMap = false;
 
 	minimapCamera.position.set(0, 5, 0);
 	minimapCamera.lookAt(0, 0, 0);
@@ -62,18 +70,26 @@ function main(){
 		renderer.render(scene, camera);
 	}
 
-	const minimapPlaneGeom = new THREE.PlaneGeometry(window.innerWidth * 0.0025, window.innerWidth * 0.0025);
+	const minimapSizeCoef = 0.005;
+	const minimapWidth = window.innerWidth * minimapSizeCoef;
+	const minimapHeight = window.innerWidth * minimapSizeCoef;
+	const minimapPlaneGeom = new THREE.PlaneGeometry(minimapWidth, minimapHeight);
+	console.log(window.innerWidth * minimapSizeCoef, window.innerWidth * minimapSizeCoef);
 	const minimapPlaneMat = new THREE.MeshBasicMaterial({
 		map: minimapRenderTarget.texture,
 		side: THREE.DoubleSide,
-		//depthTest: false,
+		depthTest: false,
+		depthWrite: false
 	})
 
 	const minimapMesh = new THREE.Mesh(minimapPlaneGeom, minimapPlaneMat);
+	minimapMesh.name = 'minimap';
 	// set renderOrder to higher than any other objects so it always renders on the top of the screen
-	minimapMesh.renderOrder = 1;
-	minimapMesh.scale.set(0.25, 0.25, 0.25);
-	minimapMesh.position.set(1, -1, -3);
+	minimapMesh.renderOrder = 999;
+	
+	//minimapMesh.onBeforeRender = function (renderer) { renderer.clearDepth(); };
+	minimapMesh.scale.set(0.2, 0.2, 0.2);
+	minimapMesh.position.set(3.5, 1.25, -3);
 
 
 
@@ -81,42 +97,43 @@ function main(){
 
 
 // CITY MODEL
-	class StageModel {
-		constructor(){
-			this.stageNum;
-			/*
-			this.geometryArr = [];
-			this.materialArr = [];	
-			*/
-			// TEMPORARY CITY MODELING
-			this.meshGroup = new THREE.Group();
+class StageModel {
+	constructor(){
+		this.stageNum;
+		/*
+		this.geometryArr = [];
+		this.materialArr = [];	
+		*/
+		// TEMPORARY CITY MODELING
+		this.meshGroup = new THREE.Group();
 
-			this.WFCDim = 10;
-			this.WFCWidth = 1.5;
-			this.WFCHeight = 1.5;
+		this.WFCDim = 10;
+		this.WFCWidth = 1.5;
+		this.WFCHeight = 1.5;
 
-			this.stageRoadMesh = new WFCFloorMesh(this.WFCDim, this.WFCWidth, this.WFCHeight, 'assets/tiles/set1/', '.png');
-			let buildingTransform = this.stageRoadMesh.waveFunctionCollapseFullCycle();
-			this.stageRoadMesh.buildMesh();
+		this.stageRoadMesh = new WFCFloorMesh(this.WFCDim, this.WFCWidth, this.WFCHeight, 'assets/tiles/set1/', '.png');
+		let buildingTransform = this.stageRoadMesh.waveFunctionCollapseFullCycle();
+		this.stageRoadMesh.buildMesh();
 
-			this.meshGroup.add(this.stageRoadMesh.getMeshGroup())
+		this.meshGroup.add(this.stageRoadMesh.getMeshGroup())
 
-			this.buildingNum = buildingTransform.length;
+		this.buildingNum = buildingTransform.length;
 
-			this.meshMaterial = new THREE.MeshNormalMaterial(); // TEMP MATERIAL
-			this.playerPosition = new THREE.Vector3(0, 0.1, 0);
-
-
-			// WFC3D
-
-			this.rulebook = rulebook;
+		this.meshMaterial = new THREE.MeshNormalMaterial(); // TEMP MATERIAL
+		this.playerPosition = new THREE.Vector3(0, 0.1, 0);
 
 
-			this.WFC3D = new WFC3D(
-				25, this.rulebook,
-				'assets/3Dtiles/Building/','.glb',
-			);
+		// WFC3D
 
+		this.rulebook = rulebook;
+
+
+		this.WFC3D = new WFC3D(
+			25, this.rulebook,
+			'assets/3Dtiles/Building/','.glb',
+		);
+
+<<<<<<< HEAD
 			Promise.all(this.WFC3D.promises).then(() => {
 				console.log("ASDF");
 				for(let i = 0; i < this.buildingNum; i++){
@@ -141,59 +158,87 @@ function main(){
 						buildingTransform[i][1],
 					);
 					this.meshGroup.add(buildingMesh);
+=======
+		Promise.all(this.WFC3D.promises).then(() => {
+			console.log("ASDF");
+			for(let i = 0; i < this.buildingNum; i++){
+				// let dim = [
+				// 	Math.ceil(buildingTransform[i][2] * 8),
+				// 	Math.ceil(buildingTransform[i][3] * 8),
+				// 	Math.ceil((buildingTransform[i][2] * 8 + buildingTransform[i][3] * 8) * 0.5),
+				// ];
+				let dim = [3,3,3];
+				let tmp = 0.5
+				let size = [
+					tmp * buildingTransform[i][2],
+					tmp * Math.random(),
+					tmp * buildingTransform[i][3],
+				];
+				let buildingMesh = this.WFC3D.createBuilding(dim, size);
 
-					function animate(){
-						requestAnimationFrame(animate);
-						// buildingMesh.rotation.x += 0.001 * (i + 1);
-						// buildingMesh.rotation.y += 0.002 * (i + 1);
-					}
-					animate();
+				let ptmp = 1;
+
+				buildingMesh.position.set(
+					- (this.WFCDim - 2) * this.WFCWidth * 0.5 +
+					buildingTransform[i][0] * ptmp,
+					0,
+					- (this.WFCDim - 2) * this.WFCHeight * 0.5 +
+					buildingTransform[i][1] * ptmp,
+				);
+				this.meshGroup.add(buildingMesh);
+>>>>>>> 5075e8cb6964f907781c37fb147ae3dc1fa4bc11
+
+				function animate(){
+					requestAnimationFrame(animate);
+					// buildingMesh.rotation.x += 0.001 * (i + 1);
+					// buildingMesh.rotation.y += 0.002 * (i + 1);
 				}
-				// this.WFC3D.addToSceneDebug(currentScene);
-				// this.WFC3D.addToScene(currentScene, grid, size);
-
-				// this.WFC3D.addToScene(currentScene);
-				// let buildingMesh = this.WFC3D.getBuilding("x,y,z", "w,d,h");
-				// WFC3D
-			});
-
-
-
-			// for (let i = 0; i < this.buildingNum; i++){
-			// 	// buildings will be spread across the XZ axis
-			// 	// the Y axis determines the height of the building. if height = h yPos = h * 0.5
-			// 	let width = buildingTransform[i][2];
-			// 	let depth = buildingTransform[i][3];
-			// 	let height = Math.random() + .5;
-			//
-			// 	let posx = buildingTransform[i][0] - this.WFCDim * this.WFCWidth * 0.5 + this.WFCWidth;
-			// 	let posz = buildingTransform[i][1] - this.WFCDim * this.WFCHeight * 0.5 + this.WFCHeight;
-			// 	let posy = height * 0.5;
-			//
-			// 	let buildingGeom =  new THREE.BoxGeometry(width, height, depth);
-			// 	let buildingMesh = new THREE.Mesh(buildingGeom, this.meshMaterial);
-			// 	buildingMesh.position.set(posx, posy, posz);
-			// 	this.meshGroup.add(buildingMesh);
-			// }
-
-			this.stageState = {
-				score: 0,
-				numberOfMoves: 0,
-				unlocked: false
+				animate();
 			}
-		}
+			// this.WFC3D.addToSceneDebug(currentScene);
+			// this.WFC3D.addToScene(currentScene, grid, size);
 
-		addToScene(scene){
-			this.meshGroup.renderOrder = 0;
-			//this.stageRoadMesh.addToScene(scene);
-			scene.add(this.meshGroup);
-		}
+			// this.WFC3D.addToScene(currentScene);
+			// let buildingMesh = this.WFC3D.getBuilding("x,y,z", "w,d,h");
+			// WFC3D
+		});
 
-		getPlayerPos(){
-			return this.playerPosition;
+
+
+		// for (let i = 0; i < this.buildingNum; i++){
+		// 	// buildings will be spread across the XZ axis
+		// 	// the Y axis determines the height of the building. if height = h yPos = h * 0.5
+		// 	let width = buildingTransform[i][2];
+		// 	let depth = buildingTransform[i][3];
+		// 	let height = Math.random() + .5;
+		//
+		// 	let posx = buildingTransform[i][0] - this.WFCDim * this.WFCWidth * 0.5 + this.WFCWidth;
+		// 	let posz = buildingTransform[i][1] - this.WFCDim * this.WFCHeight * 0.5 + this.WFCHeight;
+		// 	let posy = height * 0.5;
+		//
+		// 	let buildingGeom =  new THREE.BoxGeometry(width, height, depth);
+		// 	let buildingMesh = new THREE.Mesh(buildingGeom, this.meshMaterial);
+		// 	buildingMesh.position.set(posx, posy, posz);
+		// 	this.meshGroup.add(buildingMesh);
+		// }
+
+		this.stageState = {
+			score: 0,
+			numberOfMoves: 0,
+			unlocked: false
 		}
 	}
 
+	addToScene(scene){
+		this.meshGroup.renderOrder = 0;
+		//this.stageRoadMesh.addToScene(scene);
+		scene.add(this.meshGroup);
+	}
+
+	getPlayerPos(){
+		return this.playerPosition;
+	}
+}
 	const stageArr = [];
 
 	const titleScreenModel = new StageModel();
@@ -204,6 +249,35 @@ function main(){
 
 
 // STAGE SELECT
+	class StageSelectPannel {
+		constructor(posx, posy, mainImg){
+			this.stageUnlocked = false;
+			this.stageSelectPannelMaterial = new THREE.MeshBasicMaterial({color: 0xFF00FF});
+			this.stageSelectPannelGeometry = new THREE.PlaneGeometry(3, 4);
+			
+			this.stageSelectMesh = new THREE.Mesh(this.stageSelectPannelGeometry, this.stageSelectPannelMaterial);
+			this.stageSelectMesh.position.set(posx, posy, 0);
+			this.stageSelectMesh.name = "just mesh";
+			
+			this.stageSelectMeshGroup = new THREE.Group();
+			this.stageSelectMeshGroup.unlocked = false;
+			this.stageSelectMeshGroup.name = "group";
+			this.stageSelectMeshGroup.add(this.stageSelectMesh);
+		}
+
+		changeStatusToUnlocked(){
+			
+			this.stageUnlocked = true;
+			this.stageSelectMeshGroup.unlocked = true;
+			this.stageSelectMesh.material.color.setHex(0x00FF00);
+		}
+
+		addToScene(scene){
+			console.log(this.stageSelectMesh);
+			scene.add(this.stageSelectMeshGroup);
+		}	
+	}
+
 	const stageUnlockedStatus = [
 		true, false, false, false, false, false, false, false, false,
 	];
@@ -211,22 +285,35 @@ function main(){
 	const unlockedMaterial = new THREE.MeshBasicMaterial({color: 0x0000FF});
 
 	for (let i = 0; i < 9; i++){
+		/*
 		let tileGeom = new THREE.PlaneGeometry(1, 1);
 
 		let mesh;
 		if (stageUnlockedStatus[i]) mesh = new THREE.Mesh(tileGeom, unlockedMaterial);
 		else mesh = new THREE.Mesh(tileGeom, lockedMaterial);
-		mesh.position.set(0 + i * 2.0, 0, 0);
+		mesh.position.set(-10 + i * 2.0, 0, 0);
 		mesh.unlocked = stageUnlockedStatus[i];
-		stageSelectScene.add(mesh);
+		*/
+		
+		let stageSelectPannel = new StageSelectPannel(-12 + i * 3.5, 0, null);
+		if (i == 0) {
+			stageSelectPannel.changeStatusToUnlocked();
+			console.log(stageSelectPannel.stageUnlocked);
+		}
+		stageSelectPannel.addToScene(stageSelectScene);
+		//stageSelectScene.add(mesh);
 	}
 
 // UI ELEMENT
 	let raycaster = new THREE.Raycaster();
 	let raycasterIntersects;
 	const pointer = new THREE.Vector2();
+	const pointerPrev = new THREE.Vector2();
+	let pointerDown = false;
 	const fontLoader = new FontLoader();
 	let titleTextMesh, playButtonMesh, stageSelectMesh;
+
+	
 	fontLoader.load('assets/fonts/font_1.json', function(font){
 		const titleGeometry = new TextGeometry('PROJECT MIA', {
 			font: font,
@@ -285,6 +372,13 @@ function main(){
 
 	function render(time){
 		time *= 0.001;
+
+		renderer.setRenderTarget(null);
+		renderer.clear();
+		renderer.render(currentScene, camera);
+		requestAnimationFrame(render);
+
+
 		updateRaycaster();
 		if (gameMode == "MAIN_GAME") renderOntoRenderTarget(renderer, currentScene, minimapRenderTarget, minimapCamera);
 		else if (gameMode == "STAGE_SELECT"){
@@ -309,14 +403,28 @@ function main(){
 			camera.updateProjectionMatrix();
 		}
 
-		renderer.setRenderTarget(null);
-		renderer.clear();
-		renderer.render(currentScene, camera);
-		requestAnimationFrame(render);
+		
 
 		// update fps controls
 		//firstPersonControls.update(clock.getDelta());
 		orbitControls.update();
+		updateMinimapCamera();
+	}
+
+	function updateMinimapCamera(){
+		
+		if (pointerIsInMiniMap && pointerDown){
+			let movingVelCoef = 4;
+
+			let dx = pointerPrev.x - pointer.x;
+			let dz = pointer.y - pointerPrev.y;
+
+			minimapCamera.position.x += dx * movingVelCoef;
+			minimapCamera.position.z += dz * movingVelCoef;
+			//minimapCamera.zoom += 0.001;
+			minimapCamera.updateProjectionMatrix();
+		}
+		
 	}
 
 	function map(value, min1, max1, min2, max2) {
@@ -327,6 +435,8 @@ function main(){
 		raycasterIntersects = raycaster.intersectObjects( currentScene.children );
 		// calculate pointer position in normalized device coordinates
 		// (-1 to +1) for both components
+
+		pointerPrev.copy(pointer);
 
 		pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 		pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
@@ -347,8 +457,10 @@ function main(){
 			}
 		}
 		else if (gameMode == "STAGE_SELECT"){
+			console.log(raycasterIntersects);
 			for (let i = 0; i < raycasterIntersects.length; i++){
-				if (raycasterIntersects[i].object.unlocked){
+				// object.parent: the GROUP the pannel mesh belongs in 
+				if (raycasterIntersects[i].object.parent.unlocked){
 					currentScene = mainGameScene;
 					camera.add(minimapMesh);
 					orbitControls.enabled = true;
@@ -378,14 +490,22 @@ function main(){
 		raycaster.setFromCamera( pointer, camera );
 
 		// calculate objects intersecting the picking ray
-		//const intersects = raycaster.intersectObjects( scene.children );
-		/*
+		const intersects = raycaster.intersectObjects( currentScene.children );
+		if (intersects.length == 0) pointerIsInMiniMap = false;
 		for ( let i = 0; i < intersects.length; i ++ ) {
-			console.log("HIT");
+			if (intersects[i].object.name === 'minimap') pointerIsInMiniMap = true;
+			else pointerIsInMiniMap = false;
 		}
-		*/
+		
+		//console.log(pointerIsInMiniMap);
 
-	}
+		// disable/enable orbitcontrolsonly during maingame
+		if (gameMode == "MAIN_GAME"){
+			if (pointerIsInMiniMap) orbitControls.enabled = false;
+			else orbitControls.enabled = true;
+		}
+		
+	}	
 
 
 
@@ -404,11 +524,23 @@ function main(){
 		return needResize;
 	}
 
+	function onMouseDown(){
+		pointerDown = true;
+		console.log(pointerDown);
+	}
+
+	function onMouseUp(){
+		pointerDown = false;
+		console.log(pointerDown);
+	}
+
 
 
 
 	window.addEventListener( 'pointermove', onPointerMove );
 	window.addEventListener('click', onPointerClick);
+	window.addEventListener('mousedown', onMouseDown);
+	window.addEventListener('mouseup', onMouseUp);
 	requestAnimationFrame(render);
 }
 

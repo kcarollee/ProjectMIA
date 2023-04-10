@@ -46,6 +46,7 @@ export default class Cell {
 
         // floorMesh 를 따로 두는 이유: 바닥까지 회전시켜버리면 Seamless texture가 무용지물됨
         this.floorMesh = new THREE.Mesh(this.geometry, this.floorMaterial);
+
         this.floorMesh.rotateX(-Math.PI * 0.5);
         this.floorMesh.position.set(this.meshPos[0] , -0.01, this.meshPos[1]);
 
@@ -54,6 +55,7 @@ export default class Cell {
     }
 
     getMesh(){
+        
         return this.cellMeshGroup;
     }
 
