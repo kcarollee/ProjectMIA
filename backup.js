@@ -9,33 +9,6 @@ function main() {
   const canvas = document.querySelector("#c");
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 
-  // CAMERA
-  const fov = 75;
-  const aspect = 2; // display aspect of the canvas
-  const near = 0.001;
-  const far = 1000;
-  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(0, 0, 10);
-
-  const stageSelectCamera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  stageSelectCamera.position.set(0, 0, 10);
-  //camera.lookAt(new THREE.Vector3(0, 0, 0));
-
-  // SCENES AND GAME MODES
-  let currentScene;
-  let gameMode = "TITLE_SCREEN"; // TITLE_SCREEN, STAGE_SELECT, MAIN_GAME
-  const titleScene = new THREE.Scene();
-  const backgroundColor = 0x000000;
-  titleScene.background = new THREE.Color(backgroundColor);
-
-  const stageSelectScene = new THREE.Scene();
-  stageSelectScene.background = new THREE.Color(backgroundColor);
-
-  const mainGameScene = new THREE.Scene();
-  mainGameScene.background = new THREE.Color(backgroundColor);
-  currentScene = titleScene;
-  renderer.render(currentScene, camera);
-
   // MENU
   const menuButton = document.getElementById("menu");
   let menuActive = false;
@@ -77,16 +50,6 @@ function main() {
     });
   }
 
-  function toggleMiniMap() {
-    const minimapBox = document.getElementById("minimap");
-    minimapBox.style.display = "list-item";
-  }
-
-  function untoggleMiniMap() {
-    const minimapBox = document.getElementById("minimap");
-    minimapBox.style.display = "none";
-  }
-
   const settingsButton = document.getElementById("settings");
   settingsButton.addEventListener("click", () => {
     const menuScreen = document.getElementById("menu-screen");
@@ -110,7 +73,6 @@ function main() {
     const settingsScreen = document.getElementById("settings-screen");
     settingsScreen.style.display = "none";
     toggleStageSelectMenu();
-    untoggleMiniMap();
     currentScene = stageSelectScene;
     gameMode = "STAGE_SELECT";
 
@@ -119,144 +81,38 @@ function main() {
 
     // might need to reset the camera as well
   });
-  const zoomInButton = document.getElementById("zoomInButton");
-  const zoomOutButton = document.getElementById("zoomOutButton");
-  const guessButton = document.getElementById("guessButton");
 
-  zoomInButton.addEventListener("click", () => {
-    minimapCamera.zoom++;
-    minimapCamera.updateProjectionMatrix();
-  });
+  // CAMERA
+  const fov = 75;
+  const aspect = 2; // display aspect of the canvas
+  const near = 0.001;
+  const far = 1000;
+  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  camera.position.set(0, 0, 10);
 
-  zoomOutButton.addEventListener("click", () => {
-    minimapCamera.zoom--;
-    minimapCamera.updateProjectionMatrix();
-  });
+  const stageSelectCamera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  stageSelectCamera.position.set(0, 0, 10);
+  //camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-  guessButton.addEventListener("click", () => {});
+  // SCENES AND GAME MODES
+  let currentScene;
+  let gameMode = "TITLE_SCREEN"; // TITLE_SCREEN, STAGE_SELECT, MAIN_GAME
+  const titleScene = new THREE.Scene();
+  const backgroundColor = 0x000000;
+  titleScene.background = new THREE.Color(backgroundColor);
 
-  const minimapCanvas = document.getElementById("minimapCanvas");
-  const minimapRaycaster = new THREE.Raycaster();
-  const minimapRaycasterIntersects = [];
-  const pointer2 = new THREE.Vector2(); // pointer vector to be used on the minimap
+  const stageSelectScene = new THREE.Scene();
+  stageSelectScene.background = new THREE.Color(backgroundColor);
 
-  const cylinderGeom = new THREE.CylinderGeometry(0.1, 0.1, 10);
-  const cylinderMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-  const debugCylinderMesh = new THREE.Mesh(cylinderGeom, cylinderMat);
-  debugCylinderMesh.visible = false;
-  mainGameScene.add(debugCylinderMesh);
-
-  const boxGeom = new THREE.BoxGeometry(1, 1, 1);
-  const boxMat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-  const debugCameraMesh = new THREE.Mesh(boxGeom, boxMat);
-  debugCameraMesh.visible = false;
-  mainGameScene.add(debugCameraMesh);
-
-  minimapCanvas.addEventListener("mouseover", () => {
-    pointerIsInMiniMap = true;
-    console.log("MOUSE IN");
-  });
-
-  minimapCanvas.addEventListener("mouseout", () => {
-    pointerIsInMiniMap = false;
-    console.log("MOUSE OUT");
-  });
-
-  minimapCanvas.addEventListener("click", () => {
-    const minimapIntersects = minimapRaycaster.intersectObjects(
-      currentScene.children
-    );
-    const firstIntersect = minimapIntersects[0].point;
-    const selectedPointCoord = new THREE.Vector2(
-      firstIntersect.x,
-      firstIntersect.z
-    );
-    const playerPosCoord = new THREE.Vector2(
-      camera.position.x,
-      camera.position.z
-    );
-
-    if (guiControls.debugMode) {
-      console.log(debugCylinderMesh.visible);
-      debugCylinderMesh.position.set(firstIntersect.x, 0, firstIntersect.z);
-    }
-
-    let distance = playerPosCoord.distanceTo(selectedPointCoord);
-    console.log(
-      "selected point: ",
-      selectedPointCoord,
-      " player pos: ",
-      playerPosCoord,
-      " distance: ",
-      distance
-    );
-  });
-
-  // MINIMAP & MINIMAP CAMERA
-  const minimapCamera = new THREE.OrthographicCamera(-5, 5, 5, -5, 1, 1000);
-
-  const topDownRenderer = new THREE.WebGLRenderer({
-    canvas: minimapCanvas,
-  });
-
-  //topDownRenderer.setSize(100, 100);
-
-  const minimapRenderTarget = new THREE.WebGLRenderTarget(
-    window.innerWidth,
-    window.innerHeight
-  );
-  const minimapCameraLookAt = new THREE.Vector3(0, 0, 0);
-  let pointerIsInMiniMap = false;
-
-  minimapCamera.position.set(0, 5, 0);
-  minimapCamera.lookAt(0, 0, 0);
-
-  /*
-  function renderOntoRenderTarget(renderer, scene, renderTarget, camera) {
-    renderer.setRenderTarget(renderTarget);
-    renderer.clear();
-    renderer.render(scene, camera);
-  }
-  */
-  const minimapSizeCoef = 0.005;
-  const minimapWidth = window.innerWidth * minimapSizeCoef;
-  const minimapHeight = window.innerWidth * minimapSizeCoef;
-  const minimapPlaneGeom = new THREE.PlaneGeometry(minimapWidth, minimapHeight);
-  //console.log(window.innerWidth * minimapSizeCoef, window.innerWidth * minimapSizeCoef);
-  const minimapPlaneMat = new THREE.MeshBasicMaterial({
-    map: minimapRenderTarget.texture,
-    side: THREE.DoubleSide,
-    depthTest: false,
-    depthWrite: false,
-  });
-
-  /*
-  const minimapMesh = new THREE.Mesh(minimapPlaneGeom, minimapPlaneMat);
-  minimapMesh.name = "minimap";
-  // set renderOrder to higher than any other objects so it always renders on the top of the screen
-  minimapMesh.renderOrder = 999;
-
-  //minimapMesh.onBeforeRender = function (renderer) { renderer.clearDepth(); };
-  let minimapScale = window.innerHeight * 0.00025;
-  minimapMesh.scale.set(minimapScale, minimapScale, minimapScale);
-  minimapMesh.position.set(window.innerWidth * 0.00175, 1.25, -3);
-  */
-  // GUI FOR DEBUGMODE
-
-  const gui = new dat.GUI();
-  const guiControls = new (function () {
-    this.debugMode = false;
-  })();
-
-  gui.add(guiControls, "debugMode").onChange((e) => {
-    console.log("DEBUG MODE: ", guiControls.debugMode);
-    debugCylinderMesh.visible = e;
-    debugCameraMesh.visible = e;
-  });
+  const mainGameScene = new THREE.Scene();
+  mainGameScene.background = new THREE.Color(backgroundColor);
+  currentScene = titleScene;
+  renderer.render(currentScene, camera);
 
   // CONTROLS
 
   const orbitControls = new OrbitControls(camera, renderer.domElement);
+
   orbitControls.enableZoom = false;
   orbitControls.enablePan = false;
   orbitControls.enableDamping = true;
@@ -269,6 +125,47 @@ function main() {
   orbitControls.enabled = false;
 
   orbitControls.listenToKeyEvents(window);
+
+  // MINIMAP & MINIMAP CAMERA
+  const minimapCamera = new THREE.OrthographicCamera(-5, 5, 5, -5, 1, 1000);
+  const minimapRenderTarget = new THREE.WebGLRenderTarget(
+    window.innerWidth,
+    window.innerHeight
+  );
+  const minimapCameraLookAt = new THREE.Vector3(0, 0, 0);
+  let pointerIsInMiniMap = false;
+
+  minimapCamera.position.set(0, 5, 0);
+  minimapCamera.lookAt(0, 0, 0);
+
+  function renderOntoRenderTarget(renderer, scene, renderTarget, camera) {
+    renderer.setRenderTarget(renderTarget);
+    renderer.clear();
+    renderer.render(scene, camera);
+  }
+
+  const minimapSizeCoef = 0.005;
+  const minimapWidth = window.innerWidth * minimapSizeCoef;
+  const minimapHeight = window.innerWidth * minimapSizeCoef;
+  const minimapPlaneGeom = new THREE.PlaneGeometry(minimapWidth, minimapHeight);
+  //console.log(window.innerWidth * minimapSizeCoef, window.innerWidth * minimapSizeCoef);
+  const minimapPlaneMat = new THREE.MeshBasicMaterial({
+    map: minimapRenderTarget.texture,
+    side: THREE.DoubleSide,
+    depthTest: false,
+    depthWrite: false,
+  });
+
+  const minimapMesh = new THREE.Mesh(minimapPlaneGeom, minimapPlaneMat);
+  minimapMesh.name = "minimap";
+  // set renderOrder to higher than any other objects so it always renders on the top of the screen
+  minimapMesh.renderOrder = 999;
+
+  //minimapMesh.onBeforeRender = function (renderer) { renderer.clearDepth(); };
+  let minimapScale = window.innerHeight * 0.00025;
+  minimapMesh.scale.set(minimapScale, minimapScale, minimapScale);
+  minimapMesh.position.set(window.innerWidth * 0.00175, 1.25, -3);
+
   // CITY MODELS
 
   const stageArr = [];
@@ -307,18 +204,16 @@ function main() {
       });
     }
 
-    // TRIGGER STAGE
     onDivClick() {
       if (this.stageUnlocked) {
         currentScene = mainGameScene;
-        //camera.add(minimapMesh);
+        camera.add(minimapMesh);
         orbitControls.enabled = true;
         currentScene.add(camera);
         gameMode = "MAIN_GAME";
         generateStage();
         raycasterIntersects = [];
         untoggleStageSelectMenu();
-        toggleMiniMap();
       }
 
       // untoggle divelements
@@ -429,28 +324,15 @@ function main() {
 
     //console.log(gameMode)
     if (gameMode == "MAIN_GAME") {
-      /*
       renderOntoRenderTarget(
         renderer,
         currentScene,
         minimapRenderTarget,
         minimapCamera
       );
-      */
-
-      topDownRenderer.render(currentScene, minimapCamera);
-
       renderer.setRenderTarget(null);
       renderer.clear();
       renderer.render(currentScene, camera);
-
-      if (guiControls.debugMode) {
-        debugCameraMesh.position.set(
-          camera.position.x,
-          camera.position.y,
-          camera.position.z
-        );
-      }
 
       updateRaycaster();
     } else if (gameMode == "STAGE_SELECT") {
@@ -482,7 +364,7 @@ function main() {
 
       stageSelectCamera.aspect = canvas.clientWidth / canvas.clientHeight;
       stageSelectCamera.updateProjectionMatrix();
-      //minimapMesh.position.set(window.innerWidth * 0.00175, 1.25, -3);
+      minimapMesh.position.set(window.innerWidth * 0.00175, 1.25, -3);
     }
 
     requestAnimationFrame(render);
@@ -494,10 +376,8 @@ function main() {
   }
 
   function updateMinimapCamera() {
-    //console.log(pointerIsInMiniMap, pointerDown);
     if (pointerIsInMiniMap && pointerDown) {
-      //console.log("HELLO");
-      let movingVelCoef = 8;
+      let movingVelCoef = 4;
 
       let dx = pointerPrev.x - pointer.x;
       let dz = pointer.y - pointerPrev.y;
@@ -507,7 +387,6 @@ function main() {
       //minimapCamera.zoom += 0.001;
       minimapCamera.updateProjectionMatrix();
     }
-    pointerPrev.copy(pointer);
   }
 
   function map(value, min1, max1, min2, max2) {
@@ -519,14 +398,10 @@ function main() {
     // calculate pointer position in normalized device coordinates
     // (-1 to +1) for both components
 
+    pointerPrev.copy(pointer);
+
     pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
     pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    const rect = topDownRenderer.domElement.getBoundingClientRect();
-    pointer2.x =
-      ((event.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
-    pointer2.y =
-      -((event.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
   }
 
   function onPointerClick(event) {
@@ -548,7 +423,7 @@ function main() {
         // object.parent: the GROUP the pannel mesh belongs in
         if (raycasterIntersects[i].object.parent.unlocked) {
           currentScene = mainGameScene;
-          //camera.add(minimapMesh);
+          camera.add(minimapMesh);
           orbitControls.enabled = true;
           currentScene.add(camera);
           gameMode = "MAIN_GAME";
@@ -577,17 +452,14 @@ function main() {
   function updateRaycaster() {
     // update the picking ray with the camera and pointer position
     raycaster.setFromCamera(pointer, camera);
-    minimapRaycaster.setFromCamera(pointer2, minimapCamera);
 
     // calculate objects intersecting the picking ray
     const intersects = raycaster.intersectObjects(currentScene.children);
-    /*
     if (intersects.length == 0) pointerIsInMiniMap = false;
     for (let i = 0; i < intersects.length; i++) {
       if (intersects[i].object.name === "minimap") pointerIsInMiniMap = true;
       else pointerIsInMiniMap = false;
     }
-    */
 
     //console.log(pointerIsInMiniMap);
 
@@ -615,12 +487,12 @@ function main() {
 
   function onMouseDown() {
     pointerDown = true;
-    //console.log(pointerDown);
+    console.log(pointerDown);
   }
 
   function onMouseUp() {
     pointerDown = false;
-    //console.log(pointerDown);
+    console.log(pointerDown);
   }
 
   window.addEventListener("pointermove", onPointerMove);

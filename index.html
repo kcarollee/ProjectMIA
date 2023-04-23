@@ -19,6 +19,31 @@
   </script>
   <script type="module" src="main.js"></script>
   <body>
+    <div id="menu">MENU</div>
+    <div id="menu-screen">
+      <div id="menu-options">
+        <button id="settings">Settings</button>
+        <button id="backToGame">Back to Game</button>
+        <button id="backToStages">Back to Stages</button>
+      </div>
+    </div>
+    <div id="settings-screen">
+      <div id="menu-options">
+        <button id="volume">Volume</button>
+        <button id="fov">Fov</button>
+        <button id="back">back</button>
+      </div>
+    </div>
+    <div class="container" id="stageContainer">
+    </div>
     <canvas id="c"></canvas>
+    <div class="blue-rectangle" id="minimap">
+      <canvas class="top-down-canvas" id="minimapCanvas"></canvas>
+      <div>
+        <button id="guessButton">GUESS</button>
+        <button id="zoomInButton">+</button>
+        <button id="zoomOutButton">-</button>
+      </div>
+    </div>
   </body>
 </html>

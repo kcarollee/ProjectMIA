@@ -10,5 +10,158 @@ html, body {
    width: 100%;
    height: 100%;
    display: block;
+   
 }
+
+@font-face {
+   font-family: 'Custom Font';
+   src: url('./assets/fonts/UAV-OSD-Mono.ttf') format('truetype');
+}
+
+#menu {
+   font-family: 'Custom Font';
+   position: absolute;
+   z-index: 999;
+   top: 20px;
+   left: 20px;
+   color: blueviolet;
+   cursor: pointer;
+   font-size: 48px;
+}
+
+#menu-screen {
+   font-family: 'Custom Font';
+   z-index: 999;
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background-color: rgba(0, 0, 0, 0.5);
+   display: none;
+   justify-content: center;
+   align-items: center;
+ }
+
+ 
+#settings-screen {
+   font-family: 'Custom Font';
+   z-index: 999;
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background-color: rgba(0, 0, 0, 0.5);
+   display: none;
+   justify-content: center;
+   align-items: center;
+ }
+
+ #menu-options {
+   
+   background-color: rgba(255, 255, 255, 0.5);
+   padding: 20px;
+   /*border-radius: 10px;*/
+   text-align: center;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+   height: 50%;
+   width: 50%;
+ }
+ #menu-options button {
+   font-family: 'Custom Font';
+   background: none;
+   z-index: 999;
+   margin: 10px;
+   font-size: 48px;
+   cursor: pointer;
+   border: none;
+ }
+
+ #menu-options  :hover {
+   color: aqua;
+ }
+
+ .container {
+   font-family: 'Custom Font';
+   display: none;
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   display: flex;
+   flex-direction: row; /* Keep the flex direction as row */
+   flex-wrap: wrap; /* Add this line to wrap the flex items */
+   align-items: center; /* Center align the flex items */
+   z-index: 1; 
+}
+
+
+
+.rectangle {
+   display: none;
+   flex-direction: column;
+   align-items: center;
+   justify-content: flex-start;
+   width: 10vw;
+   height: 10vw;
+   background-color: #ccc;
+   
+   margin-right: 20px;
+   margin-bottom: 20px; 
+   font-size: 16px;
+   
+   text-align: center;
+   border-radius: 10px;
+   
+   overflow: hidden;
+   z-index: 1; 
+}
+
+.rectangle :hover{
+   background-color: violet;
+}
+
+
+
+.rectangle span {
+   margin-top: 10px;
+   z-index: 1; 
+}
+
+.blue-rectangle {
+   position: absolute;
+   top: 20px;
+   right: 20px;
+   width: 40vh;
+   height: 40vh;
+   background-color: none;
+   display: none;
+justify-content: center;
+align-items: center;
+   z-index: 1;
+   list-style: none;
+ }
+
+ 
+ .top-down-canvas {
+   position: relative;
+   width: 30vh;
+   height:30vh;
+   z-index: 2;
+ }
+
+ .blue-rectangle button{
+   font-family: 'Custom Font';
+   font-size: 38px;
+ }
+
+ .blue-rectangle div{
+   
+ }
+
+ 
 
