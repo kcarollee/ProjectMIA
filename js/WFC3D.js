@@ -320,7 +320,7 @@ export default class WFC3D {
 
             curMesh.position.set(
               i - 1 - (grid[0][0].length - 3) / 2,
-              y - (j - 1) - grid[0].length + 4,
+              y - (j - 1) - 1,
               k - 1 - (grid.length - 3) / 2
             );
 
@@ -341,7 +341,7 @@ export default class WFC3D {
         (3 / (grid[0].length - 2)) * size[1],
         (3 / (grid.length - 2)) * size[2]
       );
-      // console.log(tileMeshGroup.scale);
+      console.log(tileMeshGroup.scale);
       buildingMesh.add(tileMeshGroup);
     });
     return buildingMesh;
