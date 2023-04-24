@@ -58,6 +58,47 @@ html, body {
    align-items: center;
  }
 
+ #timeout-screen {
+   font-family: 'Custom Font';
+   z-index: 999;
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background-color: rgba(0, 0, 0, 0.5);
+   display: none;
+   justify-content: center;
+   align-items: center;
+ }
+
+ #faraway-screen {
+   font-family: 'Custom Font';
+   z-index: 999;
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background-color: rgba(0, 0, 0, 0.5);
+   display: none;
+   justify-content: center;
+   align-items: center;
+ }
+
+ #nearby-screen {
+   font-family: 'Custom Font';
+   z-index: 999;
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background-color: rgba(0, 0, 0, 0.5);
+   display: none;
+   justify-content: center;
+   align-items: center;
+ }
  #menu-options {
    
    background-color: rgba(255, 255, 255, 0.5);
@@ -83,6 +124,11 @@ html, body {
 
  #menu-options  :hover {
    color: aqua;
+ }
+
+ #menu-options  div {
+   font-size: 40px;
+   color: red;
  }
 
  .container {
@@ -159,8 +205,10 @@ align-items: center;
    font-size: 38px;
  }
 
- .blue-rectangle div{
-   
+ .time-limit {
+   font-family: 'Custom Font';
+   font-size: 25px;
+   color: crimson;
  }
 
  

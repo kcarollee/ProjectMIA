@@ -19,7 +19,8 @@ export default class StageModel {
             "assets/tiles/set1/",
             ".png"
         );
-        let buildingTransform = this.stageRoadMesh.waveFunctionCollapseFullCycle();
+        let buildingTransform =
+            this.stageRoadMesh.waveFunctionCollapseFullCycle();
         this.stageRoadMesh.buildMesh();
 
         this.meshGroup.add(this.stageRoadMesh.getMeshGroup());
@@ -57,10 +58,10 @@ export default class StageModel {
 
                 buildingMesh.position.set(
                     -(this.WFCDim - 2) * this.WFCWidth * 0.5 +
-                    buildingTransform[i][0],
+                        buildingTransform[i][0],
                     0,
                     -(this.WFCDim - 2) * this.WFCHeight * 0.5 +
-                    buildingTransform[i][1]
+                        buildingTransform[i][1]
                 );
                 this.meshGroup.add(buildingMesh);
 

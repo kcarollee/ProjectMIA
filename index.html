@@ -34,16 +34,61 @@
         <button id="back">back</button>
       </div>
     </div>
+
+    <div id="timeout-screen">
+      <div id="menu-options">
+        <div> YOUR TIME HAS RUN OUT</div>
+        <br>
+        <br>
+        <button id="retryFromTimeout">RETRY</button>
+        <button id="backToStagesFromTimeout">Back to Stages</button>
+      </div>
+    </div>
+
+    <div id="faraway-screen">
+      <div id="menu-options">
+        <div> YOUR GUESS WAS WAY OFF</div>
+        <br>
+        <br>
+        <button id="retryFromFaraway">RETRY</button>
+        <button id="backToStagesFromFaraway">Back to Stages</button>
+      </div>
+    </div>
+
+    <div id="nearby-screen">
+      <div id="menu-options">
+        <div id="resultsInfo" style="color: chartreuse;"> YOU WERE CLOSE TO THE ANSWER</div>
+        <br>
+        <br>
+        <button id="nextFromNearby">NEXT</button>
+        <button id="retryFromNearby">RETRY</button>
+        <button id="backToStagesFromNearby">Back to Stages</button>
+      </div>
+    </div>
+
+
     <div class="container" id="stageContainer">
     </div>
+
+    
+
     <canvas id="c"></canvas>
     <div class="blue-rectangle" id="minimap">
       <canvas class="top-down-canvas" id="minimapCanvas"></canvas>
-      <div>
+      <div id="defaultSubPannel">
         <button id="guessButton">GUESS</button>
         <button id="zoomInButton">+</button>
         <button id="zoomOutButton">-</button>
       </div>
+
+      <div id="confirmSubPannel" style="display: none;">
+        <button id="confirmButton">CONFIRM</button>
+        <button id="yesButton">Y</button>
+        <button id="noButton">N</button>
+      </div>
+
+      <br>
+      <div class="time-limit" id="timeLimit">TIME LEFT: </div>
     </div>
   </body>
 </html>

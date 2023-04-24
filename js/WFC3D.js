@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import Tile3D from "./Tile3D.js";
 import Cell3D from "./Cell3D.js";
 
@@ -20,7 +20,7 @@ export default class WFC3D {
         let cnt = 0;
         for (let i = 0; i < this.modelKindCount; i++) {
             let variationCount = rulebook[i][0];
-            for(let j = 0; j < variationCount; j++) {
+            for (let j = 0; j < variationCount; j++) {
                 console.log(urlString + i + "/" + j + formatString);
                 this.promises[cnt] = new Promise((resolve) => {
                     loader.load(
@@ -42,17 +42,25 @@ export default class WFC3D {
             console.log(gltf);
             // Add Empty model
             this.tiles3D.push(
-                new Tile3D("OUT EMPTY MESH", ["-1", "-1", "-1", "-1", "-1", "-1"], 0)
+                new Tile3D(
+                    "OUT EMPTY MESH",
+                    ["-1", "-1", "-1", "-1", "-1", "-1"],
+                    0
+                )
             );
             this.tiles3D.push(
-                new Tile3D("IN EMPTY MESH", ["-2", "-2", "-2", "-2", "-2", "-2"], 0)
+                new Tile3D(
+                    "IN EMPTY MESH",
+                    ["-2", "-2", "-2", "-2", "-2", "-2"],
+                    0
+                )
             );
 
             let cnt = 2;
             // load Model to Tiles3D
             for (let i = 0; i < modelKindCount; i++) {
                 let variationCount = rulebook[i][0];
-                for(let j = 0; j < variationCount; j++) {
+                for (let j = 0; j < variationCount; j++) {
                     this.tiles3D[cnt] = new Tile3D(
                         gltf[cnt - 2].scene.children[0].clone(),
                         rulebook[i].slice(1),
@@ -108,7 +116,11 @@ export default class WFC3D {
                         grid[k][j][i] = new Cell3D(1, [i, j, k], size);
                         grid[k][j][i].collapsed = true;
                     } else {
-                        grid[k][j][i] = new Cell3D(this.tiles3D.length, [i, j, k], size);
+                        grid[k][j][i] = new Cell3D(
+                            this.tiles3D.length,
+                            [i, j, k],
+                            size
+                        );
                     }
                 }
             }
@@ -146,7 +158,9 @@ export default class WFC3D {
                 for (let i = 1; i < xGrid.length - 1; i++) {
                     let cur = xGrid[i];
                     let curPos = cur.pos;
-                    let options = new Array(this.tiles3D.length).fill(0).map((x, i) => i);
+                    let options = new Array(this.tiles3D.length)
+                        .fill(0)
+                        .map((x, i) => i);
 
                     // 주변 6방향 타일 보고 갱신
                     // UD 따로 BRFL 따로 갱신해야함
@@ -158,13 +172,21 @@ export default class WFC3D {
                         ];
                         if (nextGrid[pos[2]][pos[1]][pos[0]].collapsed) {
                             let value = nextGrid[pos[2]][pos[1]][pos[0]];
-                            let validOptions = new Array(this.tiles3D.length).fill(false);
+                            let validOptions = new Array(
+                                this.tiles3D.length
+                            ).fill(false);
                             for (let option of value.options) {
                                 let valid;
                                 if (dir < 2) {
-                                    valid = this.tiles3D[option].constraint[(dir + 1) % 2];
+                                    valid =
+                                        this.tiles3D[option].constraint[
+                                            (dir + 1) % 2
+                                        ];
                                 } else {
-                                    valid = this.tiles3D[option].constraint[((dir + 4) % 4) + 2];
+                                    valid =
+                                        this.tiles3D[option].constraint[
+                                            ((dir + 4) % 4) + 2
+                                        ];
                                 }
                                 for (let l = 0; l < this.tiles3D.length; l++) {
                                     validOptions[valid[l]] = true;
@@ -259,7 +281,9 @@ export default class WFC3D {
         for (let i = 0; i < toVisit.length; i++) {
             let cur = nextGrid[toVisit[i][2]][toVisit[i][1]][toVisit[i][0]];
             let curPos = cur.pos;
-            let options = new Array(this.tiles3D.length).fill(0).map((x, i) => i);
+            let options = new Array(this.tiles3D.length)
+                .fill(0)
+                .map((x, i) => i);
 
             // 주변 6방향 타일 보고 갱신
             // UD 따로 BRFL 따로 갱신해야함
@@ -271,13 +295,19 @@ export default class WFC3D {
                 ];
                 if (nextGrid[pos[2]][pos[1]][pos[0]].collapsed) {
                     let value = nextGrid[pos[2]][pos[1]][pos[0]];
-                    let validOptions = new Array(this.tiles3D.length).fill(false);
+                    let validOptions = new Array(this.tiles3D.length).fill(
+                        false
+                    );
                     for (let option of value.options) {
                         let valid;
                         if (dir < 2) {
-                            valid = this.tiles3D[option].constraint[(dir + 1) % 2];
+                            valid =
+                                this.tiles3D[option].constraint[(dir + 1) % 2];
                         } else {
-                            valid = this.tiles3D[option].constraint[((dir + 4) % 4) + 2];
+                            valid =
+                                this.tiles3D[option].constraint[
+                                    ((dir + 4) % 4) + 2
+                                ];
                         }
                         for (let l = 0; l < this.tiles3D.length; l++) {
                             validOptions[valid[l]] = true;
@@ -325,14 +355,21 @@ export default class WFC3D {
                     let y = grid[0].length - 2;
 
                     for (let i = 1; i < grid[0][0].length - 1; i++) {
-                        let curMesh = this.tiles3D[grid[k][j][i].options[0]].mesh;
-                        if (curMesh === "OUT EMPTY MESH" || curMesh === "IN EMPTY MESH") continue;
+                        let curMesh =
+                            this.tiles3D[grid[k][j][i].options[0]].mesh;
+                        if (
+                            curMesh === "OUT EMPTY MESH" ||
+                            curMesh === "IN EMPTY MESH"
+                        )
+                            continue;
 
                         curMesh = curMesh.clone();
                         let curMeshRotationNum =
-                            this.tiles3D[grid[k][j][i].options[0]].meshRotationNum;
+                            this.tiles3D[grid[k][j][i].options[0]]
+                                .meshRotationNum;
                         curMesh.rotation.x = Math.PI * 0.5;
-                        curMesh.rotation.y = -Math.PI * 0.5 * curMeshRotationNum;
+                        curMesh.rotation.y =
+                            -Math.PI * 0.5 * curMeshRotationNum;
 
                         curMesh.position.set(
                             i - 1 - (grid[0][0].length - 3) / 2,
@@ -346,15 +383,15 @@ export default class WFC3D {
                         // curMesh.material.emissive = curMesh.material.color;
                         // curMesh.material.side = THREE.DoubleSide;
 
-                        if(curMesh.children.length !== 0){
+                        if (curMesh.children.length !== 0) {
                             console.log("isGroup");
-                            for(let i = 0; i < curMesh.children.length; i++){
-                                curMesh.children[i].material = new THREE.MeshNormalMaterial({
-                                    // side: THREE.DoubleSide,
-                                });
+                            for (let i = 0; i < curMesh.children.length; i++) {
+                                curMesh.children[i].material =
+                                    new THREE.MeshNormalMaterial({
+                                        // side: THREE.DoubleSide,
+                                    });
                             }
-                        }
-                        else {
+                        } else {
                             curMesh.material = new THREE.MeshNormalMaterial({
                                 // side: THREE.DoubleSide,
                             });
@@ -366,12 +403,12 @@ export default class WFC3D {
             }
 
             tileMeshGroup.rotation.x = -Math.PI * 0.5;
-            tileMeshGroup.position.set(0, 1 / (grid.length - 3) * size[2], 0);
+            tileMeshGroup.position.set(0, (1 / (grid.length - 3)) * size[2], 0);
 
             tileMeshGroup.scale.set(
-                1 / (grid[0][0].length - 3) * size[0],
-                1 / (grid.length - 3) * size[2],
-                1 / (grid[0].length - 3) * size[1],
+                (1 / (grid[0][0].length - 3)) * size[0],
+                (1 / (grid.length - 3)) * size[2],
+                (1 / (grid[0].length - 3)) * size[1]
             );
 
             buildingMesh.add(tileMeshGroup);
@@ -387,16 +424,19 @@ export default class WFC3D {
                 for (let j = 0; j < grid[0].length; j++) {
                     let y = grid[0].length - 2;
                     for (let i = 0; i < grid[0][0].length; i++) {
-                        let curMesh = this.tiles3D[grid[k][j][i].options[0]].mesh;
+                        let curMesh =
+                            this.tiles3D[grid[k][j][i].options[0]].mesh;
                         if (curMesh === "EMPTY MESH") continue;
                         curMesh = curMesh.clone();
                         curMesh.position.set(i, y - j, k);
                         curMesh.scale.set(0.25, 0.25, 0.25);
 
                         let curMeshRotationNum =
-                            this.tiles3D[grid[k][j][i].options[0]].meshRotationNum;
+                            this.tiles3D[grid[k][j][i].options[0]]
+                                .meshRotationNum;
                         curMesh.rotation.x = Math.PI * 0.5;
-                        curMesh.rotation.y = -Math.PI * 0.5 * curMeshRotationNum;
+                        curMesh.rotation.y =
+                            -Math.PI * 0.5 * curMeshRotationNum;
 
                         curMesh.material = new THREE.MeshNormalMaterial({
                             side: THREE.DoubleSide,
