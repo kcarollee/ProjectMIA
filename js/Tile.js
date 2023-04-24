@@ -4,17 +4,17 @@ function reverseString(s) {
     return arr.join("");
 }
 
-function compareEdge(a,b){
+function compareEdge(a, b) {
     return a === reverseString(b);
 }
 
 export default class Tile {
-    static size = [0,0];
+    static size = [0, 0];
     constructor(img, edges, buildingSpace, imageRotationNum = 0) {
         this.img = img;
         this.edges = edges;
         this.buildingSpace = buildingSpace;
-        this.constraint = [[],[],[],[]];
+        this.constraint = [[], [], [], []];
         this.imageRotationNum = imageRotationNum;
     }
 
@@ -30,9 +30,9 @@ export default class Tile {
     }
 
     analyze(tiles) {
-        for(let i = 0; i < tiles.length; i++){
+        for (let i = 0; i < tiles.length; i++) {
             let tile = tiles[i];
-            for(let j = 0; j < 4; j++){
+            for (let j = 0; j < 4; j++) {
                 if (compareEdge(tile.edges[(j + 2) % 4], this.edges[j])) {
                     this.constraint[j].push(i);
                 }
