@@ -48,10 +48,11 @@ export default class StageModel {
                 // 	Math.ceil(buildingTransform[i][3] * 8),
                 // 	Math.ceil((buildingTransform[i][2] * 8 + buildingTransform[i][3] * 8) * 0.5),
                 // ];
+                // x, y, z 순서대로
                 let dim = [3, 3, 3];
                 let size = [
                     buildingTransform[i][2],
-                    Math.random(),
+                    Math.random() * 0.5 + 0.5,
                     buildingTransform[i][3],
                 ];
                 let buildingMesh = this.WFC3D.createBuilding(dim, size);

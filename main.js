@@ -42,7 +42,7 @@ function main() {
     renderer.render(currentScene, camera);
 
     // TIME LIMIT
-    const DEFAULT_TIME_LIMIT = 20;
+    const DEFAULT_TIME_LIMIT = 200;
     const playerTime = new THREE.Clock(false); // autostart: false
     playerTime.defaultTimeLimit = DEFAULT_TIME_LIMIT;
     const timeLimitElement = document.getElementById("timeLimit");
