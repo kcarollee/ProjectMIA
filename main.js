@@ -508,6 +508,18 @@ function main() {
     orbitControls.enabled = false;
 
     orbitControls.listenToKeyEvents(window);
+    // main screen scroll control
+    document.addEventListener("mousewheel", onDocumentMouseWheel);
+    function onDocumentMouseWheel(event) {
+        console.log("TEST");
+        let fovMAX = 160;
+        let fovMIN = 1;
+
+        camera.fov -= event.wheelDeltaY * 0.01;
+        camera.fov = Math.max(Math.min(camera.fov, fovMAX), fovMIN);
+        camera.updateProjectionMatrix();
+    }
+
     // CITY MODELS
 
     const stageArr = [];
