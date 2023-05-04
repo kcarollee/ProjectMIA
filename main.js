@@ -71,11 +71,30 @@ function main() {
         menuActive = false;
     }
 
-    function toggleStageSelectMenu() {
+    function toggleChapterSelectMenu() {
+        const chapterSelectContainer =
+            document.getElementById("chapterContainer");
+        console.log(chapterSelectContainer.style);
+        chapterSelectContainer.style.display = "flex";
+        chapterPannelArr.forEach(function (pannel) {
+            pannel.toggle();
+        });
+    }
+
+    function untoggleChapterSelectMenu() {
+        const chapterSelectContainer =
+            document.getElementById("chapterContainer");
+        chapterSelectContainer.style.display = "none";
+        chapterPannelArr.forEach(function (pannel) {
+            pannel.untoggle();
+        });
+    }
+
+    function toggleStageSelectMenu(chapterStagePannelArr) {
         const stageSelectContainer = document.getElementById("stageContainer");
         console.log(stageSelectContainer.style);
         stageSelectContainer.style.display = "flex";
-        stagePannelArr.forEach(function (pannel) {
+        chapterStagePannelArr.forEach(function (pannel) {
             pannel.toggle();
         });
     }
@@ -165,18 +184,43 @@ function main() {
     });
 
     const backToStagesButton = document.getElementById("backToStages");
+    const stats = new Stats();
+    stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild(stats.dom);
+
+    let currentStageModelInstance;
+    function disposeStageModel(sceneToRemoveFrom) {
+        const objectToRemove = sceneToRemoveFrom.getObjectByName("stageModel");
+        objectToRemove.traverse((child) => {
+            if (child.type === "Mesh") {
+                if (child.material.map != undefined) {
+                    child.material.map.dispose();
+                    //console.log("TEXTURE: ", child.material.map);
+                }
+                //console.log("ISMESH");
+                child.material.dispose?.();
+                child.geometry.dispose?.();
+            }
+        });
+        // reset main game scene: delete the stage model
+        sceneToRemoveFrom.remove(objectToRemove);
+        console.log("RENDER INFO: ", renderer.info);
+        currentStageModelInstance = null;
+    }
+
     backToStagesButton.addEventListener("click", () => {
         const menuScreen = document.getElementById("menu-screen");
         menuScreen.style.display = "none";
         const settingsScreen = document.getElementById("settings-screen");
         settingsScreen.style.display = "none";
-        toggleStageSelectMenu();
+        //toggleStageSelectMenu();
+        toggleChapterSelectMenu();
         untoggleMiniMap();
         currentScene = stageSelectScene;
         gameMode = "STAGE_SELECT";
 
         // reset main game scene: delete the stage model
-        mainGameScene.remove(mainGameScene.getObjectByName("stageModel"));
+        disposeStageModel(mainGameScene);
 
         // might need to reset the camera as well
     });
@@ -186,22 +230,61 @@ function main() {
     let guessModeEnabled = false;
     let confirmModeEnabled = false;
 
+    const topDownCanvasDefaultSize = {
+        width: 30,
+        height: 30,
+    };
+
     zoomInButton.addEventListener("click", () => {
+        /*
         minimapCamera.zoom++;
         minimapCamera.updateProjectionMatrix();
+        */
+        const minimapElem = document.querySelector(".top-down-canvas");
+        topDownCanvasDefaultSize.width += 10;
+        topDownCanvasDefaultSize.height += 10;
+        minimapElem.style.width = topDownCanvasDefaultSize.width + "vh";
+        minimapElem.style.height = topDownCanvasDefaultSize.height + "vh";
     });
 
     zoomOutButton.addEventListener("click", () => {
+        /*
         minimapCamera.zoom--;
         minimapCamera.updateProjectionMatrix();
+        */
+        const minimapElem = document.querySelector(".top-down-canvas");
+        topDownCanvasDefaultSize.width -= 10;
+        topDownCanvasDefaultSize.height -= 10;
+        minimapElem.style.width = topDownCanvasDefaultSize.width + "vh";
+        minimapElem.style.height = topDownCanvasDefaultSize.height + "vh";
     });
 
     guessButton.addEventListener("click", () => {
+        /*
         guessModeEnabled = !guessModeEnabled;
         if (guessModeEnabled) {
             document.getElementById("guessButton").style.color = "red";
         } else {
             document.getElementById("guessButton").style.color = "black";
+        }
+        */
+
+        // guessing is only allowed IF the player guessed at least ONCE
+        if (guessMarkerCylinderMesh.clickedFirst) {
+            // timer must stop
+            playerTime.stop();
+
+            // RESULTS TRIGGER EVENT
+            if (playerAnswerData.distance > 3.0) {
+                toggleFarawayPannel();
+            } else {
+                const resultsInfo = document.getElementById("resultsInfo");
+                resultsInfo.innerHTML =
+                    "YOU WERE " +
+                    playerAnswerData.distance.toFixed(2) +
+                    " AWAY FROM THE ANSWER";
+                toggleNearbyPannel();
+            }
         }
     });
 
@@ -215,6 +298,8 @@ function main() {
     };
 
     yesButton.addEventListener("click", () => {
+        // MOVED TO GUESS BUTTON
+        /*
         // timer must stop
         playerTime.stop();
 
@@ -229,6 +314,7 @@ function main() {
                 " AWAY FROM THE ANSWER";
             toggleNearbyPannel();
         }
+        */
     });
     noButton.addEventListener("click", () => {
         toggleDefaultSubPannel();
@@ -248,7 +334,7 @@ function main() {
         untoggleTimeoutPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
-        mainGameScene.remove(mainGameScene.getObjectByName("stageModel"));
+        disposeStageModel(mainGameScene);
         generateStage();
         minimapCameraReset();
         playerTime.start();
@@ -256,14 +342,15 @@ function main() {
 
     backToStagesFromTimeoutButton.addEventListener("click", () => {
         untoggleTimeoutPannel();
-        toggleStageSelectMenu();
+        //toggleStageSelectMenu();
+        toggleChapterSelectMenu();
         untoggleMiniMap();
         untoggleConfirmSubPannel();
         currentScene = stageSelectScene;
         gameMode = "STAGE_SELECT";
 
         // reset main game scene: delete the stage model
-        mainGameScene.remove(mainGameScene.getObjectByName("stageModel"));
+        disposeStageModel(mainGameScene);
     });
 
     //from FARAWAY pannel
@@ -277,7 +364,7 @@ function main() {
         untoggleFarawayPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
-        mainGameScene.remove(mainGameScene.getObjectByName("stageModel"));
+        disposeStageModel(mainGameScene);
         generateStage();
         minimapCameraReset();
         playerTime.start();
@@ -285,14 +372,15 @@ function main() {
 
     backToStagesFromFarawayButton.addEventListener("click", () => {
         untoggleFarawayPannel();
-        toggleStageSelectMenu();
+        //toggleStageSelectMenu();
+        toggleChapterSelectMenu();
         untoggleMiniMap();
         untoggleConfirmSubPannel();
         currentScene = stageSelectScene;
         gameMode = "STAGE_SELECT";
 
         // reset main game scene: delete the stage model
-        mainGameScene.remove(mainGameScene.getObjectByName("stageModel"));
+        disposeStageModel(mainGameScene);
     });
 
     //from NEARBY pannel
@@ -310,7 +398,7 @@ function main() {
         untoggleNearbyPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
-        mainGameScene.remove(mainGameScene.getObjectByName("stageModel"));
+        disposeStageModel(mainGameScene);
 
         // 스테이지 선택 패널 관리
         // 만약 그다음 스테이지가 언락이 안된 상태라면
@@ -320,6 +408,8 @@ function main() {
             nextStagePannel.changeStateToUnlocked();
             StageSelectPannel.unlockedStagesNum++;
         }
+
+        checkIfChapterUnlocked();
 
         // 여기에서 난이도 조절을 위한 변수 패싱이 필요할듯 하다.
         generateStage();
@@ -332,7 +422,7 @@ function main() {
         untoggleNearbyPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
-        mainGameScene.remove(mainGameScene.getObjectByName("stageModel"));
+        disposeStageModel(mainGameScene);
         generateStage();
         minimapCameraReset();
         playerTime.start();
@@ -340,14 +430,15 @@ function main() {
 
     backToStagesFromNearbyButton.addEventListener("click", () => {
         untoggleNearbyPannel();
-        toggleStageSelectMenu();
+        //toggleStageSelectMenu();
+        toggleChapterSelectMenu();
         untoggleMiniMap();
         untoggleConfirmSubPannel();
         currentScene = stageSelectScene;
         gameMode = "STAGE_SELECT";
 
         // reset main game scene: delete the stage model
-        mainGameScene.remove(mainGameScene.getObjectByName("stageModel"));
+        disposeStageModel(mainGameScene);
     });
 
     const minimapCanvas = document.getElementById("minimapCanvas");
@@ -361,9 +452,23 @@ function main() {
     debugCylinderMesh.visible = false;
     mainGameScene.add(debugCylinderMesh);
 
+    const guessMarkerCylinderGeom = new THREE.BoxGeometry(1, 1, 1);
+    const guessMarkerCylinderMat = new THREE.MeshBasicMaterial({
+        color: 0x00ff00,
+    });
+    const guessMarkerCylinderMesh = new THREE.Mesh(
+        guessMarkerCylinderGeom,
+        guessMarkerCylinderMat
+    );
+    mainGameScene.add(guessMarkerCylinderMesh);
+    guessMarkerCylinderMesh.visible = false;
+    guessMarkerCylinderMesh.clickedFirst = false;
+    guessMarkerCylinderMesh.layers.set(1);
+
     const boxGeom = new THREE.BoxGeometry(1, 1, 1);
     const boxMat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
     const debugCameraMesh = new THREE.Mesh(boxGeom, boxMat);
+    let dragMode = false;
     debugCameraMesh.visible = false;
     mainGameScene.add(debugCameraMesh);
 
@@ -377,8 +482,22 @@ function main() {
         console.log("MOUSE OUT");
     });
 
+    minimapCanvas.addEventListener("mousedown", () => {
+        dragMode = false;
+        console.log("MOUSE DOWN");
+    });
+
+    minimapCanvas.addEventListener("mouseup", () => {
+        console.log("MOUSE UP");
+    });
+
+    minimapCanvas.addEventListener("mousemove", () => {
+        dragMode = true;
+    });
+
     minimapCanvas.addEventListener("click", () => {
-        if (guessModeEnabled) {
+        if (!dragMode) {
+            console.log("CLICKED");
             const minimapIntersects = minimapRaycaster.intersectObjects(
                 currentScene.children
             );
@@ -401,6 +520,17 @@ function main() {
                 );
             }
 
+            if (!guessMarkerCylinderMesh.clickedFirst) {
+                guessMarkerCylinderMesh.visible = true;
+                guessMarkerCylinderMesh.clickedFirst = true;
+            }
+
+            guessMarkerCylinderMesh.position.set(
+                firstIntersect.x,
+                1,
+                firstIntersect.z
+            );
+
             let distance = playerPosCoord.distanceTo(selectedPointCoord);
             playerAnswerData.answerPos = selectedPointCoord;
             playerAnswerData.playerPos = playerPosCoord;
@@ -414,15 +544,16 @@ function main() {
                 distance
             );
             confirmModeEnabled = true;
-            guessModeEnabled = false;
-            document.getElementById("guessButton").style.color = "black";
-            untoggleDefaultSubPannel();
-            toggleConfirmSubPannel();
+            guessModeEnabled = true;
+            document.getElementById("guessButton").style.color = "red";
+            //untoggleDefaultSubPannel();
+            //toggleConfirmSubPannel();
         }
     });
 
     // MINIMAP & MINIMAP CAMERA
     const minimapCamera = new THREE.OrthographicCamera(-5, 5, 5, -5, 1, 1000);
+    minimapCamera.layers.enable(1); // for the GUESS MARKER
 
     function minimapCameraReset() {
         minimapCamera.zoom = 1;
@@ -447,39 +578,6 @@ function main() {
     minimapCamera.position.set(0, 5, 0);
     minimapCamera.lookAt(0, 0, 0);
 
-    /*
-  function renderOntoRenderTarget(renderer, scene, renderTarget, camera) {
-    renderer.setRenderTarget(renderTarget);
-    renderer.clear();
-    renderer.render(scene, camera);
-  }
-  */
-    const minimapSizeCoef = 0.005;
-    const minimapWidth = window.innerWidth * minimapSizeCoef;
-    const minimapHeight = window.innerWidth * minimapSizeCoef;
-    const minimapPlaneGeom = new THREE.PlaneGeometry(
-        minimapWidth,
-        minimapHeight
-    );
-    //console.log(window.innerWidth * minimapSizeCoef, window.innerWidth * minimapSizeCoef);
-    const minimapPlaneMat = new THREE.MeshBasicMaterial({
-        map: minimapRenderTarget.texture,
-        side: THREE.DoubleSide,
-        depthTest: false,
-        depthWrite: false,
-    });
-
-    /*
-  const minimapMesh = new THREE.Mesh(minimapPlaneGeom, minimapPlaneMat);
-  minimapMesh.name = "minimap";
-  // set renderOrder to higher than any other objects so it always renders on the top of the screen
-  minimapMesh.renderOrder = 999;
-
-  //minimapMesh.onBeforeRender = function (renderer) { renderer.clearDepth(); };
-  let minimapScale = window.innerHeight * 0.00025;
-  minimapMesh.scale.set(minimapScale, minimapScale, minimapScale);
-  minimapMesh.position.set(window.innerWidth * 0.00175, 1.25, -3);
-  */
     // GUI FOR DEBUGMODE
 
     const gui = new dat.GUI();
@@ -511,18 +609,23 @@ function main() {
     // main screen scroll control
     document.addEventListener("mousewheel", onDocumentMouseWheel);
     function onDocumentMouseWheel(event) {
-        console.log("TEST");
-        let fovMAX = 160;
-        let fovMIN = 1;
+        if (pointerIsInMiniMap) {
+            // zoom max: 8
+            // zoom min: 0.5
+            minimapCamera.zoom += event.wheelDeltaY * 0.001;
+            minimapCamera.zoom = Math.min(Math.max(minimapCamera.zoom, 0.5), 8);
+            minimapCamera.updateProjectionMatrix();
+        } else {
+            let fovMAX = 75;
+            let fovMIN = 1;
 
-        camera.fov -= event.wheelDeltaY * 0.01;
-        camera.fov = Math.max(Math.min(camera.fov, fovMAX), fovMIN);
-        camera.updateProjectionMatrix();
+            camera.fov -= event.wheelDeltaY * 0.01;
+            camera.fov = Math.max(Math.min(camera.fov, fovMAX), fovMIN);
+            camera.updateProjectionMatrix();
+        }
     }
 
     // CITY MODELS
-
-    const stageArr = [];
 
     const titleScreenModel = new StageModel();
     titleScreenModel.meshGroup.scale.set(0.75, 0.75, 0.75);
@@ -530,22 +633,66 @@ function main() {
     titleScreenModel.meshGroup.position.set(4, 0.0, 0.0);
     titleScreenModel.addToScene(currentScene);
 
-    // STAGE SELECT
+    function removeTitleScreenModel() {
+        const objectToRemove = titleScene.getObjectByName();
+    }
 
-    // generate stageselect pannels
-    let stageNum = 12;
-    let stagePannelArr = [];
-    class StageSelectPannel {
-        constructor(stageNum, stageUnlocked) {
-            this.stageUnlocked = stageUnlocked;
+    // CHAPTER SELECT
+    /*
+    let chapterNum = 4;
+    let chapterPannelArr = [];
 
-            this.stageNum = stageNum;
+    class ChapterSelectPannel {
+        constructor(chapterNum, chapterUnlocked) {
+            this.chapterNum = chapterNum;
+            this.chapterUnlocked = chapterUnlocked;
 
-            this.stageContainer = document.getElementById("stageContainer");
+            this.chapterContianer = document.getElementById("chapterContainer");
+
             this.divElem = document.createElement("div");
             this.spanElem = document.createElement("span");
 
             this.spanElem.innerHTML = "STAGE" + this.stageNum;
+            this.divElem.className = "rectangle";
+            this.divElem.appendChild(this.spanElem);
+            this.stageContainer.appendChild(this.divElem);
+        }
+    }
+    */
+
+    // STAGE SELECT
+
+    // generate stageselect pannels
+    let chapterNum = 8;
+    let chapterPannelArr = [];
+    let stageNum = 16;
+    let stageNumPerChapter = 2;
+    let stagePannelArr = [];
+
+    function checkIfChapterCompleted() {}
+
+    class StageSelectPannel {
+        constructor(stageNum, stageUnlocked, isChapterPannel = false) {
+            // this.stageContainer = document.getElementById("stageContainer");
+            this.divElem = document.createElement("div");
+            this.spanElem = document.createElement("span");
+            this.isChapterPannel = isChapterPannel;
+            this.stageNum = stageNum;
+            this.stageUnlocked = stageUnlocked;
+            if (this.isChapterPannel) {
+                this.stageContainer =
+                    document.getElementById("chapterContainer");
+                this.chapterUnlocked = stageUnlocked;
+                this.chapterNum = stageNum;
+                this.spanElem.innerHTML = "CH." + this.stageNum;
+                this.numberOfStages = 4;
+                this.connectedStagePannels = [];
+            } else {
+                this.stageContainer = document.getElementById("stageContainer");
+                this.stageNum = stageNum;
+                this.spanElem.innerHTML = "STAGE" + this.stageNum;
+            }
+
             this.divElem.className = "rectangle";
             this.divElem.appendChild(this.spanElem);
             this.stageContainer.appendChild(this.divElem);
@@ -559,21 +706,30 @@ function main() {
             });
         }
 
+        // FOR CHAPTER PANNLES ONLY
+        addToConnectedStagePannels(stagePannel) {
+            this.connectedStagePannels.push(stagePannel);
+        }
         // TRIGGER STAGE
         onDivClick() {
             if (this.stageUnlocked) {
-                currentStageNum = this.stageNum;
-                currentScene = mainGameScene;
-                //camera.add(minimapMesh);
-                orbitControls.enabled = true;
-                currentScene.add(camera);
-                gameMode = "MAIN_GAME";
-                generateStage();
-                raycasterIntersects = [];
-                untoggleStageSelectMenu();
-                playerTime.start();
-                toggleMiniMap();
-                toggleDefaultSubPannel();
+                if (this.isChapterPannel) {
+                    untoggleChapterSelectMenu();
+                    toggleStageSelectMenu(this.connectedStagePannels);
+                } else {
+                    currentStageNum = this.stageNum;
+                    currentScene = mainGameScene;
+                    //camera.add(minimapMesh);
+                    orbitControls.enabled = true;
+                    currentScene.add(camera);
+                    gameMode = "MAIN_GAME";
+                    generateStage();
+                    raycasterIntersects = [];
+                    untoggleStageSelectMenu();
+                    playerTime.start();
+                    toggleMiniMap();
+                    toggleDefaultSubPannel();
+                }
             }
 
             // untoggle divelements
@@ -601,17 +757,53 @@ function main() {
         }
     }
 
+    for (let i = 0; i < chapterNum; i++) {
+        const chapterSelectPannel = new StageSelectPannel(
+            i + 1,
+            i == 0 ? true : false,
+            true
+        );
+        chapterPannelArr.push(chapterSelectPannel);
+    }
+
+    let chapterIndex = 0;
     for (let i = 0; i < stageNum; i++) {
-        console.log(i == 0 ? true : false);
         const stageSelectPannel = new StageSelectPannel(
             i + 1,
             i == 0 ? true : false
         );
         stagePannelArr.push(stageSelectPannel);
+
+        if (i != 0 && i % stageNumPerChapter == 0) chapterIndex++;
+        // connect stagepannel to corresponding chapter
+        chapterPannelArr[chapterIndex].addToConnectedStagePannels(
+            stageSelectPannel
+        );
+
+        console.log(chapterPannelArr[chapterIndex].connectedStagePannels);
     }
 
     // keep track of stages that are unlocked
     StageSelectPannel.unlockedStagesNum = 1;
+
+    // check if a chapter is available to play
+
+    // SO GET THIS, TRY TO MAKE IT SO THAT "COMPLETEING A STAGE" UNLOCKS THE NEXT LEVEL, RATHER THAN JUST "PRESSING NEXT"
+    function checkIfChapterUnlocked() {
+        chapterPannelArr.forEach((chapter) => {
+            console.log(chapter.chapterNum);
+            // if even ONE of the stages of the chapter is unlocked, then the whole chapter is unlocked
+            const stages = chapter.connectedStagePannels;
+            let chapterIsOpen = false;
+            stages.forEach((stage) => {
+                console.log(stage.stageUnlocked);
+                if (stage.stageUnlocked) chapterIsOpen = true;
+            });
+            if (chapterIsOpen) {
+                chapter.changeStateToUnlocked();
+            }
+        });
+    }
 
     // UI ELEMENT
     let raycaster = new THREE.Raycaster();
@@ -688,6 +880,7 @@ function main() {
     });
 
     function render(time) {
+        stats.begin();
         time *= 0.001;
 
         //console.log(gameMode)
@@ -767,23 +960,24 @@ function main() {
         //firstPersonControls.update(clock.getDelta());
         orbitControls.update();
         updateMinimapCamera();
+        stats.end();
     }
 
     function updateMinimapCamera() {
         //console.log(pointerIsInMiniMap, pointerDown);
-        if (pointerIsInMiniMap && pointerDown) {
+        if (dragMode && pointerDown && pointerIsInMiniMap) {
             //console.log("HELLO");
-            if (!guessModeEnabled && !confirmModeEnabled) {
-                let movingVelCoef = 8;
+            //if (!guessModeEnabled && !confirmModeEnabled) {
+            let movingVelCoef = 8;
 
-                let dx = pointerPrev.x - pointer.x;
-                let dz = pointer.y - pointerPrev.y;
+            let dx = pointerPrev.x - pointer.x;
+            let dz = pointer.y - pointerPrev.y;
 
-                minimapCamera.position.x += dx * movingVelCoef;
-                minimapCamera.position.z += dz * movingVelCoef;
-                //minimapCamera.zoom += 0.001;
-                minimapCamera.updateProjectionMatrix();
-            }
+            minimapCamera.position.x += dx * movingVelCoef;
+            minimapCamera.position.z += dz * movingVelCoef;
+            //minimapCamera.zoom += 0.001;
+            minimapCamera.updateProjectionMatrix();
+            //}
         }
         pointerPrev.copy(pointer);
     }
@@ -815,7 +1009,11 @@ function main() {
                     gameMode = "STAGE_SELECT";
 
                     currentScene = stageSelectScene;
-                    toggleStageSelectMenu();
+
+                    toggleChapterSelectMenu();
+                    console.log("REMOVE MODEL FROM TITLE");
+                    disposeStageModel(titleScene);
+                    //toggleStageSelectMenu();
                     raycasterIntersects = [];
                     break;
                 }
@@ -840,9 +1038,20 @@ function main() {
     }
 
     function generateStage() {
+        // reset guess button color
+        document.getElementById("guessButton").style.color = "black";
+        // reset guess marker
+        guessMarkerCylinderMesh.visible = false;
+        guessMarkerCylinderMesh.clickedFirst = false;
+        /*
         const newStage = new StageModel();
         newStage.addToScene(mainGameScene);
-        camera.position.copy(newStage.getPlayerPos());
+        */
+
+        currentStageModelInstance = new StageModel();
+        currentStageModelInstance.addToScene(mainGameScene);
+
+        camera.position.copy(currentStageModelInstance.getPlayerPos());
         orbitControls.target.set(
             camera.position.x,
             camera.position.y,
@@ -893,11 +1102,13 @@ function main() {
 
     function onMouseDown() {
         pointerDown = true;
+
         //console.log(pointerDown);
     }
 
     function onMouseUp() {
         pointerDown = false;
+
         //console.log(pointerDown);
     }
 

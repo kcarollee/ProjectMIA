@@ -80,7 +80,6 @@ export default class WFC3D {
                 let tile3D = this.tiles3D[i];
                 tile3D.analyze(this.tiles3D);
             }
-
         });
     }
 
@@ -292,7 +291,9 @@ export default class WFC3D {
                 ];
                 if (nextGrid[pos[2]][pos[1]][pos[0]].collapsed) {
                     let value = nextGrid[pos[2]][pos[1]][pos[0]];
-                    let validOptions = new Array(this.tiles3D.length).fill(false);
+                    let validOptions = new Array(this.tiles3D.length).fill(
+                        false
+                    );
                     for (let option of value.options) {
                         let valid;
                         if (dir < 2) {
@@ -360,16 +361,18 @@ export default class WFC3D {
 
                         curMesh = curMesh.clone();
                         let curMeshRotationNum =
-                            this.tiles3D[grid[k][j][i].options[0]].meshRotationNum;
+                            this.tiles3D[grid[k][j][i].options[0]]
+                                .meshRotationNum;
                         curMesh.rotation.x = Math.PI * 0.5;
-                        curMesh.rotation.y = -Math.PI * 0.5 * curMeshRotationNum;
+                        curMesh.rotation.y =
+                            -Math.PI * 0.5 * curMeshRotationNum;
 
                         curMesh.position.set(
                             i - 1 - (grid[0][0].length - 3) / 2,
                             (y + 1) * 0.5 - (j - 1) - 1,
                             k - 1 - (grid.length - 3) / 2
                         );
-                        console.log(curMesh.position);
+                        //console.log(curMesh.position);
 
                         curMesh.scale.set(0.25, 0.25, 0.25);
 
@@ -395,7 +398,11 @@ export default class WFC3D {
             }
 
             tileMeshGroup.rotation.x = -Math.PI * 0.5;
-            tileMeshGroup.position.set(0, (1 / (grid.length - 3)) * size[1] * (grid.length - 3) * 0.5, 0);
+            tileMeshGroup.position.set(
+                0,
+                (1 / (grid.length - 3)) * size[1] * (grid.length - 3) * 0.5,
+                0
+            );
 
             tileMeshGroup.scale.set(
                 (1 / (grid[0][0].length - 3)) * size[0],
