@@ -214,6 +214,7 @@ function main() {
         const settingsScreen = document.getElementById("settings-screen");
         settingsScreen.style.display = "none";
         //toggleStageSelectMenu();
+        untoggleStageSelectMenu();
         toggleChapterSelectMenu();
         untoggleMiniMap();
         currentScene = stageSelectScene;
@@ -278,6 +279,18 @@ function main() {
             if (playerAnswerData.distance > 3.0) {
                 toggleFarawayPannel();
             } else {
+                // UNLOCK NEXT STAGE
+                const nextStagePannel =
+                    stagePannelArr[StageSelectPannel.unlockedStagesNum];
+                if (currentStageNum == StageSelectPannel.unlockedStagesNum) {
+                    nextStagePannel.changeStateToUnlocked();
+                    StageSelectPannel.unlockedStagesNum++;
+                }
+
+                checkIfChapterUnlocked();
+
+                // SHOW RESULTS
+
                 const resultsInfo = document.getElementById("resultsInfo");
                 resultsInfo.innerHTML =
                     "YOU WERE " +
@@ -400,6 +413,8 @@ function main() {
         toggleDefaultSubPannel();
         disposeStageModel(mainGameScene);
 
+        /*
+        // MOVED TO WHERE A STAGE IS COMPLETED
         // 스테이지 선택 패널 관리
         // 만약 그다음 스테이지가 언락이 안된 상태라면
         const nextStagePannel =
@@ -410,7 +425,7 @@ function main() {
         }
 
         checkIfChapterUnlocked();
-
+        */
         // 여기에서 난이도 조절을 위한 변수 패싱이 필요할듯 하다.
         generateStage();
         minimapCameraReset();

@@ -9,8 +9,10 @@ export default class StageModel {
         this.meshGroup.name = "stageModel";
 
         this.WFCDim = 10;
-        this.WFCWidth = 1.5;
-        this.WFCHeight = 1.5;
+        this.WFCWidth = 1;
+        this.WFCHeight = 1;
+
+        this.scale = 0.5;
 
         this.stageRoadMesh = new WFCFloorMesh(
             this.WFCDim,
@@ -24,6 +26,8 @@ export default class StageModel {
         this.stageRoadMesh.buildMesh();
 
         this.meshGroup.add(this.stageRoadMesh.getMeshGroup());
+
+        
 
         this.buildingNum = buildingTransform.length;
 
@@ -65,15 +69,19 @@ export default class StageModel {
                         buildingTransform[i][1]
                 );
                 this.meshGroup.add(buildingMesh);
-
+                
+                /*
                 function animate() {
                     requestAnimationFrame(animate);
                     // buildingMesh.rotation.x += 0.001 * (i + 1);
                     // buildingMesh.rotation.y += 0.002 * (i + 1);
                 }
-
+                
                 animate();
+                */
             }
+            this.meshGroup.scale.set(0.5, 1,  1);
+            //console.log(this.meshGroup);
         });
 
         this.stageState = {
