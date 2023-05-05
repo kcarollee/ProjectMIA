@@ -3,13 +3,15 @@ import WFCFloorMesh from "./WFCFloorMesh.js";
 import WFC3D from "./WFC3D.js";
 
 export default class StageModel {
-    constructor() {
+    constructor(difficulty) {
+        this.difficulty = difficulty;
+        console.log(this.difficulty);
         // TEMPORARY CITY MODELING
         this.meshGroup = new THREE.Group();
         this.meshGroup.name = "stageModel";
 
         this.WFCDim = 10;
-        this.WFCFloorSize = [1.5, 1.5];
+        this.WFCFloorSize = [1.0, 1.0];
 
         // 난이도에서 각 모든 매개변수를 설정 할 수 있도록 하기
         // 룰북에 난이도 변수 추가하고, 각 난이도에 맞는 디멘션, Width, Height 등 설정하기
@@ -83,7 +85,7 @@ export default class StageModel {
                 animate();
                 */
             }
-            this.meshGroup.scale.set(0.5, 1,  1);
+            //this.meshGroup.scale.set(2, 1, 2);
             //console.log(this.meshGroup);
         });
 

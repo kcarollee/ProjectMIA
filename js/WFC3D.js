@@ -349,6 +349,9 @@ export default class WFC3D {
             let tileMeshGroup = new THREE.Group();
             // console.log("Start");
             // console.log(grid);
+            let buildingMat = [new THREE.MeshToonMaterial({side: THREE.DoubleSide, color: 0xFFFFFF * Math.random()}), 
+                new THREE.MeshToonMaterial({side: THREE.DoubleSide, color: 0xFFFFFF * Math.random()})];
+           
             for (let k = 1; k < grid.length - 1; k++) {
                 for (let j = 1; j < grid[0].length - 1; j++) {
                     let y = grid[0].length - 2;
@@ -381,18 +384,24 @@ export default class WFC3D {
 
                         // curMesh.material.emissive = curMesh.material.color;
                         // curMesh.material.side = THREE.DoubleSide;
-
+                        
                         if (curMesh.children.length !== 0) {
                             for (let i = 0; i < curMesh.children.length; i++) {
+                                /*
                                 curMesh.children[i].material =
                                     new THREE.MeshNormalMaterial({
                                         side: THREE.DoubleSide,
                                     });
+                                */
+                                    curMesh.children[i].material = buildingMat[i];
                             }
                         } else {
+                            /*
                             curMesh.material = new THREE.MeshNormalMaterial({
                                 side: THREE.DoubleSide,
                             });
+                            */
+                            curMesh.material = buildingMat[0];
                         }
 
                         tileMeshGroup.add(curMesh);

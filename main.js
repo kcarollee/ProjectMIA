@@ -38,9 +38,18 @@ function main() {
 
     const mainGameScene = new THREE.Scene();
     mainGameScene.background = new THREE.Color(backgroundColor);
+    mainGameScene.fog = new THREE.Fog(0x000000, 1, 5);
+    
     currentScene = titleScene;
     renderer.render(currentScene, camera);
 
+    // LIGHT
+
+    const ambientLight = new THREE.AmbientLight({color: 0xFFFFFF, intensity: 100});
+    const directionalLight = new THREE.DirectionalLight({color: 0xFFFFFF, intensity: 100});
+    directionalLight.position.set(1, 1, 1);
+    //mainGameScene.add(ambientLight);
+    mainGameScene.add(directionalLight);
     // TIME LIMIT
     const DEFAULT_TIME_LIMIT = 200;
     const playerTime = new THREE.Clock(false); // autostart: false
@@ -189,6 +198,7 @@ function main() {
     document.body.appendChild(stats.dom);
 
     let currentStageModelInstance;
+
     function disposeStageModel(sceneToRemoveFrom) {
         const objectToRemove = sceneToRemoveFrom.getObjectByName("stageModel");
         objectToRemove.traverse((child) => {
@@ -197,9 +207,9 @@ function main() {
                     child.material.map.dispose();
                     //console.log("TEXTURE: ", child.material.map);
                 }
-                //console.log("ISMESH");
-                child.material.dispose?.();
-                child.geometry.dispose?.();
+               
+                child.material.dispose();
+                child.geometry.dispose();
             }
         });
         // reset main game scene: delete the stage model
@@ -344,11 +354,12 @@ function main() {
 
     retryFromTimeoutButton.addEventListener("click", () => {
         // reset main game scene: delete the stage model
+        let difficulty = difficultyInfo[currentStageNum];
         untoggleTimeoutPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
         disposeStageModel(mainGameScene);
-        generateStage();
+        generateStage(difficulty);
         minimapCameraReset();
         playerTime.start();
     });
@@ -374,11 +385,12 @@ function main() {
 
     retryFromFarawayButton.addEventListener("click", () => {
         // reset main game scene: delete the stage model
+        let difficulty = difficultyInfo[currentStageNum];
         untoggleFarawayPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
         disposeStageModel(mainGameScene);
-        generateStage();
+        generateStage(difficulty);
         minimapCameraReset();
         playerTime.start();
     });
@@ -407,6 +419,8 @@ function main() {
 
     let currentStageNum;
     nextFromNearbyButton.addEventListener("click", () => {
+        currentStageNum++;
+        let difficulty = difficultyInfo[currentStageNum];
         // reset main game scene: delete the stage model
         untoggleNearbyPannel();
         untoggleConfirmSubPannel();
@@ -427,18 +441,19 @@ function main() {
         checkIfChapterUnlocked();
         */
         // 여기에서 난이도 조절을 위한 변수 패싱이 필요할듯 하다.
-        generateStage();
+        generateStage(difficulty);
         minimapCameraReset();
         playerTime.start();
     });
 
     retryFromNearbyButton.addEventListener("click", () => {
+        let difficulty = difficultyInfo[currentStageNum];
         // reset main game scene: delete the stage model
         untoggleNearbyPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
         disposeStageModel(mainGameScene);
-        generateStage();
+        generateStage(difficulty);
         minimapCameraReset();
         playerTime.start();
     });
@@ -678,10 +693,10 @@ function main() {
     // STAGE SELECT
 
     // generate stageselect pannels
-    let chapterNum = 8;
+    let chapterNum = 4;
     let chapterPannelArr = [];
     let stageNum = 16;
-    let stageNumPerChapter = 2;
+    let stageNumPerChapter = 4;
     let stagePannelArr = [];
 
     function checkIfChapterCompleted() {}
@@ -738,7 +753,7 @@ function main() {
                     orbitControls.enabled = true;
                     currentScene.add(camera);
                     gameMode = "MAIN_GAME";
-                    generateStage();
+                    generateStage(difficultyInfo[this.stageNum]);
                     raycasterIntersects = [];
                     untoggleStageSelectMenu();
                     playerTime.start();
@@ -797,6 +812,8 @@ function main() {
 
         console.log(chapterPannelArr[chapterIndex].connectedStagePannels);
     }
+
+    
 
     // keep track of stages that are unlocked
     StageSelectPannel.unlockedStagesNum = 1;
@@ -1033,26 +1050,10 @@ function main() {
                     break;
                 }
             }
-        } else if (gameMode == "STAGE_SELECT") {
-            console.log(raycasterIntersects);
-            for (let i = 0; i < raycasterIntersects.length; i++) {
-                // object.parent: the GROUP the pannel mesh belongs in
-                if (raycasterIntersects[i].object.parent.unlocked) {
-                    currentScene = mainGameScene;
-                    //camera.add(minimapMesh);
-                    orbitControls.enabled = true;
-                    currentScene.add(camera);
-                    gameMode = "MAIN_GAME";
-                    //firstPersonControls.enabled = true;
-                    raycasterIntersects = [];
-                    generateStage();
-                    break;
-                }
-            }
-        }
+        } 
     }
 
-    function generateStage() {
+    function generateStage(difficulty) {
         // reset guess button color
         document.getElementById("guessButton").style.color = "black";
         // reset guess marker
@@ -1063,7 +1064,7 @@ function main() {
         newStage.addToScene(mainGameScene);
         */
 
-        currentStageModelInstance = new StageModel();
+        currentStageModelInstance = new StageModel(difficulty);
         currentStageModelInstance.addToScene(mainGameScene);
 
         camera.position.copy(currentStageModelInstance.getPlayerPos());

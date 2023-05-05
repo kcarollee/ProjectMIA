@@ -42,6 +42,7 @@ export default class Cell {
 
     buildMesh() {
         this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.name = "Cell";
         //this.cellMeshGroup.add(this.mesh, this.floorMesh);
         //console.log(this.rotationNum);
         this.mesh.rotateX(-Math.PI * 0.5);
