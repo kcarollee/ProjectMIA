@@ -10,6 +10,7 @@ export default class StageModel {
         this.meshGroup = new THREE.Group();
         this.meshGroup.name = "stageModel";
 
+        // 난이도 관련
         this.WFCDim = 10;
         this.WFCFloorSize = [1.0, 1.0];
 
@@ -58,10 +59,11 @@ export default class StageModel {
                 // 	Math.ceil((buildingTransform[i][2] * 8 + buildingTransform[i][3] * 8) * 0.5),
                 // ];
                 // x, y, z 순서대로
+                // 난이도 관련
                 let dim = [3, 3, 3];
                 let size = [
                     buildingTransform[i][2],
-                    Math.random() * 0.5 + 0.5,
+                    Math.random() * 0.5 + 0.5,      // 난이도 관련
                     buildingTransform[i][3],
                 ];
                 let buildingMesh = this.WFC3D.createBuilding(dim, size);
