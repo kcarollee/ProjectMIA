@@ -4,10 +4,10 @@ import Cell from "./Cell.js";
 
 export default class WFCFloorMesh {
     // 20, 'assets/tiles/crosswalk/', '.png'
+    static #instance;
     constructor(
         dim,
-        cellWidth,
-        cellHeight,
+        cellSize,
         urlString,
         formatString,
         //default rulesets
@@ -20,6 +20,8 @@ export default class WFCFloorMesh {
         sbc1Str = "AACCCCCC",
         sbc2Str = "CCCCCCAA"
     ) {
+        if(WFCFloorMesh.#instance) return WFCFloorMesh.#instance;
+
         this.tileImages = [];
         // load road textures
         for (let i = 0; i < 54; i++) {
@@ -34,16 +36,8 @@ export default class WFCFloorMesh {
         );
 
         this.tiles = [];
-        this.DIM = dim;
-        this.cellWidth = cellWidth;
-        this.cellHeight = cellHeight;
-        // buildingSpace
-        this.u0 = cellHeight * 0.5;
-        this.u1 = cellHeight * 0.375;
-        this.u2 = cellHeight * 0.25;
-        this.r0 = cellWidth * 0.5;
-        this.r1 = cellWidth * 0.375;
-        this.r2 = cellWidth * 0.25;
+
+        this.setSize(dim, cellSize);
 
         this.grid = [];
         // array of selected cells
@@ -62,6 +56,30 @@ export default class WFCFloorMesh {
         this.cellMeshGroup = new THREE.Group();
 
         this._wfcInit();
+
+        WFCFloorMesh.#instance = this;
+    }
+
+    setSize(dim, cellSize){
+        this.DIM = dim;
+        this.cellSize = cellSize;
+
+        // buildingSpace
+        // Tile의 스태틱 변수에 cellSize를 저장해서 그걸 갖다가 쓰도록 한다.
+        // 아니면 얕은 복사로 어디에 저장을 해서 그걸 다 참조하도록 하는것도 괜찮다.
+
+        this.rbs = [cellSize[0] * 0.5, cellSize[0] * 0.375, cellSize[0] * 0.25];
+        this.ubs = [cellSize[1] * 0.5, cellSize[1] * 0.375, cellSize[1] * 0.25];
+
+        // 회전 할 경우, 순서는 변경 되는데 사이즈는 변경하면 안되서 나중에 셀 사이즈를 곱하도록 할 것
+
+        this.r0 = cellSize[0] * 0.5;
+        this.r1 = cellSize[0] * 0.375;
+        this.r2 = cellSize[0] * 0.25;
+
+        this.u0 = cellSize[1] * 0.5;
+        this.u1 = cellSize[1] * 0.375;
+        this.u2 = cellSize[1] * 0.25;
     }
 
     _wfcInit() {
@@ -355,21 +373,21 @@ export default class WFCFloorMesh {
         this.wfcIterCount = 0;
         this.selectedArr = [];
 
-        let xOffset = this.cellWidth * this.DIM * 0.5 - this.cellWidth * 0.5;
-        let yOffset = this.cellHeight * this.DIM * 0.5 - this.cellHeight * 0.5;
+        let xOffset = this.cellSize[0] * (this.DIM - 1) * 0.5;
+        let yOffset = this.cellSize[1] * (this.DIM - 1) * 0.5;
         // Create cell for each spot on the grid
         for (let i = 0; i < this.DIM * this.DIM; i++) {
             this.grid[i] = new Cell(
                 this.tiles.length,
-                this.cellWidth,
-                this.cellHeight
+                this.cellSize[0],
+                this.cellSize[1]
             );
             let pos = [i % this.DIM, parseInt(i / this.DIM)];
             //console.log(pos);
             this.grid[i].setPos([pos[0], pos[1]]);
             this.grid[i].setMeshPos([
-                pos[0] * this.cellWidth - xOffset,
-                pos[1] * this.cellHeight - yOffset,
+                pos[0] * this.cellSize[0] - xOffset,
+                pos[1] * this.cellSize[1] - yOffset,
             ]);
         }
     }
@@ -574,21 +592,17 @@ export default class WFCFloorMesh {
                         }
                     }
                     buildingPos = [
-                        (i - 1) * this.cellWidth +
-                            0.5 * this.cellWidth -
-                            this.tiles[this.grid[index].options[0]]
-                                .buildingSpace[3] +
+                        (i - 0.5) * this.cellSize[0] -
+                            this.tiles[this.grid[index].options[0]].buildingSpace[3] +
                             buildingSpace[0] * 0.5,
-                        (j - 1) * this.cellHeight +
-                            0.5 * this.cellHeight -
-                            this.tiles[this.grid[index].options[0]]
-                                .buildingSpace[0] +
+                        (j - 0.5) * this.cellSize[1] -
+                            this.tiles[this.grid[index].options[0]].buildingSpace[0] +
                             buildingSpace[1] * 0.5,
                     ];
                 } else {
                     buildingPos = [
-                        (i - 1) * this.cellWidth + 0.5 * this.cellWidth,
-                        (j - 1) * this.cellHeight + 0.5 * this.cellHeight,
+                        (i - 0.5) * this.cellSize[0],
+                        (j - 0.5) * this.cellSize[1],
                     ];
                 }
 
@@ -604,12 +618,10 @@ export default class WFCFloorMesh {
         return buildingTransform;
     }
 
-    waveFunctionCollapseFullCycle() {
+    createFloor() {
+        this.startOver();
         while (this.wfcIterCount !== this.DIM * this.DIM)
             this.waveFunctionCollapseSingleIteration();
-
-        // 생성 완료 된 후에 건물 부지 측정
-        return this.calcBuildingTransform();
     }
 
     buildMesh() {

@@ -5,7 +5,9 @@ import Cell3D from "./Cell3D.js";
 
 export default class WFC3D {
     // 'assets/3Dtiles/Building/', '.glb'
+    static #instance;
     constructor(rulebook, urlString, formatString) {
+        if(WFC3D.#instance) return WFC3D.#instance;
         // 타일 로드
         this.modelKindCount = rulebook.length;
         this.meshes = [];
@@ -13,6 +15,7 @@ export default class WFC3D {
         this.tiles3D = [];
         this.loadGLTFs(urlString, formatString, rulebook);
         this._WFC3DInit(this.modelKindCount, rulebook);
+        WFC3D.#instance = this;
     }
 
     loadGLTFs(urlString, formatString, rulebook) {

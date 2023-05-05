@@ -9,20 +9,23 @@ export default class StageModel {
         this.meshGroup.name = "stageModel";
 
         this.WFCDim = 10;
-        this.WFCWidth = 1;
-        this.WFCHeight = 1;
+        this.WFCFloorSize = [1.5, 1.5];
 
-        this.scale = 0.5;
+        // 난이도에서 각 모든 매개변수를 설정 할 수 있도록 하기
+        // 룰북에 난이도 변수 추가하고, 각 난이도에 맞는 디멘션, Width, Height 등 설정하기
 
         this.stageRoadMesh = new WFCFloorMesh(
             this.WFCDim,
-            this.WFCWidth,
-            this.WFCHeight,
+            this.WFCFloorSize,
             "assets/tiles/set1/",
             ".png"
         );
+
+        this.stageRoadMesh.createFloor();
+
         let buildingTransform =
-            this.stageRoadMesh.waveFunctionCollapseFullCycle();
+            this.stageRoadMesh.calcBuildingTransform();
+
         this.stageRoadMesh.buildMesh();
 
         this.meshGroup.add(this.stageRoadMesh.getMeshGroup());
@@ -62,10 +65,10 @@ export default class StageModel {
                 let buildingMesh = this.WFC3D.createBuilding(dim, size);
 
                 buildingMesh.position.set(
-                    -(this.WFCDim - 2) * this.WFCWidth * 0.5 +
+                    -(this.WFCDim - 2) * this.WFCFloorSize[0] * 0.5 +
                         buildingTransform[i][0],
-                    0,
-                    -(this.WFCDim - 2) * this.WFCHeight * 0.5 +
+                    0.001,
+                    -(this.WFCDim - 2) * this.WFCFloorSize[1] * 0.5 +
                         buildingTransform[i][1]
                 );
                 this.meshGroup.add(buildingMesh);
