@@ -27,7 +27,7 @@ export default class StageModel {
 
         let buildingTransform =
             this.stageRoadMesh.calcBuildingTransform();
-
+        
         this.stageRoadMesh.buildMesh();
 
         this.meshGroup.add(this.stageRoadMesh.getMeshGroup());
@@ -37,7 +37,9 @@ export default class StageModel {
         this.buildingNum = buildingTransform.length;
 
         this.meshMaterial = new THREE.MeshNormalMaterial(); // TEMP MATERIAL
-        this.playerPosition = new THREE.Vector3(0, 0.1, 0);
+        this.playerInitialPositionX;
+        this.playerInitialPositionZ;
+        this.playerPosition = new THREE.Vector3(0, 0.05, 0);
 
         // WFC3D
 
@@ -48,6 +50,9 @@ export default class StageModel {
             "assets/3Dtiles/Building/",
             ".glb"
         );
+        
+        
+
 
         Promise.all(this.WFC3D.promises).then(() => {
             console.log("ASDF");
@@ -64,6 +69,8 @@ export default class StageModel {
                     Math.random() * 0.5 + 0.5,
                     buildingTransform[i][3],
                 ];
+
+                
                 let buildingMesh = this.WFC3D.createBuilding(dim, size);
 
                 buildingMesh.position.set(

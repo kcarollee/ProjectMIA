@@ -38,7 +38,7 @@ function main() {
 
     const mainGameScene = new THREE.Scene();
     mainGameScene.background = new THREE.Color(backgroundColor);
-    mainGameScene.fog = new THREE.Fog(0x000000, 1, 5);
+    //mainGameScene.fog = new THREE.Fog(0x000000, 1, 5);
     
     currentScene = titleScene;
     renderer.render(currentScene, camera);
@@ -420,7 +420,7 @@ function main() {
     let currentStageNum;
     nextFromNearbyButton.addEventListener("click", () => {
         currentStageNum++;
-        let difficulty = difficultyInfo[currentStageNum];
+        let difficulty = difficultyInfo[currentStageNum - 1];
         // reset main game scene: delete the stage model
         untoggleNearbyPannel();
         untoggleConfirmSubPannel();
@@ -701,31 +701,65 @@ function main() {
 
     function checkIfChapterCompleted() {}
 
+    // SKYBOX
+
+    /*
+    right left
+    up  down
+    front   back
+
+    */
+
+    function setSceneBackground(scene, chapterNum){
+        const path = './assets/skybox/level' + chapterNum + '/';
+        scene.background = new THREE.CubeTextureLoader()
+            .setPath(path)
+            .load([
+                'bk.jpg',  'ft.jpg',
+                'up.jpg', 'dn.jpg',
+                'lf.jpg', 'rt.jpg',
+        ]);
+    }
+    
     class StageSelectPannel {
         constructor(stageNum, stageUnlocked, isChapterPannel = false) {
             // this.stageContainer = document.getElementById("stageContainer");
             this.divElem = document.createElement("div");
             this.spanElem = document.createElement("span");
+            this.imgElem = document.createElement("img");
             this.isChapterPannel = isChapterPannel;
             this.stageNum = stageNum;
             this.stageUnlocked = stageUnlocked;
             if (this.isChapterPannel) {
+                
                 this.stageContainer =
                     document.getElementById("chapterContainer");
                 this.chapterUnlocked = stageUnlocked;
                 this.chapterNum = stageNum;
+                this.imgElem.src = './assets/chapterThumbnails/' + this.chapterNum + '.jpg';
+                
                 this.spanElem.innerHTML = "CH." + this.stageNum;
                 this.numberOfStages = 4;
                 this.connectedStagePannels = [];
             } else {
+                this.chapterNum = Math.floor((this.stageNum - 1) / stageNumPerChapter) + 1;
+                this.imgElem.src = './assets/chapterThumbnails/' + this.chapterNum + '.jpg';
                 this.stageContainer = document.getElementById("stageContainer");
                 this.stageNum = stageNum;
-                this.spanElem.innerHTML = "STAGE" + this.stageNum;
+                this.spanElem.innerHTML = "STAGE" + ((this.stageNum - 1) % stageNumPerChapter + 1);
             }
 
             this.divElem.className = "rectangle";
             this.divElem.appendChild(this.spanElem);
+
+            
+            //this.imgElem.style.objectFit = "fill";
+            this.imgElem.style.width = "80%";
+
+            this.divElem.appendChild(this.imgElem);
+
             this.stageContainer.appendChild(this.divElem);
+            
 
             if (this.stageUnlocked) {
                 this.divElem.style.backgroundColor = "#ccc";
@@ -753,7 +787,7 @@ function main() {
                     orbitControls.enabled = true;
                     currentScene.add(camera);
                     gameMode = "MAIN_GAME";
-                    generateStage(difficultyInfo[this.stageNum]);
+                    generateStage(difficultyInfo[this.stageNum - 1]);
                     raycasterIntersects = [];
                     untoggleStageSelectMenu();
                     playerTime.start();
@@ -932,7 +966,7 @@ function main() {
             timeLimitElement.innerHTML = "TIME LEFT:" + timeLeft;
 
             // TRIGGER TIMEOUT EVENT
-            if (timeLeft == 0) {
+            if (timeLeft <= 0) {
                 toggleTimeoutPannel();
                 if (guessModeEnabled) guessModeEnabled = false;
                 if (confirmModeEnabled) confirmModeEnabled = false;
@@ -1056,6 +1090,8 @@ function main() {
     function generateStage(difficulty) {
         // reset guess button color
         document.getElementById("guessButton").style.color = "black";
+        console.log("CHAPTER ", difficulty[0]);
+        setSceneBackground(mainGameScene, difficulty[0]);
         // reset guess marker
         guessMarkerCylinderMesh.visible = false;
         guessMarkerCylinderMesh.clickedFirst = false;
