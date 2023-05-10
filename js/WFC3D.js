@@ -1,13 +1,14 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 import Tile3D from "./Tile3D.js";
 import Cell3D from "./Cell3D.js";
 
 export default class WFC3D {
     // 'assets/3Dtiles/Building/', '.glb'
     static #instance;
+
     constructor(rulebook, urlString, formatString) {
-        if(WFC3D.#instance) return WFC3D.#instance;
+        if (WFC3D.#instance) return WFC3D.#instance;
         // 타일 로드
         this.modelKindCount = rulebook.length;
         this.meshes = [];
@@ -125,9 +126,8 @@ export default class WFC3D {
             }
         }
 
-        grid = this.propagateOnce(grid);
         // console.log(grid);
-        return grid;
+        return this.propagateOnce(grid);
     }
 
     checkValid(options, validOptions) {
@@ -179,13 +179,13 @@ export default class WFC3D {
                                 if (dir < 2) {
                                     valid =
                                         this.tiles3D[option].constraint[
-                                            (dir + 1) % 2
-                                        ];
+                                        (dir + 1) % 2
+                                            ];
                                 } else {
                                     valid =
                                         this.tiles3D[option].constraint[
-                                            ((dir + 4) % 4) + 2
-                                        ];
+                                        ((dir + 4) % 4) + 2
+                                            ];
                                 }
                                 for (let l = 0; l < this.tiles3D.length; l++) {
                                     validOptions[valid[l]] = true;
@@ -198,11 +198,33 @@ export default class WFC3D {
                 }
             }
         }
-        return nextGrid;
+
+        let toVisit = [];
+        for (let j = 1; j < nextGrid[0].length - 1; j++) {
+            for (let i = 1; i < nextGrid[0][0].length - 1; i++) {
+                toVisit.push([1, j, i]);
+                toVisit.push([nextGrid.length - 2, j, i]);
+            }
+        }
+
+        for (let k = 2; k < nextGrid.length - 2; k++) {
+            for (let i = 1; i < nextGrid[0][0].length - 1; i++) {
+                toVisit.push([k, 1, i]);
+                toVisit.push([k, nextGrid[0].length - 2, i]);
+            }
+        }
+
+        for (let k = 2; k < nextGrid.length - 2; k++) {
+            for (let j = 2; j < nextGrid[0].length - 2; j++) {
+                toVisit.push([k, j, 1]);
+                toVisit.push([k, j, nextGrid[0][0].length - 2]);
+            }
+        }
+        return [nextGrid, toVisit];
     }
 
     // wfc3D 한 단계 돌리기기
-    waveFunctionCollapse3DSingleIteration(grid) {
+    waveFunctionCollapse3DSingleIteration(grid, toVisit) {
         function flatten3DArray(arr) {
             let flat = [];
             for (let i = 0; i < arr.length; i++) {
@@ -250,31 +272,65 @@ export default class WFC3D {
         // 다음번 그리드 갱신하는 함수
         // 다음번에 방문할 타일 작성
         let nextGrid = this.deepCopy3DArray(grid);
-        let toVisit = [];
 
-        for (let k = 1; k < grid.length - 1; k++) {
-            let xyGrid = grid[k];
-            for (let j = 1; j < xyGrid.length - 1; j++) {
-                let xGrid = xyGrid[j];
-                for (let i = 1; i < xGrid.length - 1; i++) {
-                    // 현재 위치의 주변이 붕괴되어 있으면 방문 해야함
-                    let cur = xGrid[i];
-                    if (cur.collapsed) continue;
-                    let curPos = cur.pos;
-                    for (let dir = 0; dir < 6; dir++) {
-                        let pos = [
-                            curPos[0] + WFC3D.dx[dir],
-                            curPos[1] + WFC3D.dy[dir],
-                            curPos[2] + WFC3D.dz[dir],
-                        ];
-                        if (nextGrid[pos[2]][pos[1]][pos[0]].collapsed) {
-                            toVisit.push(cur.pos);
-                            break;
-                        }
-                    }
+
+        let nextVisitPos = selectedCell.pos;
+
+        for(let i = 0; i < toVisit.length; i++){
+            let isSame = true;
+            for(let j = 0; j < toVisit[0].length; j++){
+                if(toVisit[i][j] !== nextVisitPos[j]){
+                    isSame = false;
+                    break;
                 }
             }
+            if(isSame){
+                toVisit.splice(i,1);
+                break;
+            }
         }
+
+        const isIncludeArrays = (arr, arrElem) => {
+            return arr.some(a => arrElem.every((v,i) => v === a[i]));
+        }
+
+        for (let dir = 0; dir < 6; dir++) {
+            let pos = [
+                nextVisitPos[0] + WFC3D.dx[dir],
+                nextVisitPos[1] + WFC3D.dy[dir],
+                nextVisitPos[2] + WFC3D.dz[dir],
+            ];
+            // 중복 걸러야한다.
+            if (!nextGrid[pos[2]][pos[1]][pos[0]].collapsed && !isIncludeArrays(toVisit, pos)) {
+                toVisit.push(pos);
+                break;
+            }
+        }
+
+        // for (let k = 1; k < grid.length - 1; k++) {
+        //     let xyGrid = grid[k];
+        //     for (let j = 1; j < xyGrid.length - 1; j++) {
+        //         let xGrid = xyGrid[j];
+        //         for (let i = 1; i < xGrid.length - 1; i++) {
+        //             // 현재 위치의 주변이 붕괴되어 있으면 방문 해야함
+        //             let cur = xGrid[i];
+        //             if (cur.collapsed) continue;
+        //             let curPos = cur.pos;
+        //             for (let dir = 0; dir < 6; dir++) {
+        //                 let pos = [
+        //                     curPos[0] + WFC3D.dx[dir],
+        //                     curPos[1] + WFC3D.dy[dir],
+        //                     curPos[2] + WFC3D.dz[dir],
+        //                 ];
+        //                 if (nextGrid[pos[2]][pos[1]][pos[0]].collapsed) {
+        //                     toVisit.push(cur.pos);
+        //                     break;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
 
         // 방문해야 하는 모든 타일 방문
         for (let i = 0; i < toVisit.length; i++) {
@@ -305,8 +361,8 @@ export default class WFC3D {
                         } else {
                             valid =
                                 this.tiles3D[option].constraint[
-                                    ((dir + 4) % 4) + 2
-                                ];
+                                ((dir + 4) % 4) + 2
+                                    ];
                         }
                         for (let l = 0; l < this.tiles3D.length; l++) {
                             validOptions[valid[l]] = true;
@@ -317,48 +373,138 @@ export default class WFC3D {
             }
             nextGrid[curPos[2]][curPos[1]][curPos[0]].options = options;
         }
-        return [nextGrid, selectedCell];
+        return [nextGrid, selectedCell, toVisit];
     }
 
+    // 실제 건물 부르는 함수
     createBuilding(dim, size) {
-        let grid = this.startOver(dim, size);
+        let grid = [];
+        let toVisit = [];
+        [grid, toVisit] = this.startOver(dim, size);
         // console.log("Grid", grid);
         let wfc3dIterCnt = dim[0] * dim[1] * dim[2];
         let selectedArr = [];
-
+        // let failCnt = 0;
         while (wfc3dIterCnt--) {
-            [grid, selectedArr[wfc3dIterCnt]] =
-                this.waveFunctionCollapse3DSingleIteration(grid);
+            [grid, selectedArr[wfc3dIterCnt], toVisit] =
+                this.waveFunctionCollapse3DSingleIteration(grid, toVisit);
 
             if (grid === undefined) {
-                grid = this.startOver(dim, size);
+                [grid, toVisit] = this.startOver(dim, size);
                 wfc3dIterCnt = dim[0] * dim[1] * dim[2];
                 selectedArr = [];
+                // failCnt++;
                 //console.log(wfc3dIterCnt);
             }
         }
         // console.log(selectedArr);
 
+        // console.log(failCnt);
         // return selectedArr;
+
         return this.makeBuildingMesh(grid, size);
     }
 
+    isFloating(grid) {
+        let isEmpty = true;
+        let maximum = grid.length - 3;
+        while (isEmpty && maximum--) {
+            // 1층이 비었는지 확인
+            for (let j = 1; j < grid[0].length - 1; j++) {
+                for (let i = 1; i < grid[0][0].length - 1; i++) {
+                    if (this.tiles3D[grid[1][j][i].options[0]].mesh !== "OUT EMPTY MESH") {
+                        isEmpty = false;
+                        break;
+                    }
+                }
+            }
+            // 1층이 비었으면 전부 다 한칸 내림
+            if (isEmpty) {
+                for (let k = 2; k < grid.length; k++) {
+                    for (let j = 1; j < grid[0].length - 1; j++) {
+                        for (let i = 1; i < grid[0][0].length - 1; i++) {
+                            grid[k - 1][j][i] = grid[k][j][i];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    setMaterials(chapterNumber) {
+        this.buildingMatsParams = [
+            {
+                color: materialInfo[chapterNumber - 1][0],
+            },
+            {
+                color: materialInfo[chapterNumber - 1][1],
+            },
+            {
+                color: materialInfo[chapterNumber - 1][2],
+            },
+            {
+                color: materialInfo[chapterNumber - 1][3],
+            },
+        ]
+    }
+
     makeBuildingMesh(grid, size) {
+
+        function colorRandom(color, strength = 256) {
+            const clampNumber = (num, a, b) =>
+                Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
+
+            return Math.floor(
+                Math.floor(clampNumber(color / 0x10000 + (Math.random() - 0.5) * strength, 0, 0xff)) * 0x10000 +
+                Math.floor(clampNumber((color / 0x100) % 0x100 + (Math.random() - 0.5) * strength, 0, 0xff)) * 0x100 +
+                Math.floor(clampNumber(color % 0x100 + (Math.random() - 0.5) * strength, 0, 0xff))
+            );
+        }
+
         let buildingMesh = new THREE.Group();
         Promise.all(this.promises).then(() => {
             let tileMeshGroup = new THREE.Group();
             // console.log("Start");
             // console.log(grid);
-            let buildingMat = [new THREE.MeshToonMaterial({side: THREE.DoubleSide, color: 0xFFFFFF * Math.random()}), 
-                new THREE.MeshToonMaterial({side: THREE.DoubleSide, color: 0xFFFFFF * Math.random()})];
-           
+
+            // let buildingMat = [
+            //     new THREE.MeshPhongMaterial({
+            //         side: THREE.DoubleSide, color: 0xFFFFFF * Math.random()
+            //     }),
+            //     new THREE.MeshPhongMaterial({
+            //         side: THREE.DoubleSide, color: 0xFFFFFF * Math.random()
+            //     }),
+            // ];
+
+            let buildingMat = [
+                new THREE.MeshPhongMaterial({
+                    side: THREE.DoubleSide,
+                    color: colorRandom(this.buildingMatsParams[0].color, 100),
+                }),
+                new THREE.MeshPhongMaterial({
+                    side: THREE.DoubleSide,
+                    color: colorRandom(this.buildingMatsParams[1].color, 100)
+                }),
+                new THREE.MeshPhongMaterial({
+                    side: THREE.DoubleSide,
+                    color: colorRandom(this.buildingMatsParams[2].color, 100)
+                }),
+                new THREE.MeshPhongMaterial({
+                    side: THREE.DoubleSide,
+                    color: colorRandom(this.buildingMatsParams[3].color, 100)
+                }),
+            ];
+
+            // console.log(buildingMat[1].color);
+
+            this.isFloating(grid);
+
             for (let k = 1; k < grid.length - 1; k++) {
                 for (let j = 1; j < grid[0].length - 1; j++) {
                     let y = grid[0].length - 2;
 
                     for (let i = 1; i < grid[0][0].length - 1; i++) {
-                        let curMesh =
-                            this.tiles3D[grid[k][j][i].options[0]].mesh;
+                        let curMesh = this.tiles3D[grid[k][j][i].options[0]].mesh;
                         if (
                             curMesh === "OUT EMPTY MESH" ||
                             curMesh === "IN EMPTY MESH"
@@ -384,7 +530,7 @@ export default class WFC3D {
 
                         // curMesh.material.emissive = curMesh.material.color;
                         // curMesh.material.side = THREE.DoubleSide;
-                        
+
                         if (curMesh.children.length !== 0) {
                             for (let i = 0; i < curMesh.children.length; i++) {
                                 /*
@@ -393,7 +539,7 @@ export default class WFC3D {
                                         side: THREE.DoubleSide,
                                     });
                                 */
-                                    curMesh.children[i].material = buildingMat[i];
+                                curMesh.children[i].material = buildingMat[i];
                             }
                         } else {
                             /*

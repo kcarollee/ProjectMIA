@@ -11,8 +11,8 @@ export default class StageModel {
         this.meshGroup.name = "stageModel";
 
         // 난이도 관련
-        this.WFCDim = 10;
-        this.WFCFloorSize = [1.0, 1.0];
+        this.WFCDim = this.difficulty[1];
+        this.WFCFloorSize = [this.difficulty[2], this.difficulty[2]];
 
         // 난이도에서 각 모든 매개변수를 설정 할 수 있도록 하기
         // 룰북에 난이도 변수 추가하고, 각 난이도에 맞는 디멘션, Width, Height 등 설정하기
@@ -50,6 +50,8 @@ export default class StageModel {
             ".glb"
         );
 
+        this.WFC3D.setMaterials(this.difficulty[0]);
+
         Promise.all(this.WFC3D.promises).then(() => {
             console.log("ASDF");
             for (let i = 0; i < this.buildingNum; i++) {
@@ -60,10 +62,10 @@ export default class StageModel {
                 // ];
                 // x, y, z 순서대로
                 // 난이도 관련
-                let dim = [3, 3, 3];
+                let dim = this.difficulty[3];
                 let size = [
                     buildingTransform[i][2],
-                    Math.random() * 0.5 + 0.5,      // 난이도 관련
+                    this.difficulty[4] * (Math.random() + 0.5),      // 난이도 관련 difficulty의 0.5배 부터 1.5배까지
                     buildingTransform[i][3],
                 ];
                 let buildingMesh = this.WFC3D.createBuilding(dim, size);

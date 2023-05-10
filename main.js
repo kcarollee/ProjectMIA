@@ -30,7 +30,8 @@ function main() {
     let currentScene;
     let gameMode = "TITLE_SCREEN"; // TITLE_SCREEN, STAGE_SELECT, MAIN_GAME
     const titleScene = new THREE.Scene();
-    const backgroundColor = 0x000000;
+    // const backgroundColor = 0x000000;
+    const backgroundColor = 0xff6600;
     titleScene.background = new THREE.Color(backgroundColor);
 
     const stageSelectScene = new THREE.Scene();
@@ -39,7 +40,7 @@ function main() {
     const mainGameScene = new THREE.Scene();
     mainGameScene.background = new THREE.Color(backgroundColor);
     mainGameScene.fog = new THREE.Fog(0x000000, 1, 5);
-    
+
     currentScene = titleScene;
     renderer.render(currentScene, camera);
 
@@ -48,7 +49,7 @@ function main() {
     const ambientLight = new THREE.AmbientLight({color: 0xFFFFFF, intensity: 100});
     const directionalLight = new THREE.DirectionalLight({color: 0xFFFFFF, intensity: 100});
     directionalLight.position.set(1, 1, 1);
-    //mainGameScene.add(ambientLight);
+    mainGameScene.add(ambientLight);
     mainGameScene.add(directionalLight);
     // TIME LIMIT
     const DEFAULT_TIME_LIMIT = 200;
@@ -420,6 +421,7 @@ function main() {
     let currentStageNum;
     nextFromNearbyButton.addEventListener("click", () => {
         currentStageNum++;
+        console.log(currentStageNum);
         let difficulty = difficultyInfo[currentStageNum];
         // reset main game scene: delete the stage model
         untoggleNearbyPannel();
@@ -657,7 +659,7 @@ function main() {
 
     // CITY MODELS
 
-    const titleScreenModel = new StageModel();
+    const titleScreenModel = new StageModel(difficultyInfo[0]);
     titleScreenModel.meshGroup.scale.set(0.75, 0.75, 0.75);
     titleScreenModel.meshGroup.rotation.set(Math.PI * 0.5, 0, 0);
     titleScreenModel.meshGroup.position.set(4, 0.0, 0.0);
