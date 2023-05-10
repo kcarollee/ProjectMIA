@@ -92,7 +92,8 @@ export default class StageModel {
                 animate();
                 */
             }
-            //this.meshGroup.scale.set(2, 1, 2);
+            //this.meshGroup.scale.set(0.75 * this.WFCFloorSize[0] ,0.75 * this.WFCFloorSize[0], 0.75 * this.WFCFloorSize[1]);
+            //this.meshGroup.updateWorldMatrix();
             //console.log(this.meshGroup);
         });
 
