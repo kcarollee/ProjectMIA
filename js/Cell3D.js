@@ -9,7 +9,6 @@ export default class Cell3D {
             this.options = new Array(value).fill(0).map((_, i) => i);
         }
         this.pos = pos;
-        this.size = size;
     }
 
     setPos(pos) {

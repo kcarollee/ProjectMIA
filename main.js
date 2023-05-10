@@ -30,7 +30,8 @@ function main() {
     let currentScene;
     let gameMode = "TITLE_SCREEN"; // TITLE_SCREEN, STAGE_SELECT, MAIN_GAME
     const titleScene = new THREE.Scene();
-    const backgroundColor = 0x000000;
+    // const backgroundColor = 0x000000;
+    const backgroundColor = 0xff6600;
     titleScene.background = new THREE.Color(backgroundColor);
 
     const stageSelectScene = new THREE.Scene();
@@ -48,7 +49,7 @@ function main() {
     const ambientLight = new THREE.AmbientLight({color: 0xFFFFFF, intensity: 100});
     const directionalLight = new THREE.DirectionalLight({color: 0xFFFFFF, intensity: 100});
     directionalLight.position.set(1, 1, 1);
-    //mainGameScene.add(ambientLight);
+    mainGameScene.add(ambientLight);
     mainGameScene.add(directionalLight);
     // TIME LIMIT
     const DEFAULT_TIME_LIMIT = 200;
@@ -657,7 +658,7 @@ function main() {
 
     // CITY MODELS
 
-    const titleScreenModel = new StageModel();
+    const titleScreenModel = new StageModel(difficultyInfo[0]);
     titleScreenModel.meshGroup.scale.set(0.75, 0.75, 0.75);
     titleScreenModel.meshGroup.rotation.set(Math.PI * 0.5, 0, 0);
     titleScreenModel.meshGroup.position.set(4, 0.0, 0.0);
@@ -700,7 +701,6 @@ function main() {
     let stagePannelArr = [];
 
     function checkIfChapterCompleted() {}
-
     // SKYBOX
 
     /*

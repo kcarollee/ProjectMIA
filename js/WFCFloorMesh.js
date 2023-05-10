@@ -4,7 +4,7 @@ import Cell from "./Cell.js";
 
 export default class WFCFloorMesh {
     // 20, 'assets/tiles/crosswalk/', '.png'
-    //static #instance;
+    // static #instance; 
     constructor(
         dim,
         cellSize,
@@ -20,7 +20,7 @@ export default class WFCFloorMesh {
         sbc1Str = "AACCCCCC",
         sbc2Str = "CCCCCCAA"
     ) {
-        //if(WFCFloorMesh.#instance) return WFCFloorMesh.#instance;
+        // if(WFCFloorMesh.#instance) return WFCFloorMesh.#instance;
 
         this.tileImages = [];
         // load road textures
@@ -57,7 +57,7 @@ export default class WFCFloorMesh {
 
         this._wfcInit();
 
-        //WFCFloorMesh.#instance = this;
+        // WFCFloorMesh.#instance = this;
     }
 
     setSize(dim, cellSize){
