@@ -15,6 +15,8 @@ function main() {
     const near = 0.001;
     const far = 1000;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    camera.prevPosition = new THREE.Vector3();
+    camera.prevPosition2 = new THREE.Vector3();
     camera.position.set(0, 0, 10);
 
     const stageSelectCamera = new THREE.PerspectiveCamera(
@@ -32,8 +34,8 @@ function main() {
     const titleScene = new THREE.Scene();
     // const backgroundColor = 0x000000;
     const backgroundColor = 0xff6600;
-    titleScene.background = new THREE.Color(backgroundColor);
-
+    titleScene.background = new THREE.Color(0x000000);
+    
     const stageSelectScene = new THREE.Scene();
     stageSelectScene.background = new THREE.Color(backgroundColor);
 
@@ -42,6 +44,8 @@ function main() {
     //mainGameScene.fog = new THREE.Fog(0x000000, 1, 5);
     
     currentScene = titleScene;
+
+
     renderer.render(currentScene, camera);
 
     // LIGHT
@@ -197,6 +201,17 @@ function main() {
     const stats = new Stats();
     stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(stats.dom);
+
+    const backToChaptersButton = document.getElementById("backToChapters");
+    backToChaptersButton.addEventListener("click", () => {
+        const menuScreen = document.getElementById("menu-screen");
+        menuScreen.style.display = "none";
+        const settingsScreen = document.getElementById("settings-screen");
+        settingsScreen.style.display = "none";
+        //toggleStageSelectMenu();
+        untoggleStageSelectMenu();
+        toggleChapterSelectMenu();
+    });
 
     let currentStageModelInstance;
 
@@ -355,7 +370,7 @@ function main() {
 
     retryFromTimeoutButton.addEventListener("click", () => {
         // reset main game scene: delete the stage model
-        let difficulty = difficultyInfo[currentStageNum];
+        let difficulty = difficultyInfo[currentStageNum - 1];
         untoggleTimeoutPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
@@ -386,7 +401,7 @@ function main() {
 
     retryFromFarawayButton.addEventListener("click", () => {
         // reset main game scene: delete the stage model
-        let difficulty = difficultyInfo[currentStageNum];
+        let difficulty = difficultyInfo[currentStageNum - 1];
         untoggleFarawayPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
@@ -448,7 +463,7 @@ function main() {
     });
 
     retryFromNearbyButton.addEventListener("click", () => {
-        let difficulty = difficultyInfo[currentStageNum];
+        let difficulty = difficultyInfo[currentStageNum - 1];
         // reset main game scene: delete the stage model
         untoggleNearbyPannel();
         untoggleConfirmSubPannel();
@@ -945,6 +960,8 @@ function main() {
         stageSelectScene.add(stageSelectMesh);
     });
 
+    let playerIsInBuilding = false;
+    let buildingAreaInfo = null;
     function render(time) {
         stats.begin();
         time *= 0.001;
@@ -960,6 +977,7 @@ function main() {
       );
       */
             //playerTime.defaultTimeLimit;
+            
             timeLeft = Math.floor(
                 playerTime.defaultTimeLimit - playerTime.getElapsedTime()
             );
@@ -972,9 +990,23 @@ function main() {
                 if (confirmModeEnabled) confirmModeEnabled = false;
                 playerTime.stop();
             }
-
+            
             topDownRenderer.render(currentScene, minimapCamera);
 
+            // COLLISION
+            //console.log(camera.position, camera.prevPosition);
+            // [playerIsInBuilding, buildingAreaInfo] = currentStageModelInstance.checkIfPlayerIsInBuilding(camera.position.x, camera.position.z);
+            
+            // if (playerIsInBuilding){
+            //     console.log(camera.position);
+            //     console.log("INSIDE");
+            //     let diffVec = new THREE.Vector3();
+                
+            //     orbitControls.enabled = false;
+            //     orbitControls.dispose();
+              
+            // };
+            
             renderer.setRenderTarget(null);
             renderer.clear();
             renderer.render(currentScene, camera);
@@ -1020,11 +1052,25 @@ function main() {
             //minimapMesh.position.set(window.innerWidth * 0.00175, 1.25, -3);
         }
 
+        
+
         requestAnimationFrame(render);
 
         // update fps controls
         //firstPersonControls.update(clock.getDelta());
+        // camera.prevPosition.set(camera.position.x, camera.position.y, camera.position.z);
+        // if (camera.prevPosition.x != camera.prevPosition.x){
+        //     if (camera.prevPosition.y != camera.prevPosition.y){
+        //         if (camera.prevPosition.z != camera.prevPosition.z){
+        //             camera.prevPosition2.set(camera.prevPosition.x, camera.prevPosition.y, camera.prevPosition.z);
+        //         }
+        //     }
+        // }
+        
         orbitControls.update();
+        
+
+    
         updateMinimapCamera();
         stats.end();
     }
@@ -1133,7 +1179,9 @@ function main() {
         // disable/enable orbitcontrolsonly during maingame
         if (gameMode == "MAIN_GAME") {
             if (pointerIsInMiniMap) orbitControls.enabled = false;
-            else orbitControls.enabled = true;
+            else {
+                if(!playerIsInBuilding) orbitControls.enabled = true;
+            }
         }
     }
 

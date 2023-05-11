@@ -138,12 +138,21 @@ html, body {
    top: 50%;
    left: 50%;
    transform: translate(-50%, -50%);
-   display: flex;
+   display: none;
    flex-direction: row; /* Keep the flex direction as row */
    flex-wrap: wrap; /* Add this line to wrap the flex items */
    align-items: center; /* Center align the flex items */
    z-index: 1; 
+
 }
+
+.container button {
+  font-family: 'Custom Font';
+  background: transparent;
+  border: none;
+}
+
+
 
 .container :hover{
   cursor: pointer;

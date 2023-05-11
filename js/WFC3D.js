@@ -384,7 +384,7 @@ export default class WFC3D {
         // console.log("Grid", grid);
         let wfc3dIterCnt = dim[0] * dim[1] * dim[2];
         let selectedArr = [];
-        // let failCnt = 0;
+        let failCnt = 0;
         while (wfc3dIterCnt--) {
             [grid, selectedArr[wfc3dIterCnt], toVisit] =
                 this.waveFunctionCollapse3DSingleIteration(grid, toVisit);
@@ -393,13 +393,13 @@ export default class WFC3D {
                 [grid, toVisit] = this.startOver(dim, size);
                 wfc3dIterCnt = dim[0] * dim[1] * dim[2];
                 selectedArr = [];
-                // failCnt++;
+                failCnt++;
                 //console.log(wfc3dIterCnt);
             }
         }
         // console.log(selectedArr);
 
-        // console.log(failCnt);
+        console.log(failCnt);
         // return selectedArr;
 
         return this.makeBuildingMesh(grid, size);
