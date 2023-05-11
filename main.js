@@ -355,7 +355,7 @@ function main() {
 
     retryFromTimeoutButton.addEventListener("click", () => {
         // reset main game scene: delete the stage model
-        let difficulty = difficultyInfo[currentStageNum];
+        let difficulty = difficultyInfo[currentStageNum - 1];
         untoggleTimeoutPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
@@ -386,7 +386,7 @@ function main() {
 
     retryFromFarawayButton.addEventListener("click", () => {
         // reset main game scene: delete the stage model
-        let difficulty = difficultyInfo[currentStageNum];
+        let difficulty = difficultyInfo[currentStageNum - 1];
         untoggleFarawayPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
@@ -448,7 +448,7 @@ function main() {
     });
 
     retryFromNearbyButton.addEventListener("click", () => {
-        let difficulty = difficultyInfo[currentStageNum];
+        let difficulty = difficultyInfo[currentStageNum - 1];
         // reset main game scene: delete the stage model
         untoggleNearbyPannel();
         untoggleConfirmSubPannel();

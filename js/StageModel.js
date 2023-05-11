@@ -28,9 +28,22 @@ export default class StageModel {
 
         let buildingTransform =
             this.stageRoadMesh.calcBuildingTransform();
-        
-        this.stageRoadMesh.buildMesh();
 
+        this.buildingSpace = [];
+        for(let i = 0; i < buildingTransform.length; i++) {
+            this.buildingSpace.push([
+                -(this.WFCDim - 2) * this.WFCFloorSize[0] * 0.5 + buildingTransform[i][0] - buildingTransform[i][2] * 0.5,
+                -(this.WFCDim - 2) * this.WFCFloorSize[0] * 0.5 + buildingTransform[i][0] + buildingTransform[i][2] * 0.5,
+                -(this.WFCDim - 2) * this.WFCFloorSize[1] * 0.5 + buildingTransform[i][1] - buildingTransform[i][3] * 0.5,
+                -(this.WFCDim - 2) * this.WFCFloorSize[1] * 0.5 + buildingTransform[i][1] + buildingTransform[i][3] * 0.5,
+            ]);
+        }
+        this.playerPosition = new THREE.Vector3(
+            0, 0.05, 0
+        );
+        this.setPlayerPos(this.buildingSpace);
+
+        this.stageRoadMesh.buildMesh();
         this.meshGroup.add(this.stageRoadMesh.getMeshGroup());
 
         
@@ -38,9 +51,6 @@ export default class StageModel {
         this.buildingNum = buildingTransform.length;
 
         this.meshMaterial = new THREE.MeshNormalMaterial(); // TEMP MATERIAL
-        this.playerInitialPositionX;
-        this.playerInitialPositionZ;
-        this.playerPosition = new THREE.Vector3(0, 0.05, 0);
 
         // WFC3D
 
@@ -51,11 +61,10 @@ export default class StageModel {
             "assets/3Dtiles/Building/",
             ".glb"
         );
-        
-        
 
 
         this.WFC3D.setMaterials(this.difficulty[0]);
+
 
         Promise.all(this.WFC3D.promises).then(() => {
             console.log("ASDF");
@@ -84,21 +93,32 @@ export default class StageModel {
                     -(this.WFCDim - 2) * this.WFCFloorSize[1] * 0.5 +
                         buildingTransform[i][1]
                 );
+
                 this.meshGroup.add(buildingMesh);
-                
-                /*
-                function animate() {
-                    requestAnimationFrame(animate);
-                    // buildingMesh.rotation.x += 0.001 * (i + 1);
-                    // buildingMesh.rotation.y += 0.002 * (i + 1);
-                }
-                
-                animate();
-                */
+
+                // const geometry = new THREE.BoxGeometry(
+                //     buildingTransform[i][2],
+                //     this.difficulty[4] * (Math.random() + 0.5),
+                //     buildingTransform[i][3]
+                // );
+                //
+                // const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+                // const cube = new THREE.Mesh( geometry, material );
+                // cube.position.set(
+                //     -(this.WFCDim - 2) * this.WFCFloorSize[0] * 0.5 +
+                //     buildingTransform[i][0],
+                //     0.001,
+                //     -(this.WFCDim - 2) * this.WFCFloorSize[1] * 0.5 +
+                //     buildingTransform[i][1]
+                // );
+                //
+                // this.meshGroup.add( cube );
+
             }
             //this.meshGroup.scale.set(0.75 * this.WFCFloorSize[0] ,0.75 * this.WFCFloorSize[0], 0.75 * this.WFCFloorSize[1]);
             //this.meshGroup.updateWorldMatrix();
             //console.log(this.meshGroup);
+
         });
 
         this.stageState = {
@@ -106,6 +126,36 @@ export default class StageModel {
             numberOfMoves: 0,
             unlocked: false,
         };
+    }
+
+    setPlayerPos(buildingSpaces){
+        function isInBuilding(posXZ){
+            let isIn = false;
+            for(let i = 0; i < buildingSpaces.length; i++){
+                if(posXZ[0] > buildingSpaces[i][0] && posXZ[0] < buildingSpaces[i][1] &&
+                   posXZ[1] > buildingSpaces[i][2] && posXZ[1] < buildingSpaces[i][3]) {
+                    isIn = true;
+                    break;
+                }
+            }
+            return isIn;
+        }
+
+        let posXZ;
+
+        do{
+            posXZ = [
+                this.difficulty[1] * this.difficulty[2] * (Math.random() - 0.5),
+                this.difficulty[1] * this.difficulty[2] * (Math.random() - 0.5)
+            ];
+            console.log(posXZ);
+        }while (isInBuilding(posXZ))
+
+        this.playerPosition = new THREE.Vector3(
+            posXZ[0], 0.05, posXZ[1]
+        );
+        console.log("계산완료");
+        console.log(this.playerPosition);
     }
 
     addToScene(scene) {
