@@ -91,7 +91,7 @@ function main() {
     mainGameScene.add(ambientLight);
     mainGameScene.add(directionalLight);
     // TIME LIMIT
-    const DEFAULT_TIME_LIMIT = 200;
+    const DEFAULT_TIME_LIMIT = 60;
     const playerTime = new THREE.Clock(false); // autostart: false
     playerTime.defaultTimeLimit = DEFAULT_TIME_LIMIT;
     const timeLimitElement = document.getElementById("timeLimit");
@@ -234,10 +234,11 @@ function main() {
     });
 
     const backToStagesButton = document.getElementById("backToStages");
+    /*
     const stats = new Stats();
     stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(stats.dom);
-
+    */
     const backToChaptersButton = document.getElementById("backToChapters");
     backToChaptersButton.addEventListener("click", () => {
         const menuScreen = document.getElementById("menu-screen");
@@ -338,7 +339,7 @@ function main() {
             playerTime.stop();
 
             // RESULTS TRIGGER EVENT
-            if (playerAnswerData.distance > 3.0) {
+            if (playerAnswerData.distance > 1.0) {
                 toggleFarawayPannel();
             } else {
                 // UNLOCK NEXT STAGE
@@ -357,7 +358,7 @@ function main() {
                 resultsInfo.innerHTML =
                     "YOU WERE " +
                     playerAnswerData.distance.toFixed(2) +
-                    " AWAY FROM THE ANSWER";
+                    " UNITS AWAY FROM THE ANSWER";
                 toggleNearbyPannel();
             }
         }
@@ -588,10 +589,16 @@ function main() {
                 firstIntersect.x,
                 firstIntersect.z
             );
+            
             const playerPosCoord = new THREE.Vector2(
                 camera.position.x,
                 camera.position.z
             );
+
+            const playerInitialPosCoord = new THREE.Vector2(
+                currentStageModelInstance.playerPosition.x,
+                currentStageModelInstance.playerPosition.z
+            )
 
             if (guiControls.debugMode) {
                 console.log(debugCylinderMesh.visible);
@@ -613,15 +620,15 @@ function main() {
                 firstIntersect.z
             );
 
-            let distance = playerPosCoord.distanceTo(selectedPointCoord);
+            let distance = playerInitialPosCoord.distanceTo(selectedPointCoord);
             playerAnswerData.answerPos = selectedPointCoord;
-            playerAnswerData.playerPos = playerPosCoord;
+            playerAnswerData.playerPos = playerInitialPosCoord;
             playerAnswerData.distance = distance;
             console.log(
                 "selected point: ",
                 selectedPointCoord,
                 " player pos: ",
-                playerPosCoord,
+                playerInitialPosCoord,
                 " distance: ",
                 distance
             );
@@ -1001,7 +1008,7 @@ function main() {
     let playerIsInBuilding = false;
     let buildingAreaInfo = null;
     function render(time) {
-        stats.begin();
+        //stats.begin();
         time *= 0.001;
 
         //console.log(gameMode)
@@ -1130,7 +1137,7 @@ function main() {
 
     
         updateMinimapCamera();
-        stats.end();
+        //stats.end();
     }
 
     function updateMinimapCamera() {
