@@ -26,7 +26,7 @@ export default class StageModel {
 
         this.stageRoadMesh.createFloor();
 
-        this.buildingTransform =
+        let buildingTransform =
             this.stageRoadMesh.calcBuildingTransform();
 
         this.buildingSpace = [];
@@ -48,7 +48,7 @@ export default class StageModel {
 
         
 
-        this.buildingNum = this.buildingTransform.length;
+        this.buildingNum = buildingTransform.length;
 
         this.meshMaterial = new THREE.MeshNormalMaterial(); // TEMP MATERIAL
 
@@ -61,13 +61,10 @@ export default class StageModel {
             "assets/3Dtiles/Building/",
             ".glb"
         );
-        
-        
-        
+
 
         this.WFC3D.setMaterials(this.difficulty[0]);
 
-        
 
         Promise.all(this.WFC3D.promises).then(() => {
             console.log("ASDF");
@@ -81,9 +78,9 @@ export default class StageModel {
                 // 난이도 관련
                 let dim = this.difficulty[3];
                 let size = [
-                    this.buildingTransform[i][2],
+                    buildingTransform[i][2],
                     this.difficulty[4] * (Math.random() + 0.5),      // 난이도 관련 difficulty의 0.5배 부터 1.5배까지
-                    this.buildingTransform[i][3],
+                    buildingTransform[i][3],
                 ];
 
                 
@@ -91,10 +88,10 @@ export default class StageModel {
 
                 buildingMesh.position.set(
                     -(this.WFCDim - 2) * this.WFCFloorSize[0] * 0.5 +
-                        this.buildingTransform[i][0],
+                        buildingTransform[i][0],
                     0.001,
                     -(this.WFCDim - 2) * this.WFCFloorSize[1] * 0.5 +
-                        this.buildingTransform[i][1]
+                        buildingTransform[i][1]
                 );
 
                 this.meshGroup.add(buildingMesh);
@@ -159,6 +156,34 @@ export default class StageModel {
         );
         console.log("계산완료");
         console.log(this.playerPosition);
+    }
+
+    checkIfPlayerIsInBuilding(playerPosX, playerPosZ){
+        //console.log(playerPosX, playerPosZ, this.buildingTransform);
+        let newBuildingTransformArr = [];
+        for(let i = 0; i < this.buildingTransform.length; i++){
+            let buildingAreaInfo = this.buildingTransform[i];
+
+            let buildingPosX = -(this.WFCDim - 2) * this.WFCFloorSize[0] * 0.5 + buildingAreaInfo[0];
+            let buildingPosZ = -(this.WFCDim - 2) * this.WFCFloorSize[1] * 0.5 + buildingAreaInfo[1];
+
+            let sizeX = buildingAreaInfo[2];
+            let sizeZ = buildingAreaInfo[3];
+
+            newBuildingTransformArr.push([buildingPosX, buildingPosZ, sizeX, sizeZ]);
+            
+            if (Math.abs(playerPosX - buildingPosX) < sizeX * 0.5){
+                if (Math.abs(playerPosZ - buildingPosZ) < sizeZ * 0.5){
+                    //console.log("HIT");
+                    return [true, [buildingPosX, buildingPosZ, sizeX, sizeZ]];
+                }
+                else continue;
+            }
+            else continue;
+            
+        }
+        return [false, null];
+        //console.log(playerPosX, playerPosZ, newBuildingTransformArr);
     }
 
     addToScene(scene) {

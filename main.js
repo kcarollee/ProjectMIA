@@ -32,13 +32,48 @@ function main() {
     let currentScene;
     let gameMode = "TITLE_SCREEN"; // TITLE_SCREEN, STAGE_SELECT, MAIN_GAME
     const titleScene = new THREE.Scene();
+    const stageSelectScene = new THREE.Scene();
     // const backgroundColor = 0x000000;
     const backgroundColor = 0xff6600;
     titleScene.background = new THREE.Color(0x000000);
-    
-    const stageSelectScene = new THREE.Scene();
-    stageSelectScene.background = new THREE.Color(backgroundColor);
+    let rowRectNum = 40;
+    let colRectNum = 40;
+    let boxSide = 1;
+    let boxDepth = 5;
+    let titleSceneBoxGeom = new THREE.BoxGeometry(boxSide, boxSide, boxDepth);
+    let titleSceneBoxMeshArr = [];
+    let titleSceneBoxMeshArr2 = [];
+    let titleSceneBoxGroup = new THREE.Group();
+    let titleSceneBoxGroup2 = new THREE.Group();
+    let xOffset = -rowRectNum * 0.5 + boxSide * 0.5;
+    let yOffset = -colRectNum * 0.5 + boxSide * 0.5;
+    for (let y = 0; y < colRectNum; y++){
+        for (let x = 0; x < rowRectNum; x++){
+            let titleSceneBoxMat = new THREE.MeshBasicMaterial({color: new THREE.Color(Math.random(), Math.random() * 0.25, 0.25)});
+            let titleSceneBoxMesh = new THREE.Mesh(titleSceneBoxGeom, titleSceneBoxMat);
+            titleSceneBoxMesh.position.set(xOffset + x * boxSide, yOffset + y * boxSide, Math.sin(x) * Math.cos(y));
+            titleSceneBoxMeshArr.push(titleSceneBoxMesh);
+            titleSceneBoxGroup.add(titleSceneBoxMesh);
 
+            let titleSceneBoxMat2 = new THREE.MeshBasicMaterial({color: new THREE.Color(Math.random(), Math.random() * 0.25, 0.25)});
+            let titleSceneBoxMesh2 = new THREE.Mesh(titleSceneBoxGeom, titleSceneBoxMat);
+            titleSceneBoxMesh2.position.set(xOffset + x * boxSide, yOffset + y * boxSide, Math.sin(x) * Math.cos(y));
+
+            titleSceneBoxMeshArr2.push(titleSceneBoxMesh2);
+            titleSceneBoxGroup2.add(titleSceneBoxMesh2);
+        }
+    }
+    titleSceneBoxGroup.position.set(0, 0, -10);
+    titleSceneBoxGroup.scale.set(2.0, 2.0, 1.0);
+    titleSceneBoxGroup.rotation.set(-Math.PI * 0.1, 0, -Math.PI * 0.1);
+    titleScene.add(titleSceneBoxGroup);
+
+    titleSceneBoxGroup2.position.set(0, 0, -3)
+    //const titleSceneBoxGroupCopy = new THREE.Group().copy(titleSceneBoxGroup);
+    stageSelectScene.add(titleSceneBoxGroup2);
+
+    
+    
     const mainGameScene = new THREE.Scene();
     mainGameScene.background = new THREE.Color(backgroundColor);
     //mainGameScene.fog = new THREE.Fog(0x000000, 1, 5);
@@ -181,6 +216,7 @@ function main() {
         nearbyPannel.style.display = "none";
     }
 
+    /*
     const settingsButton = document.getElementById("settings");
     settingsButton.addEventListener("click", () => {
         const menuScreen = document.getElementById("menu-screen");
@@ -188,7 +224,7 @@ function main() {
         const settingsScreen = document.getElementById("settings-screen");
         settingsScreen.style.display = "flex";
     });
-
+    */
     const backButton = document.getElementById("back");
     backButton.addEventListener("click", () => {
         const menuScreen = document.getElementById("menu-screen");
@@ -635,6 +671,7 @@ function main() {
         console.log("DEBUG MODE: ", guiControls.debugMode);
         debugCylinderMesh.visible = e;
         debugCameraMesh.visible = e;
+        titleScreenModel.meshGroup.visible = e;
     });
 
     // CONTROLS
@@ -677,6 +714,7 @@ function main() {
     titleScreenModel.meshGroup.scale.set(0.75, 0.75, 0.75);
     titleScreenModel.meshGroup.rotation.set(Math.PI * 0.5, 0, 0);
     titleScreenModel.meshGroup.position.set(4, 0.0, 0.0);
+    titleScreenModel.meshGroup.visible = false;
     titleScreenModel.addToScene(currentScene);
 
     function removeTitleScreenModel() {
@@ -898,7 +936,7 @@ function main() {
     fontLoader.load("assets/fonts/font_1.json", function (font) {
         const titleGeometry = new TextGeometry("PROJECT MIA", {
             font: font,
-            size: 0.5,
+            size: 0.85,
             height: 0.25,
             curveSegments: 12,
             bevelEnabled: true,
@@ -913,7 +951,7 @@ function main() {
             titleGeometry,
             new THREE.MeshNormalMaterial()
         );
-        titleTextMesh.position.set(-10.0, 3.0, 0.0);
+        titleTextMesh.position.set(-5.5, 2.0, 3.0);
         titleTextMesh.name = "TITLE_MESH";
         currentScene.add(titleTextMesh);
 
@@ -934,7 +972,7 @@ function main() {
             playButtonGeometry,
             new THREE.MeshNormalMaterial()
         );
-        playButtonMesh.position.set(-8.5, -3.0, 0.0);
+        playButtonMesh.position.set(-1.75, -3.0, 3.0);
         playButtonMesh.name = "PLAY_MESH";
         currentScene.add(playButtonMesh);
 
@@ -955,7 +993,7 @@ function main() {
             stageSelectGeometry,
             new THREE.MeshNormalMaterial()
         );
-        stageSelectMesh.position.set(-6, 5.5, 0);
+        stageSelectMesh.position.set(-5.5, 3, 2);
         stageSelectMesh.name = "PLAY_MESH";
         stageSelectScene.add(stageSelectMesh);
     });
@@ -1017,14 +1055,25 @@ function main() {
                     camera.position.y,
                     camera.position.z
                 );
+                
             }
 
             updateRaycaster();
         } else if (gameMode == "STAGE_SELECT") {
+
+            let titleBoxIndex = 0;
+            for (let y = 0; y < colRectNum; y++){
+                for (let x = 0; x < rowRectNum; x++){
+                    let titleSceneBoxMesh = titleSceneBoxMeshArr2[titleBoxIndex];
+                    titleSceneBoxMesh.scale.set(1, 1, Math.sin(x * y + time));
+                    titleBoxIndex++;
+                }
+            }
             renderer.setRenderTarget(null);
             renderer.clear();
             renderer.render(currentScene, stageSelectCamera);
         } else if (gameMode == "TITLE_SCREEN" && titleTextMesh != undefined) {
+            
             if (titleTextMesh != undefined) {
                 titleTextMesh.rotateX(Math.sin(time) * 0.0003);
                 titleTextMesh.rotateY(Math.cos(time) * 0.00005);
@@ -1033,6 +1082,15 @@ function main() {
             if (playButtonMesh != undefined) {
                 playButtonMesh.rotateX(Math.cos(time) * 0.0005);
                 playButtonMesh.rotateY(Math.sin(time) * 0.0003);
+            }
+            
+            let titleBoxIndex = 0;
+            for (let y = 0; y < colRectNum; y++){
+                for (let x = 0; x < rowRectNum; x++){
+                    let titleSceneBoxMesh = titleSceneBoxMeshArr[titleBoxIndex];
+                    titleSceneBoxMesh.scale.set(1, 1, Math.sin(x * y + time));
+                    titleBoxIndex++;
+                }
             }
             //console.log("HERE")
             renderer.setRenderTarget(null);
