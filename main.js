@@ -1122,7 +1122,7 @@ function main() {
         requestAnimationFrame(render);
 
         // update fps controls
-        //firstPersonControls.update(clock.getDelta());
+        // firstPersonControls.update(clock.getDelta());
         // camera.prevPosition.set(camera.position.x, camera.position.y, camera.position.z);
         // if (camera.prevPosition.x != camera.prevPosition.x){
         //     if (camera.prevPosition.y != camera.prevPosition.y){

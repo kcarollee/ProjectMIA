@@ -8,7 +8,19 @@ export default class Cell {
         } else {
             this.options = new Array(value).fill(0).map((_, i) => i);
         }
-        this.geometry = new THREE.PlaneGeometry(width, height);
+        this.geometry = new THREE.PlaneGeometry(width, height, 10, 10);
+        
+
+        /*
+        // CREATE NOISE
+        
+        this.positionAttribute = this.geometry.getAttribute('position');
+        for (let i = 0; i < this.positionAttribute.count; i++){
+            let initialY = this.positionAttribute.getZ(i);
+            this.positionAttribute.setZ(i, initialY + Math.random() * 0.1);
+        }
+      
+        */
         this.material = new THREE.MeshBasicMaterial({
             side: THREE.DoubleSide,
             transparent: true,
@@ -35,7 +47,7 @@ export default class Cell {
     setMeshPos(meshPos) {
         this.meshPos = meshPos;
     }
-
+    
     setRotationNum(num) {
         this.rotationNum = num;
     }
@@ -43,8 +55,8 @@ export default class Cell {
     buildMesh() {
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.name = "Cell";
-        //this.cellMeshGroup.add(this.mesh, this.floorMesh);
-        //console.log(this.rotationNum);
+        // this.cellMeshGroup.add(this.mesh, this.floorMesh);
+        // console.log(this.rotationNum);
         this.mesh.rotateX(-Math.PI * 0.5);
         this.mesh.position.set(this.meshPos[0], 0, this.meshPos[1]);
         this.mesh.rotateZ(-Math.PI * 0.5 * this.rotationNum);
@@ -57,6 +69,8 @@ export default class Cell {
 
         this.cellMeshGroup.add(this.mesh);
         this.cellMeshGroup.add(this.floorMesh);
+
+        console.log(this.mesh.geometry.attributes.position);
     }
 
     getMesh() {
