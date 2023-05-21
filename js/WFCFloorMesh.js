@@ -611,7 +611,7 @@ export default class WFCFloorMesh {
                     buildingPos[1],
                     buildingSpace[0],
                     buildingSpace[1],
-                    Math.random() < 0.8 ? true : false
+                    Math.random() < 0.6 ? true : false
                 ]);
             }
         }

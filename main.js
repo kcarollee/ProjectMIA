@@ -290,6 +290,7 @@ function main() {
     });
     const zoomInButton = document.getElementById("zoomInButton");
     const zoomOutButton = document.getElementById("zoomOutButton");
+    const homeButton = document.getElementById("homeButton");
     const guessButton = document.getElementById("guessButton");
     let guessModeEnabled = false;
     let confirmModeEnabled = false;
@@ -322,6 +323,15 @@ function main() {
         minimapElem.style.width = topDownCanvasDefaultSize.width + "vh";
         minimapElem.style.height = topDownCanvasDefaultSize.height + "vh";
     });
+
+    homeButton.addEventListener("click", () => {
+        camera.position.copy(currentStageModelInstance.getPlayerPos());
+        orbitControls.target.set(
+            camera.position.x,
+            camera.position.y,
+            camera.position.z + 0.01
+        );
+    })
 
     guessButton.addEventListener("click", () => {
         /*

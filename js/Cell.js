@@ -70,7 +70,7 @@ export default class Cell {
         this.cellMeshGroup.add(this.mesh);
         this.cellMeshGroup.add(this.floorMesh);
 
-        console.log(this.mesh.geometry.attributes.position);
+        //console.log(this.mesh.geometry.attributes.position);
     }
 
     getMesh() {
