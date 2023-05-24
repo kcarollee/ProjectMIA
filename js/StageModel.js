@@ -421,4 +421,5 @@ export default class StageModel {
     getPlayerPos() {
         return this.playerPosition;
     }
+
 }

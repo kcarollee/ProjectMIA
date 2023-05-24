@@ -3,11 +3,18 @@ import OrbitControls from "./js/OrbitControls.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
+
+import { mix, range, normalWorld, oscSine, timerLocal } from 'three/nodes';
+
+import WebGPU from 'three/addons/capabilities/WebGPU.js';
+import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
+
 import StageModel from "./js/StageModel.js";
 
 function main() {
     const canvas = document.querySelector("#c");
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    // const renderer = new WebGPURenderer({ canvas, antialias: true });
 
     // CAMERA
     const fov = 75;
@@ -36,6 +43,14 @@ function main() {
     // const backgroundColor = 0x000000;
     const backgroundColor = 0xff6600;
     titleScene.background = new THREE.Color(0x000000);
+
+    let alight = new THREE.AmbientLight({color : 0xFFFFFF});
+    let dlight = new THREE.DirectionalLight({color : 0xFFFFFF});
+    dlight.position.set(0,10,10);
+
+    titleScene.add(alight);
+    titleScene.add(dlight);
+
     let rowRectNum = 40;
     let colRectNum = 40;
     let boxSide = 1;
@@ -72,12 +87,12 @@ function main() {
     //const titleSceneBoxGroupCopy = new THREE.Group().copy(titleSceneBoxGroup);
     stageSelectScene.add(titleSceneBoxGroup2);
 
-    
-    
+
+
     const mainGameScene = new THREE.Scene();
     mainGameScene.background = new THREE.Color(backgroundColor);
     //mainGameScene.fog = new THREE.Fog(0x000000, 1, 5);
-    
+
     currentScene = titleScene;
 
 
@@ -234,11 +249,11 @@ function main() {
     });
 
     const backToStagesButton = document.getElementById("backToStages");
-    /*
+
     const stats = new Stats();
     stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(stats.dom);
-    */
+
     const backToChaptersButton = document.getElementById("backToChapters");
     backToChaptersButton.addEventListener("click", () => {
         const menuScreen = document.getElementById("menu-screen");
@@ -260,7 +275,7 @@ function main() {
                     child.material.map.dispose();
                     //console.log("TEXTURE: ", child.material.map);
                 }
-               
+
                 child.material.dispose();
                 child.geometry.dispose();
             }
@@ -333,6 +348,152 @@ function main() {
         );
     })
 
+    const calcScore = () => {
+        const maxClickScore = 1000;
+        const maxDistanceScore = 1000;
+        const maxTimeScore = 1000;
+        const min = (a, b) => {
+            return a <= b ? a : b;
+        }
+        const max = (a, b) => {
+            return a >= b ? a : b;
+        }
+        const calcClickScore = (clickCnt) => {
+            if(clickCnt === 1)
+                return maxClickScore;
+            else if(clickCnt < 5){
+                return maxClickScore * (1 - 0.05 * (clickCnt - 1));
+            }
+            else{
+                return max(0, maxClickScore * (0.85 - 0.1 * (clickCnt - 4)));
+            }
+        }
+        const calcDistScore = (distance) => {
+            let cellWidth = currentStageModelInstance.difficulty[2];
+            if(distance < 0.25 * cellWidth){
+                return maxDistanceScore;
+            }
+            else if(distance < cellWidth){
+                return maxDistanceScore * (1 - 0.5 * (distance - 0.25 * cellWidth) / (0.75 * cellWidth));
+            }
+            else if(distance < 2 * cellWidth){
+                return maxDistanceScore * (0.5 - 0.25 * (distance - cellWidth) / (cellWidth));
+            }
+            else if(distance < 4 * cellWidth){
+                return maxDistanceScore * (0.25 - 0.25 * (distance - 2 * cellWidth) / (2 * cellWidth));
+            }
+            else
+                return 0;
+        }
+        const calcTimeScore = (playTime) => {
+            return min(
+                maxTimeScore,
+                4 * maxTimeScore * Math.sqrt(Math.pow(playerTime.defaultTimeLimit,2) - Math.pow(playTime,2)) /
+                (Math.sqrt(15) * playerTime.defaultTimeLimit)
+            );
+        }
+        console.log(
+            "click : ", calcClickScore(playerAnswerData.clickCnt),
+            "dist : ", calcDistScore(playerAnswerData.distance),
+            "time : ", + calcTimeScore(playerTime.elapsedTime),
+            );
+        return calcClickScore(playerAnswerData.clickCnt) + calcDistScore(playerAnswerData.distance) + calcTimeScore(playerTime.elapsedTime);
+    }
+
+    const getInfoFromCookies = (cookieKey) => {
+        let result = "";
+        const cookieArr = document.cookie.split("; ");
+
+        console.log(cookieArr);
+
+        for(let i = 0; i < cookieArr.length; i++) {
+            if(cookieArr[i][0] === " ") {
+                cookieArr[i] = cookieArr[i].substring(1);
+            }
+
+            if(cookieArr[i].indexOf(cookieKey) === 0) {
+                result = cookieArr[i].slice(cookieKey.length, cookieArr[i].length);
+                result = JSON.parse(result);
+
+                console.log(result);
+                console.log(typeof result);
+
+                return result;
+            }
+        }
+        console.log(result);
+        console.log(typeof result);
+
+        return result;
+    }
+
+    // 각 스테이지 점수들에 대한 쿠키를 가져와서 각 챕터별 배열로 만들어서 리턴
+    // currentStageNum 변수 사용
+    const initStageRanking = () => {
+        // for(let i = 1; i <= 16; i++){
+        //     let cookie = '';
+        //     let tmpArr = [0];
+        //     tmpArr = JSON.stringify(tmpArr);
+        //
+        //     let expiration = new Date();
+        //     expiration.setDate(expiration.getDate() + 30);
+        //
+        //     cookie = `stage${i}=${tmpArr}; expires${expiration.toUTCString()};`;
+        //     document.cookie = cookie;
+        // }
+    }
+
+    const getStageRankingFromCookies = (stage) => {
+        let cookieKey = "stage" + stage + "=";
+        return getInfoFromCookies(cookieKey);
+    }
+
+
+    // 해당 점수를 해당 챕터의 스테이지에 삽입한다 최대점수와 동일한 경우에만 삽입하지 않고 나머지 경우에만 삽입한다.
+    // 각 스테이지마다 점수는 5개 까지 저장할 될 수 있다.
+    const setStageRankingToCookies = (stage, score) => {
+        let stageRankings = getStageRankingFromCookies(stage);
+
+        if(stageRankings.includes(score)) return;
+        console.log("ST RANK", stageRankings);
+        if(stageRankings === '') stageRankings = [];
+
+        stageRankings.push(score);
+        stageRankings.sort(function (a,b){
+            return b - a;
+        });
+        stageRankings = stageRankings.slice(0,5);
+
+        stageRankings = JSON.stringify(stageRankings);
+
+        let cookie = "";
+
+        let expiration = new Date();
+        expiration.setDate(expiration.getDate() + 10);
+
+        cookie = `stage${stage}=${stageRankings}; expires${expiration.toUTCString()};`
+        document.cookie = cookie;
+    }
+
+    const getStageUnlockInfoFromCookie = () => {
+        let cookieKey = "stageUnlockInfo=";
+        return getInfoFromCookies(cookieKey);
+    }
+
+    const setStageUnlockInfoFromCookie = (stage) => {
+        let unlockInfo = getStageUnlockInfoFromCookie();
+        unlockInfo[stage - 1] = true;
+        unlockInfo = JSON.stringify(unlockInfo);
+
+        let cookie = "";
+
+        let expiration = new Date();
+        expiration.setDate(expiration.getDate() + 10);
+
+        cookie = `stageUnlockInfo=${unlockInfo}; expires${expiration.toUTCString()};`
+        document.cookie = cookie;
+    }
+
     guessButton.addEventListener("click", () => {
         /*
         guessModeEnabled = !guessModeEnabled;
@@ -349,7 +510,7 @@ function main() {
             playerTime.stop();
 
             // RESULTS TRIGGER EVENT
-            if (playerAnswerData.distance > 1.0) {
+            if (playerAnswerData.distance > 100.0) {
                 toggleFarawayPannel();
             } else {
                 // UNLOCK NEXT STAGE
@@ -364,12 +525,17 @@ function main() {
 
                 // SHOW RESULTS
 
+                let score = calcScore();
                 const resultsInfo = document.getElementById("resultsInfo");
                 resultsInfo.innerHTML =
                     "YOU WERE " +
                     playerAnswerData.distance.toFixed(2) +
-                    " UNITS AWAY FROM THE ANSWER";
+                    " UNITS AWAY FROM THE ANSWER" +
+                    "<br>SCORE : " + score.toFixed(0);
                 toggleNearbyPannel();
+                console.log("getStageRankingFromCookies : ", getStageRankingFromCookies(currentStageNum));
+                console.log("getStageUnlockInfoFromCookies : ", getStageUnlockInfoFromCookie());
+                setStageRankingToCookies(currentStageNum, Math.floor(score));
             }
         }
     });
@@ -381,6 +547,7 @@ function main() {
         playerPos: null,
         answerPos: null,
         distance: null,
+        clickCnt: 0,
     };
 
     yesButton.addEventListener("click", () => {
@@ -425,6 +592,7 @@ function main() {
         generateStage(difficulty);
         minimapCameraReset();
         playerTime.start();
+        playerAnswerData.clickCnt = 0;
     });
 
     backToStagesFromTimeoutButton.addEventListener("click", () => {
@@ -456,6 +624,7 @@ function main() {
         generateStage(difficulty);
         minimapCameraReset();
         playerTime.start();
+        playerAnswerData.clickCnt = 0;
     });
 
     backToStagesFromFarawayButton.addEventListener("click", () => {
@@ -507,6 +676,7 @@ function main() {
         generateStage(difficulty);
         minimapCameraReset();
         playerTime.start();
+        playerAnswerData.clickCnt = 0;
     });
 
     retryFromNearbyButton.addEventListener("click", () => {
@@ -519,6 +689,7 @@ function main() {
         generateStage(difficulty);
         minimapCameraReset();
         playerTime.start();
+        playerAnswerData.clickCnt = 0;
     });
 
     backToStagesFromNearbyButton.addEventListener("click", () => {
@@ -599,7 +770,7 @@ function main() {
                 firstIntersect.x,
                 firstIntersect.z
             );
-            
+
             const playerPosCoord = new THREE.Vector2(
                 camera.position.x,
                 camera.position.z
@@ -630,17 +801,21 @@ function main() {
                 firstIntersect.z
             );
 
+
             let distance = playerInitialPosCoord.distanceTo(selectedPointCoord);
             playerAnswerData.answerPos = selectedPointCoord;
             playerAnswerData.playerPos = playerInitialPosCoord;
             playerAnswerData.distance = distance;
+            playerAnswerData.clickCnt++;
             console.log(
                 "selected point: ",
                 selectedPointCoord,
                 " player pos: ",
                 playerInitialPosCoord,
                 " distance: ",
-                distance
+                distance,
+                " clickCnt",
+                playerAnswerData.clickCnt,
             );
             confirmModeEnabled = true;
             guessModeEnabled = true;
@@ -733,7 +908,7 @@ function main() {
     titleScreenModel.meshGroup.position.set(4, 0.0, 0.0);
     titleScreenModel.meshGroup.visible = false;
     titleScreenModel.addToScene(currentScene);
-
+    initStageRanking();
     function removeTitleScreenModel() {
         const objectToRemove = titleScene.getObjectByName();
     }
@@ -790,7 +965,7 @@ function main() {
                 'lf.jpg', 'rt.jpg',
         ]);
     }
-    
+
     class StageSelectPannel {
         constructor(stageNum, stageUnlocked, isChapterPannel = false) {
             // this.stageContainer = document.getElementById("stageContainer");
@@ -801,13 +976,13 @@ function main() {
             this.stageNum = stageNum;
             this.stageUnlocked = stageUnlocked;
             if (this.isChapterPannel) {
-                
+
                 this.stageContainer =
                     document.getElementById("chapterContainer");
                 this.chapterUnlocked = stageUnlocked;
                 this.chapterNum = stageNum;
                 this.imgElem.src = './assets/chapterThumbnails/' + this.chapterNum + '.jpg';
-                
+
                 this.spanElem.innerHTML = "CH." + this.stageNum;
                 this.numberOfStages = 4;
                 this.connectedStagePannels = [];
@@ -822,14 +997,14 @@ function main() {
             this.divElem.className = "rectangle";
             this.divElem.appendChild(this.spanElem);
 
-            
+
             //this.imgElem.style.objectFit = "fill";
             this.imgElem.style.width = "80%";
 
             this.divElem.appendChild(this.imgElem);
 
             this.stageContainer.appendChild(this.divElem);
-            
+
 
             if (this.stageUnlocked) {
                 this.divElem.style.backgroundColor = "#ccc";
@@ -917,7 +1092,7 @@ function main() {
         console.log(chapterPannelArr[chapterIndex].connectedStagePannels);
     }
 
-    
+
 
     // keep track of stages that are unlocked
     StageSelectPannel.unlockedStagesNum = 1;
@@ -1018,7 +1193,7 @@ function main() {
     let playerIsInBuilding = false;
     let buildingAreaInfo = null;
     function render(time) {
-        //stats.begin();
+        stats.begin();
         time *= 0.001;
 
         //console.log(gameMode)
@@ -1032,7 +1207,7 @@ function main() {
       );
       */
             //playerTime.defaultTimeLimit;
-            
+
             timeLeft = Math.floor(
                 playerTime.defaultTimeLimit - playerTime.getElapsedTime()
             );
@@ -1045,23 +1220,23 @@ function main() {
                 if (confirmModeEnabled) confirmModeEnabled = false;
                 playerTime.stop();
             }
-            
+
             topDownRenderer.render(currentScene, minimapCamera);
 
             // COLLISION
             //console.log(camera.position, camera.prevPosition);
             // [playerIsInBuilding, buildingAreaInfo] = currentStageModelInstance.checkIfPlayerIsInBuilding(camera.position.x, camera.position.z);
-            
+
             // if (playerIsInBuilding){
             //     console.log(camera.position);
             //     console.log("INSIDE");
             //     let diffVec = new THREE.Vector3();
-                
+
             //     orbitControls.enabled = false;
             //     orbitControls.dispose();
-              
+
             // };
-            
+
             renderer.setRenderTarget(null);
             renderer.clear();
             renderer.render(currentScene, camera);
@@ -1072,7 +1247,7 @@ function main() {
                     camera.position.y,
                     camera.position.z
                 );
-                
+
             }
 
             updateRaycaster();
@@ -1090,7 +1265,7 @@ function main() {
             renderer.clear();
             renderer.render(currentScene, stageSelectCamera);
         } else if (gameMode == "TITLE_SCREEN" && titleTextMesh != undefined) {
-            
+
             if (titleTextMesh != undefined) {
                 titleTextMesh.rotateX(Math.sin(time) * 0.0003);
                 titleTextMesh.rotateY(Math.cos(time) * 0.00005);
@@ -1100,7 +1275,7 @@ function main() {
                 playButtonMesh.rotateX(Math.cos(time) * 0.0005);
                 playButtonMesh.rotateY(Math.sin(time) * 0.0003);
             }
-            
+
             let titleBoxIndex = 0;
             for (let y = 0; y < colRectNum; y++){
                 for (let x = 0; x < rowRectNum; x++){
@@ -1127,7 +1302,7 @@ function main() {
             //minimapMesh.position.set(window.innerWidth * 0.00175, 1.25, -3);
         }
 
-        
+
 
         requestAnimationFrame(render);
 
@@ -1141,13 +1316,13 @@ function main() {
         //         }
         //     }
         // }
-        
-        orbitControls.update();
-        
 
-    
+        orbitControls.update();
+
+
+
         updateMinimapCamera();
-        //stats.end();
+        stats.end();
     }
 
     function updateMinimapCamera() {
@@ -1205,7 +1380,7 @@ function main() {
                     break;
                 }
             }
-        } 
+        }
     }
 
     function generateStage(difficulty) {

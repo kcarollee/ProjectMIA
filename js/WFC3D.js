@@ -505,10 +505,7 @@ export default class WFC3D {
 
                     for (let i = 1; i < grid[0][0].length - 1; i++) {
                         let curMesh = this.tiles3D[grid[k][j][i].options[0]].mesh;
-                        if (
-                            curMesh === "OUT EMPTY MESH" ||
-                            curMesh === "IN EMPTY MESH"
-                        )
+                        if (curMesh === "OUT EMPTY MESH" || curMesh === "IN EMPTY MESH")
                             continue;
 
                         curMesh = curMesh.clone();
