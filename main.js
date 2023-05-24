@@ -652,11 +652,12 @@ function main() {
 
     // MINIMAP & MINIMAP CAMERA
     const minimapCamera = new THREE.OrthographicCamera(-5, 5, 5, -5, 1, 1000);
+    //const minimapCamera = new THREE.PerspectiveCamera(100);
     minimapCamera.layers.enable(1); // for the GUESS MARKER
 
     function minimapCameraReset() {
         minimapCamera.zoom = 1;
-        minimapCamera.position.set(0, 5, 0);
+        minimapCamera.position.set(0, 10, 0);
         minimapCamera.lookAt(0, 0, 0);
         minimapCamera.updateProjectionMatrix();
     }
@@ -674,7 +675,7 @@ function main() {
     const minimapCameraLookAt = new THREE.Vector3(0, 0, 0);
     let pointerIsInMiniMap = false;
 
-    minimapCamera.position.set(0, 5, 0);
+    minimapCamera.position.set(0, 10, 0);
     minimapCamera.lookAt(0, 0, 0);
 
     // GUI FOR DEBUGMODE
@@ -1045,7 +1046,7 @@ function main() {
                 if (confirmModeEnabled) confirmModeEnabled = false;
                 playerTime.stop();
             }
-            
+            currentStageModelInstance.update(minimapCamera.position);
             topDownRenderer.render(currentScene, minimapCamera);
 
             // COLLISION
@@ -1061,7 +1062,8 @@ function main() {
             //     orbitControls.dispose();
               
             // };
-            
+
+            currentStageModelInstance.update(camera.position);
             renderer.setRenderTarget(null);
             renderer.clear();
             renderer.render(currentScene, camera);
@@ -1074,7 +1076,7 @@ function main() {
                 );
                 
             }
-
+            
             updateRaycaster();
         } else if (gameMode == "STAGE_SELECT") {
 

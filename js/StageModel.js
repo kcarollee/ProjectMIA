@@ -53,6 +53,8 @@ export default class StageModel {
 
         this.meshMaterial = new THREE.MeshNormalMaterial(); // TEMP MATERIAL
 
+        this.volumeModels = [];
+        this.updateNedded = false;
         this.placeRandomStructures();
 
         // WFC3D
@@ -131,7 +133,7 @@ export default class StageModel {
             unlocked: false,
         };
 
-        this.volumeModels = [];
+        
         
     }
 
@@ -370,18 +372,29 @@ export default class StageModel {
 
             // structure 6: volumetric model 
             {
+                let scaleY = 2.5 + Math.random() * 2.5;
                 let tempVol = new VolumetricSculpture(
                     this.playerPosition,
-                    new THREE.Vector3(buildingPosX, 1, buildingPosZ),
-                    new THREE.Vector3(sizeX, 1, sizeZ)
+                    new THREE.Vector3(buildingPosX, scaleY * 0.5, buildingPosZ),
+                    new THREE.Vector3(sizeX, scaleY, sizeZ)
                 );
                 tempVol.addToGroup(this.meshGroup);
+                this.volumeModels.push(tempVol);
+                this.updateNedded = true;
             }
 
             console.log(this.meshGroup);
         }
         
         //console.log(playerPosX, playerPosZ, newBuildingTransformArr);
+    }
+
+    update(camPos){
+        if (this.updateNedded){
+            this.volumeModels.forEach((volumeModel) => {
+                volumeModel.updateUniforms(camPos);
+            });
+        }
     }
 
     checkIfPlayerIsInBuilding(playerPosX, playerPosZ){

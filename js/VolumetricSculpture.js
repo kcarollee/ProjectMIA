@@ -19,12 +19,12 @@ export default class VolumetricSculpture {
             uniforms:{
                 map: {value: this.texture},
                 cameraPos: {value: new THREE.Vector3(cameraPos.x, cameraPos.y, cameraPos.z)},
-                threshold: {value: 0.6},
+                threshold: {value: 0.5},
                 steps: {value: 200}
             },
             vertexShader,
             fragmentShader,
-            
+            side: THREE.DoubleSide
         });
         
         this.geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -41,18 +41,71 @@ export default class VolumetricSculpture {
     init3DTexture(){
         let vector = new THREE.Vector3();
         let index = 0;
+        // // type 1: random, threshold : 0.6
+        // for (let z = 0; z < this.size; z++){
+    	//     for (let y = 0; y < this.size; y++){
+    	//         for (let x = 0; x < this.size; x++){
+        //             this.data[index++] = this.map(Math.random(), 0, 1, 0, 256);
+        //         }
+    	//     }
+    	// }
+
+        // // type 2: random spheres threshold: 0.25
+        // let randomPoints = [];
+        // let randomPointsNum = 50;
+        // for (let i = 0; i < randomPointsNum; i++){
+        //     let randomPoint = new THREE.Vector3(
+        //         this.map(Math.random(), 0, 1, 0, this.size),
+        //         this.map(Math.random(), 0, 1, 0, this.size),
+        //         this.map(Math.random(), 0, 1, 0, this.size)
+        //     );
+        //     randomPoints.push(randomPoint);
+        // }
+        // let radius = this.size * 0.2;
+        // for (let z = 0; z < this.size; z++){
+    	//     for (let y = 0; y < this.size; y++){
+    	//         for (let x = 0; x < this.size; x++){
+        //             let currentPoint = new THREE.Vector3(x, y, z);
+        //             let distanceSum = 0;
+        //             randomPoints.forEach((randomPoint) => {
+        //                 let distance = randomPoint.distanceTo(currentPoint);
+        //                 if (distance > radius){
+        //                     distanceSum += 1;
+        //                 }
+        //                 else {
+        //                     distanceSum += this.map(distance, 0, this.size, 0, 256);
+        //                 }
+        //             });
+        //             this.data[index++] = distanceSum;
+
+                   
+        //         }
+    	//     }
+    	// }
+        
+        // type 3: random, threshold : 0.6
         for (let z = 0; z < this.size; z++){
     	    for (let y = 0; y < this.size; y++){
     	        for (let x = 0; x < this.size; x++){
-    	           this.data[index++] = this.map(Math.random(), 0, 1, 0, 256);
-                   //this.data[index++] = 255;
-                   
+                    this.data[index++] = this.map(noise.simplex3(x * 0.1, y * 0.1, z * 0.1), -1, 1, 0, 256);
                 }
     	    }
     	}
-        console.log(this.data);
+
+        // // type 4: random, threshold : 0.6
+        // let scale = 0.1
+        // for (let z = 0; z < this.size; z++){
+    	//     for (let y = 0; y < this.size; y++){
+    	//         for (let x = 0; x < this.size; x++){
+        //             const d = 1.0 - vector.set( x, y, z ).subScalar( this.size / 2 ).divideScalar( this.size ).length();
+		// 			this.data[index++] = ( 128 + 128 * noise.simplex3( x * scale / 1.5, y * scale, z * scale / 1.5 ) ) * d * d;
+					
+        //         }
+    	//     }
+    	// }
     }
 
+    // camPos: THREE.Vector3
     updateUniforms(camPos){
         this.material.uniforms.cameraPos.value.copy(camPos);
     }
@@ -63,6 +116,7 @@ export default class VolumetricSculpture {
         if (group.type === 'Group'){
             group.add(this.mesh);
             console.log("ADDED");
+            
         }
     }
 }
