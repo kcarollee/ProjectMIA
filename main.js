@@ -22,6 +22,7 @@ function main() {
     const near = 0.001;
     const far = 1000;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    const cameraToFloorRay = new THREE.Raycaster();
     camera.prevPosition = new THREE.Vector3();
     camera.prevPosition2 = new THREE.Vector3();
     camera.position.set(0, 0, 10);
@@ -1434,6 +1435,20 @@ function main() {
             else {
                 if(!playerIsInBuilding) orbitControls.enabled = true;
             }
+
+            // CHANGE CAMERA POSITION BASED ON TERRAIN HEIGHT
+            /*
+            cameraToFloorRay.set(new THREE.Vector3(camera.position.x, 2, camera.position.z), new THREE.Vector3(0, -1, 0));
+            let intersectPoint = cameraToFloorRay.intersectObject(currentStageModelInstance.getMeshGroup())[0].point;
+            camera.position.y = intersectPoint.y + 2.0;
+            
+            orbitControls.object.position.set(
+                intersectPoint.x, 
+                0.5,
+                intersectPoint.z
+            );
+            //orbitControls.update();
+            */
         }
     }
 

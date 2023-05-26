@@ -137,6 +137,10 @@ export default class StageModel {
         
     }
 
+    getMeshGroup(){
+        return this.meshGroup;
+    }
+
     setPlayerPos(buildingSpaces){
         function isInBuilding(posXZ){
             let isIn = false;
