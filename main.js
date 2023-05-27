@@ -44,12 +44,24 @@ function main() {
     const backgroundColor = 0xff6600;
     titleScene.background = new THREE.Color(0x000000);
 
-    let alight = new THREE.AmbientLight({color : 0xFFFFFF});
-    let dlight = new THREE.DirectionalLight({color : 0xFFFFFF});
-    dlight.position.set(0,10,10);
+    let alight = new THREE.AmbientLight(0xFFFFFF, 0.2);
+    let dlight = new THREE.DirectionalLight(0xFFFFFF, 5);
+    let dlHelper = new THREE.DirectionalLightHelper(dlight, 0.5, 0x00ff00);
+    dlight.position.set(0,10,0);
+
 
     titleScene.add(alight);
-    titleScene.add(dlight);
+    // titleScene.add(dlight);
+    // titleScene.add(dlHelper);
+
+    let i = 0;
+    function animate() {
+        requestAnimationFrame(animate);
+        i += 0.0025;
+        dlight.position.set(0, 3 * Math.cos(i), 3 * Math.sin(i));
+        dlHelper.update();
+    }
+    animate();
 
     let rowRectNum = 40;
     let colRectNum = 40;
@@ -94,8 +106,7 @@ function main() {
     //mainGameScene.fog = new THREE.Fog(0x000000, 1, 5);
 
     currentScene = titleScene;
-
-
+    
     renderer.render(currentScene, camera);
 
     // LIGHT
@@ -105,6 +116,10 @@ function main() {
     directionalLight.position.set(1, 1, 1);
     mainGameScene.add(ambientLight);
     mainGameScene.add(directionalLight);
+
+    mainGameScene.add(dlight);
+    mainGameScene.add(dlHelper);
+
     // TIME LIMIT
     const DEFAULT_TIME_LIMIT = 60;
     const playerTime = new THREE.Clock(false); // autostart: false
@@ -429,27 +444,18 @@ function main() {
 
     // 각 스테이지 점수들에 대한 쿠키를 가져와서 각 챕터별 배열로 만들어서 리턴
     // currentStageNum 변수 사용
-    const initStageRanking = () => {
-        // for(let i = 1; i <= 16; i++){
-        //     let cookie = '';
-        //     let tmpArr = [0];
-        //     tmpArr = JSON.stringify(tmpArr);
-        //
-        //     let expiration = new Date();
-        //     expiration.setDate(expiration.getDate() + 30);
-        //
-        //     cookie = `stage${i}=${tmpArr}; expires${expiration.toUTCString()};`;
-        //     document.cookie = cookie;
-        // }
-    }
 
+
+
+    // 현재 스테이지 랭킹 인포 가져가기.
+    // 1등부터 5등까지 내림차순으로 정렬되어 있다.
     const getStageRankingFromCookies = (stage) => {
         let cookieKey = "stage" + stage + "=";
         return getInfoFromCookies(cookieKey);
     }
 
-
-    // 해당 점수를 해당 챕터의 스테이지에 삽입한다 최대점수와 동일한 경우에만 삽입하지 않고 나머지 경우에만 삽입한다.
+    // 매개변수 : 해당 점수를 해당 스테이지에 삽입한다.
+    // 최대점수와 동일한 경우에만 삽입하지 않고 나머지 경우에만 삽입한다.
     // 각 스테이지마다 점수는 5개 까지 저장할 될 수 있다.
     const setStageRankingToCookies = (stage, score) => {
         let stageRankings = getStageRankingFromCookies(stage);
@@ -469,28 +475,40 @@ function main() {
         let cookie = "";
 
         let expiration = new Date();
-        expiration.setDate(expiration.getDate() + 10);
+        expiration.setDate(expiration.getDate() + 100);
 
-        cookie = `stage${stage}=${stageRankings}; expires${expiration.toUTCString()};`
+        cookie = `stage${stage}=${stageRankings}; expires=${expiration.toUTCString()};`
         document.cookie = cookie;
     }
 
+    // 스테이지 언락 인포 가져가기
     const getStageUnlockInfoFromCookie = () => {
         let cookieKey = "stageUnlockInfo=";
         return getInfoFromCookies(cookieKey);
     }
 
+    // 매개변수 : 언락할 스테이지 번호
+    // 스테이지 언락 하기
     const setStageUnlockInfoFromCookie = (stage) => {
         let unlockInfo = getStageUnlockInfoFromCookie();
+        if(unlockInfo === ''){
+            unlockInfo = [
+                true, false, false, false,
+                false, false, false, false,
+                false, false, false, false,
+                false, false, false, false,
+            ];
+        }
+
         unlockInfo[stage - 1] = true;
         unlockInfo = JSON.stringify(unlockInfo);
 
         let cookie = "";
 
         let expiration = new Date();
-        expiration.setDate(expiration.getDate() + 10);
+        expiration.setDate(expiration.getDate() + 100);
 
-        cookie = `stageUnlockInfo=${unlockInfo}; expires${expiration.toUTCString()};`
+        cookie = `stageUnlockInfo=${unlockInfo}; expires=${expiration.toUTCString()};`
         document.cookie = cookie;
     }
 
@@ -519,6 +537,7 @@ function main() {
                 if (currentStageNum == StageSelectPannel.unlockedStagesNum) {
                     nextStagePannel.changeStateToUnlocked();
                     StageSelectPannel.unlockedStagesNum++;
+                    setStageUnlockInfoFromCookie(StageSelectPannel.unlockedStagesNum);
                 }
 
                 checkIfChapterUnlocked();
@@ -909,7 +928,6 @@ function main() {
     titleScreenModel.meshGroup.position.set(4, 0.0, 0.0);
     titleScreenModel.meshGroup.visible = false;
     titleScreenModel.addToScene(currentScene);
-    initStageRanking();
     function removeTitleScreenModel() {
         const objectToRemove = titleScene.getObjectByName();
     }

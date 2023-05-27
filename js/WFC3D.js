@@ -477,21 +477,31 @@ export default class WFC3D {
             // ];
 
             let buildingMat = [
-                new THREE.MeshPhongMaterial({
+                new THREE.MeshStandardMaterial({
                     side: THREE.DoubleSide,
                     color: colorRandom(this.buildingMatsParams[0].color, 100),
+                    transparent : true,
+                    opacity : 0.5,
+                    metalness : 0.5,
+                    roughness : 0.5,
                 }),
-                new THREE.MeshPhongMaterial({
+                new THREE.MeshStandardMaterial({
                     side: THREE.DoubleSide,
-                    color: colorRandom(this.buildingMatsParams[1].color, 100)
+                    color: colorRandom(this.buildingMatsParams[1].color, 100),
+                    metalness : 0.5,
+                    roughness : 0.5,
                 }),
-                new THREE.MeshPhongMaterial({
+                new THREE.MeshStandardMaterial({
                     side: THREE.DoubleSide,
-                    color: colorRandom(this.buildingMatsParams[2].color, 100)
+                    color: colorRandom(this.buildingMatsParams[2].color, 100),
+                    metalness : 0.5,
+                    roughness : 0.5,
                 }),
-                new THREE.MeshPhongMaterial({
+                new THREE.MeshStandardMaterial({
                     side: THREE.DoubleSide,
-                    color: colorRandom(this.buildingMatsParams[3].color, 100)
+                    color: colorRandom(this.buildingMatsParams[3].color, 100),
+                    metalness : 0.5,
+                    roughness : 0.5,
                 }),
             ];
 
