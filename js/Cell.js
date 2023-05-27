@@ -10,7 +10,7 @@ export default class Cell {
         }
         this.geometry = new THREE.PlaneGeometry(width, height, 25, 25);
     
-        this.material = new THREE.MeshPhongMaterial({
+        this.material = new THREE.MeshBasicMaterial({
             side: THREE.DoubleSide,
             //transparent: true,
         });
