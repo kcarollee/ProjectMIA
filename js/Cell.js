@@ -59,8 +59,8 @@ export default class Cell {
             // world vertex values
             let currentVertWorld = new THREE.Vector3();
             currentVertWorld.copy(this.mesh.localToWorld(currentVertLocal));
-            let noiseAmp = 0.1;
-            let noiseDensity = 0.5;
+            let noiseAmp = 0.05;
+            let noiseDensity = 1.0;
 
             let noiseVal = noiseAmp * noise.simplex3(currentVertWorld.x * noiseDensity, currentVertWorld.y * noiseDensity, currentVertWorld.z);
             this.positionAttribute.setZ(i, noiseVal);

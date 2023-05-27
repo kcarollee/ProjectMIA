@@ -292,6 +292,7 @@ export default class StageModel {
             //         this.meshGroup.add(randomCubeMesh);
             //     }
             // }
+
             
             // structure 4: building
             /*
@@ -325,7 +326,6 @@ export default class StageModel {
             // {
                 
                 
-
             //     noise.seed(Math.random())
             //     console.log(noise.simplex3(1.2, 1.4, 2.4));
 
@@ -387,7 +387,7 @@ export default class StageModel {
                 this.updateNedded = true;
             }
 
-            console.log(this.meshGroup);
+            //console.log(this.meshGroup);
         }
         
         //console.log(playerPosX, playerPosZ, newBuildingTransformArr);

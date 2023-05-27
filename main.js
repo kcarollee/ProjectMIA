@@ -480,6 +480,7 @@ function main() {
         let cookieKey = "stageUnlockInfo=";
         return getInfoFromCookies(cookieKey);
     }
+    
 
     const setStageUnlockInfoFromCookie = (stage) => {
         let unlockInfo = getStageUnlockInfoFromCookie();
@@ -1437,18 +1438,13 @@ function main() {
             }
 
             // CHANGE CAMERA POSITION BASED ON TERRAIN HEIGHT
-            /*
-            cameraToFloorRay.set(new THREE.Vector3(camera.position.x, 2, camera.position.z), new THREE.Vector3(0, -1, 0));
-            let intersectPoint = cameraToFloorRay.intersectObject(currentStageModelInstance.getMeshGroup())[0].point;
-            camera.position.y = intersectPoint.y + 2.0;
             
-            orbitControls.object.position.set(
-                intersectPoint.x, 
-                0.5,
-                intersectPoint.z
-            );
-            //orbitControls.update();
-            */
+            // cameraToFloorRay.set(new THREE.Vector3(camera.position.x, 2, camera.position.z), new THREE.Vector3(0, -1, 0));
+            // let intersectPoint = cameraToFloorRay.intersectObject(currentStageModelInstance.getMeshGroup())[0].point;
+            // camera.position.y = intersectPoint.y + 0.01;
+            
+            
+            
         }
     }
 
