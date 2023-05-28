@@ -148,11 +148,16 @@ html, body {
 
 .container button {
   font-family: 'Custom Font';
+  font-size: 20px;
   background: transparent;
+  color: white;
+  flex-direction: column;
+  position:  fixed;
+  top: 12vw;
+  left: 19vw;
   border: none;
+  z-index: 1; 
 }
-
-
 
 .container :hover{
   cursor: pointer;

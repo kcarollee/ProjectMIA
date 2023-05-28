@@ -8,7 +8,7 @@ export default class Cell {
         } else {
             this.options = new Array(value).fill(0).map((_, i) => i);
         }
-        this.geometry = new THREE.PlaneGeometry(width, height, 25, 25);
+        this.geometry = new THREE.PlaneGeometry(width, height, 50, 50);
     
         this.material = new THREE.MeshBasicMaterial({
             side: THREE.DoubleSide,
@@ -52,6 +52,23 @@ export default class Cell {
 
          // CREATE NOISE
          this.positionAttribute = this.geometry.getAttribute('position');
+         let calculateGaussianCurve = (x, y, amp, sigX, sigY) => {
+            const amplitude = amp; // Adjust the amplitude of the curve
+            const sigmaX = sigX; // Adjust the standard deviation along the x-axis
+            const sigmaY = sigY; // Adjust the standard deviation along the y-axis
+            const centerX = 0.0; // Adjust the center position along the x-axis
+            const centerY = 0.0; // Adjust the center position along the y-axis
+          
+            const exponent = -(
+              ((x - centerX) ** 2) / (2 * sigmaX ** 2) +
+              ((y - centerY) ** 2) / (2 * sigmaY ** 2)
+            );
+            const coefficient = 2 * Math.PI * sigmaX * sigmaY;
+          
+            const result = amplitude * Math.exp(exponent) / coefficient;
+            return result;
+        }
+        
          for (let i = 0; i < this.positionAttribute.count; i++){
             let currentVertLocal = new THREE.Vector3();
             // local vertex values
@@ -59,10 +76,14 @@ export default class Cell {
             // world vertex values
             let currentVertWorld = new THREE.Vector3();
             currentVertWorld.copy(this.mesh.localToWorld(currentVertLocal));
-            let noiseAmp = 0.05;
-            let noiseDensity = 1.0;
+            let noiseAmp = 0.1;
+            let noiseDensity = 0.25;
 
-            let noiseVal = noiseAmp * noise.simplex3(currentVertWorld.x * noiseDensity, currentVertWorld.y * noiseDensity, currentVertWorld.z);
+            let heightOffsetDensity = 0.25;
+            let heightOffset = calculateGaussianCurve(currentVertWorld.x, currentVertWorld.z, 5, 1.5, 1.5);
+            //console.log(heightOffset);
+            let noiseVal = noiseAmp * noise.simplex3(currentVertWorld.x * noiseDensity, currentVertWorld.y * noiseDensity, currentVertWorld.z * noiseDensity);
+            noiseVal += heightOffset;
             this.positionAttribute.setZ(i, noiseVal);
          }
 

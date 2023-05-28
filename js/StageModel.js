@@ -134,6 +134,13 @@ export default class StageModel {
         };
 
         
+        // sea mesh
+        this.seaGeometry = new THREE.PlaneGeometry(100, 100, 10, 10);
+        this.seaMaterial = new THREE.MeshBasicMaterial({color: 0x0000FF, transparent: true, opacity: 0.5});
+        this.seaMesh = new THREE.Mesh(this.seaGeometry, this.seaMaterial);
+        this.seaMesh.rotateX(-Math.PI * 0.5);
+        this.seaMesh.position.set(0, -0.05, 0);
+        this.meshGroup.add(this.seaMesh);
         
     }
 
@@ -324,8 +331,6 @@ export default class StageModel {
             
             // structure 5: Noise structure
             // {
-                
-                
             //     noise.seed(Math.random())
             //     console.log(noise.simplex3(1.2, 1.4, 2.4));
 
@@ -375,17 +380,17 @@ export default class StageModel {
             // }
 
             // structure 6: volumetric model 
-            {
-                let scaleY = 2.5 + Math.random() * 2.5;
-                let tempVol = new VolumetricSculpture(
-                    this.playerPosition,
-                    new THREE.Vector3(buildingPosX, scaleY * 0.5, buildingPosZ),
-                    new THREE.Vector3(sizeX, scaleY, sizeZ)
-                );
-                tempVol.addToGroup(this.meshGroup);
-                this.volumeModels.push(tempVol);
-                this.updateNedded = true;
-            }
+            // {
+            //     let scaleY = 2.5 + Math.random() * 2.5;
+            //     let tempVol = new VolumetricSculpture(
+            //         this.playerPosition,
+            //         new THREE.Vector3(buildingPosX, scaleY * 0.5, buildingPosZ),
+            //         new THREE.Vector3(sizeX, scaleY, sizeZ)
+            //     );
+            //     tempVol.addToGroup(this.meshGroup);
+            //     this.volumeModels.push(tempVol);
+            //     this.updateNedded = true;
+            // }
 
             //console.log(this.meshGroup);
         }

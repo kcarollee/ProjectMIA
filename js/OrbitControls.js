@@ -23,6 +23,7 @@ class OrbitControls extends EventDispatcher {
     constructor(object, domElement) {
         super();
 
+        this.insideBuilding = false;
         this.object = object;
         this.domElement = domElement;
         this.domElement.style.touchAction = "none"; // disable touch scroll
@@ -145,7 +146,7 @@ class OrbitControls extends EventDispatcher {
         // this method is exposed, but perhaps it would be better if we can make it private...
         this.update = (function () {
             const offset = new Vector3();
-
+            
             // so camera.up is the orbit axis
             const quat = new Quaternion().setFromUnitVectors(
                 object.up,
@@ -157,10 +158,15 @@ class OrbitControls extends EventDispatcher {
             const lastQuaternion = new Quaternion();
 
             const twoPI = 2 * Math.PI;
-
-            return function update() {
+            
+            return function update(posy) {
                 const position = scope.object.position;
-
+                if (scope.insideBuilding) {
+                    //scope.panSpeed = 0.0;
+                    //console.log(scope.panSpeed);
+                }
+                const offsetY = posy;
+                
                 offset.copy(position).sub(scope.target);
 
                 // rotate offset to "y-axis-is-up" space
@@ -230,8 +236,15 @@ class OrbitControls extends EventDispatcher {
                         panOffset,
                         scope.dampingFactor
                     );
+                    if (offsetY !== undefined) {
+                        //console.log(offsetY);
+                        scope.target.y = offsetY;
+                    }
+                    
+                    
                 } else {
                     scope.target.add(panOffset);
+                    
                 }
 
                 offset.setFromSpherical(spherical);
@@ -278,6 +291,10 @@ class OrbitControls extends EventDispatcher {
                 return false;
             };
         })();
+
+        this.setObjectPositionY = function (posy){
+            scope.object.position.y = posy;
+        }
 
         this.dispose = function () {
             scope.domElement.removeEventListener("contextmenu", onContextMenu);
@@ -368,7 +385,7 @@ class OrbitControls extends EventDispatcher {
             return function panLeft(distance, objectMatrix) {
                 v.setFromMatrixColumn(objectMatrix, 0); // get X column of objectMatrix
                 v.multiplyScalar(-distance);
-
+                
                 panOffset.add(v);
             };
         })();
@@ -400,6 +417,7 @@ class OrbitControls extends EventDispatcher {
                 if (scope.object.isPerspectiveCamera) {
                     // perspective
                     const position = scope.object.position;
+                    
                     offset.copy(position).sub(scope.target);
                     let targetDistance = offset.length();
 

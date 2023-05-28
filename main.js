@@ -141,12 +141,14 @@ function main() {
 
     function toggleMenu() {
         const menuScreen = document.getElementById("menu-screen");
+        disableControls();
         menuScreen.style.display = "flex";
         menuActive = true;
     }
 
     function untoggleMenu() {
         const menuScreen = document.getElementById("menu-screen");
+        enableControls();
         menuScreen.style.display = "none";
         menuActive = false;
     }
@@ -218,6 +220,7 @@ function main() {
     }
 
     function toggleTimeoutPannel() {
+        disableControls();
         const timeoutPannel = document.getElementById("timeout-screen");
         timeoutPannel.style.display = "flex";
     }
@@ -228,6 +231,7 @@ function main() {
     }
 
     function toggleFarawayPannel() {
+        disableControls();
         const farawayPannel = document.getElementById("faraway-screen");
         farawayPannel.style.display = "flex";
     }
@@ -238,6 +242,7 @@ function main() {
     }
 
     function toggleNearbyPannel() {
+        disableControls();
         const nearbyPannel = document.getElementById("nearby-screen");
         nearbyPannel.style.display = "flex";
     }
@@ -487,6 +492,7 @@ function main() {
         let cookieKey = "stageUnlockInfo=";
         return getInfoFromCookies(cookieKey);
     }
+
     
 
     // 매개변수 : 언락할 스테이지 번호
@@ -530,16 +536,20 @@ function main() {
             playerTime.stop();
 
             // RESULTS TRIGGER EVENT
-            if (playerAnswerData.distance > 100.0) {
+            let threshold = difficultyInfo[currentStageNum - 1][2];
+            if (playerAnswerData.distance > threshold){
                 toggleFarawayPannel();
             } else {
                 // UNLOCK NEXT STAGE
                 const nextStagePannel =
                     stagePannelArr[StageSelectPannel.unlockedStagesNum];
+                console.log("STAGES UNLOCK INFO ", currentStageNum, StageSelectPannel.unlockedStagesNum);
                 if (currentStageNum == StageSelectPannel.unlockedStagesNum) {
+                    
                     nextStagePannel.changeStateToUnlocked();
                     StageSelectPannel.unlockedStagesNum++;
                     setStageUnlockInfoFromCookie(StageSelectPannel.unlockedStagesNum);
+                    console.log(getInfoFromCookies());
                 }
 
                 checkIfChapterUnlocked();
@@ -1097,10 +1107,33 @@ function main() {
     }
 
     let chapterIndex = 0;
+    let unlockedStatusArr = getStageUnlockInfoFromCookie();
+    //console.log(unlockedStatusArr === '');
+    // if no cookies
+    if (unlockedStatusArr === ''){
+        unlockedStatusArr = [
+            true, false, false, false,
+            false, false, false, false,
+            false, false, false, false,
+            false, false, false, false
+        ]
+        StageSelectPannel.unlockedStagesNum = 1;
+    }
+    else {
+        StageSelectPannel.unlockedStagesNum = 0;
+        unlockedStatusArr.forEach((unlocked) => {
+            if (unlocked){
+                StageSelectPannel.unlockedStagesNum++;
+            }
+        })
+        console.log("UNLOCKED STAGES NUM: ", StageSelectPannel.unlockedStagesNum);
+    }
+    
     for (let i = 0; i < stageNum; i++) {
+        let unlocked = unlockedStatusArr[i];
         const stageSelectPannel = new StageSelectPannel(
             i + 1,
-            i == 0 ? true : false
+            unlocked
         );
         stagePannelArr.push(stageSelectPannel);
 
@@ -1110,13 +1143,14 @@ function main() {
             stageSelectPannel
         );
 
-        console.log(chapterPannelArr[chapterIndex].connectedStagePannels);
+        //console.log(chapterPannelArr[chapterIndex].connectedStagePannels);
     }
 
+    checkIfChapterUnlocked();
 
 
-    // keep track of stages that are unlocked
-    StageSelectPannel.unlockedStagesNum = 1;
+
+   
 
     // check if a chapter is available to play
 
@@ -1246,17 +1280,20 @@ function main() {
 
             // COLLISION
             //console.log(camera.position, camera.prevPosition);
-            // [playerIsInBuilding, buildingAreaInfo] = currentStageModelInstance.checkIfPlayerIsInBuilding(camera.position.x, camera.position.z);
+            [playerIsInBuilding, buildingAreaInfo] = currentStageModelInstance.checkIfPlayerIsInBuilding(camera.position.x, camera.position.z);
 
-            // if (playerIsInBuilding){
-            //     console.log(camera.position);
-            //     console.log("INSIDE");
-            //     let diffVec = new THREE.Vector3();
+            if (playerIsInBuilding){
+                console.log(camera.position);
+                console.log("INSIDE");
+                let diffVec = new THREE.Vector3();
 
-            //     orbitControls.enabled = false;
-            //     orbitControls.dispose();
+                //orbitControls.enabled = false;
+                orbitControls.insideBuilding = true;
+                //orbitControls.dispose();
 
-            // };
+            }
+            else orbitControls.insideBuilding = false;
+            
 
             currentStageModelInstance.update(camera.position);
             renderer.setRenderTarget(null);
@@ -1339,12 +1376,24 @@ function main() {
         //     }
         // }
 
-        orbitControls.update();
+        //orbitControls.update();
 
 
 
         updateMinimapCamera();
         stats.end();
+    }
+
+    function disableControls(){
+        orbitControls.keys = {
+            LEFT: 0, RIGHT: 0, UP: 0, BOTTOM: 0 
+        }
+    }
+
+    function enableControls(){
+        orbitControls.keys = {
+            LEFT: "KeyA", UP: "KeyW", RIGHT: "KeyD", BOTTOM: "KeyS"
+        }
     }
 
     function updateMinimapCamera() {
@@ -1406,6 +1455,7 @@ function main() {
     }
 
     function generateStage(difficulty) {
+        enableControls();
         // reset guess button color
         document.getElementById("guessButton").style.color = "black";
         console.log("CHAPTER ", difficulty[0]);
@@ -1457,12 +1507,16 @@ function main() {
 
             // CHANGE CAMERA POSITION BASED ON TERRAIN HEIGHT
             
-            // cameraToFloorRay.set(new THREE.Vector3(camera.position.x, 2, camera.position.z), new THREE.Vector3(0, -1, 0));
-            // let intersectPoint = cameraToFloorRay.intersectObject(currentStageModelInstance.getMeshGroup())[0].point;
-            // camera.position.y = intersectPoint.y + 0.01;
+            cameraToFloorRay.set(new THREE.Vector3(camera.position.x, 1, camera.position.z), new THREE.Vector3(0, -1, 0));
+            let intersectObject = cameraToFloorRay.intersectObject(currentStageModelInstance.getMeshGroup())[0];
+            if (intersectObject !== undefined){
+                let intersectPoint = cameraToFloorRay.intersectObject(currentStageModelInstance.getMeshGroup())[0].point;
+                orbitControls.update(intersectPoint.y + 0.1);
+            }
             
+            //camera.position.y = intersectPoint.y + 0.01;
             
-            
+            //orbitControls.setObjectPositionY(intersectPoint.y + 0.1);
         }
     }
 
