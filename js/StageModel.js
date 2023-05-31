@@ -26,9 +26,8 @@ export default class StageModel {
         );
 
         this.stageRoadMesh.createFloor();
-
-        this.buildingTransform =
-            this.stageRoadMesh.calcBuildingTransform();
+        this.stageRoadMesh.buildMesh();    
+        this.buildingTransform = this.stageRoadMesh.calcBuildingTransform();
 
         this.buildingSpace = [];
         for(let i = 0; i < this.buildingTransform.length; i++) {
@@ -44,7 +43,7 @@ export default class StageModel {
         );
         this.setPlayerPos(this.buildingSpace);
 
-        this.stageRoadMesh.buildMesh();
+        
         this.meshGroup.add(this.stageRoadMesh.getMeshGroup());
 
         
@@ -92,11 +91,12 @@ export default class StageModel {
                 ];
 
                 let buildingMesh = this.WFC3D.createBuilding(dim, size);
-
+                let cellMaxHeight = this.buildingTransform[i][5];
+                let cellMinHeight = this.buildingTransform[i][6];
                 buildingMesh.position.set(
                     -(this.WFCDim - 2) * this.WFCFloorSize[0] * 0.5 +
                         this.buildingTransform[i][0],
-                    0.001,
+                    cellMinHeight,
                     -(this.WFCDim - 2) * this.WFCFloorSize[1] * 0.5 +
                         this.buildingTransform[i][1]
                 );
@@ -206,6 +206,9 @@ export default class StageModel {
 
             let sizeX = buildingAreaInfo[2];
             let sizeZ = buildingAreaInfo[3];
+
+            let cellMinHeight = buildingAreaInfo[6];
+            let cellMaxHeight = buildingAreaInfo[5];
 
             // structure 0: grass
             /*
@@ -384,7 +387,7 @@ export default class StageModel {
                 let scaleY = 2.5 + Math.random() * 2.5;
                 let tempVol = new VolumetricSculpture(
                     this.playerPosition,
-                    new THREE.Vector3(buildingPosX, scaleY * 0.5, buildingPosZ),
+                    new THREE.Vector3(buildingPosX, scaleY * 0.5 + cellMinHeight, buildingPosZ),
                     new THREE.Vector3(sizeX, scaleY, sizeZ)
                 );
                 tempVol.addToGroup(this.meshGroup);

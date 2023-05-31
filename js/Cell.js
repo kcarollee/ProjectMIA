@@ -80,7 +80,7 @@ export default class Cell {
             let currentVertWorld = new THREE.Vector3();
             currentVertWorld.copy(this.mesh.localToWorld(currentVertLocal));
             let noiseAmp = 0.1;
-            let noiseDensity = 0.25;
+            let noiseDensity = 0.5;
             
             let heightOffsetDensity = 0.25;
             let heightOffset = calculateGaussianCurve(currentVertWorld.x, currentVertWorld.z, 10, 1.5, 1.5, 2, 2) + 
@@ -96,7 +96,7 @@ export default class Cell {
             // determining min, max height points
             if (this.minHeight > finalHeight) this.minHeight = finalHeight;
             if (this.maxHeight < finalHeight) this.maxHeight = finalHeight;
-         }
+        }
 
         // floorMesh 를 따로 두는 이유: 바닥까지 회전시켜버리면 Seamless texture가 무용지물됨
         this.floorMesh = new THREE.Mesh(this.geometry, this.floorMaterial);
@@ -110,6 +110,8 @@ export default class Cell {
         //this.cellMeshGroup.add(this.floorMesh);
 
         //console.log(this.mesh.geometry.attributes.position);
+
+        //console.log("MIN MAX: ", this.minHeight, this.maxHeight);
     }
 
     getMesh() {

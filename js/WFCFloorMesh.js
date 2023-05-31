@@ -605,13 +605,16 @@ export default class WFCFloorMesh {
                         (j - 0.5) * this.cellSize[1],
                     ];
                 }
-
+                
+                let cellMaxHeight = this.grid[index].maxHeight;
+                let cellMinHeight = this.grid[index].minHeight
                 buildingTransform.push([
                     buildingPos[0],
                     buildingPos[1],
                     buildingSpace[0],
                     buildingSpace[1],
-                    Math.random() < 0.6 ? true : false
+                    Math.random() < 0.6 ? true : false,
+                    cellMaxHeight, cellMinHeight
                 ]);
             }
         }

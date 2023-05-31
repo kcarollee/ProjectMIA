@@ -1283,8 +1283,8 @@ function main() {
             [playerIsInBuilding, buildingAreaInfo] = currentStageModelInstance.checkIfPlayerIsInBuilding(camera.position.x, camera.position.z);
 
             if (playerIsInBuilding){
-                console.log(camera.position);
-                console.log("INSIDE");
+                //console.log(camera.position);
+                //console.log("INSIDE");
                 let diffVec = new THREE.Vector3();
 
                 //orbitControls.enabled = false;
