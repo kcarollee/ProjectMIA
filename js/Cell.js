@@ -8,7 +8,7 @@ export default class Cell {
         } else {
             this.options = new Array(value).fill(0).map((_, i) => i);
         }
-        this.geometry = new THREE.PlaneGeometry(width, height, 50, 50);
+        this.geometry = new THREE.PlaneGeometry(width, height, 10, 50);
     
         this.material = new THREE.MeshBasicMaterial({
             side: THREE.DoubleSide,
@@ -19,6 +19,9 @@ export default class Cell {
             side: THREE.DoubleSide,
         });
         this.cellMeshGroup = new THREE.Group();
+
+        this.minHeight = 0;
+        this.maxHeight = 0;
     }
 
     setTexture(tex) {
@@ -52,12 +55,12 @@ export default class Cell {
 
          // CREATE NOISE
          this.positionAttribute = this.geometry.getAttribute('position');
-         let calculateGaussianCurve = (x, y, amp, sigX, sigY) => {
+         let calculateGaussianCurve = (x, y, amp, sigX, sigY, cX, cY) => {
             const amplitude = amp; // Adjust the amplitude of the curve
             const sigmaX = sigX; // Adjust the standard deviation along the x-axis
             const sigmaY = sigY; // Adjust the standard deviation along the y-axis
-            const centerX = 0.0; // Adjust the center position along the x-axis
-            const centerY = 0.0; // Adjust the center position along the y-axis
+            const centerX = cX; // Adjust the center position along the x-axis
+            const centerY = cY; // Adjust the center position along the y-axis
           
             const exponent = -(
               ((x - centerX) ** 2) / (2 * sigmaX ** 2) +
@@ -78,13 +81,21 @@ export default class Cell {
             currentVertWorld.copy(this.mesh.localToWorld(currentVertLocal));
             let noiseAmp = 0.1;
             let noiseDensity = 0.25;
-
+            
             let heightOffsetDensity = 0.25;
-            let heightOffset = calculateGaussianCurve(currentVertWorld.x, currentVertWorld.z, 5, 1.5, 1.5);
+            let heightOffset = calculateGaussianCurve(currentVertWorld.x, currentVertWorld.z, 10, 1.5, 1.5, 2, 2) + 
+            calculateGaussianCurve(currentVertWorld.x, currentVertWorld.z, 10, 1.5, 1.5, -2, -2);
+            //heightOffset *= 0.5;
             //console.log(heightOffset);
             let noiseVal = noiseAmp * noise.simplex3(currentVertWorld.x * noiseDensity, currentVertWorld.y * noiseDensity, currentVertWorld.z * noiseDensity);
             noiseVal += heightOffset;
-            this.positionAttribute.setZ(i, noiseVal);
+
+            let finalHeight = noiseVal;
+            this.positionAttribute.setZ(i, finalHeight);
+
+            // determining min, max height points
+            if (this.minHeight > finalHeight) this.minHeight = finalHeight;
+            if (this.maxHeight < finalHeight) this.maxHeight = finalHeight;
          }
 
         // floorMesh 를 따로 두는 이유: 바닥까지 회전시켜버리면 Seamless texture가 무용지물됨
