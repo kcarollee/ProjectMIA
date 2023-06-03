@@ -46,7 +46,7 @@ function main() {
     titleScene.background = new THREE.Color(0x000000);
 
     let alight = new THREE.AmbientLight(0xFFFFFF, 0.2);
-    let dlight = new THREE.DirectionalLight(0xFFFFFF, 5);
+    let dlight = new THREE.DirectionalLight(0xFFFFFF, 1);
     // let dlHelper = new THREE.DirectionalLightHelper(dlight, 0.5, 0x00ff00);
     // dlight.position.set(0,10,0);
     // let dlHelper = new THREE.DirectionalLightHelper(dlight, 0.5, 0x00ff00);
@@ -61,7 +61,7 @@ function main() {
     function animate() {
         requestAnimationFrame(animate);
         i += 0.0025;
-        //dlight.position.set(0, 3 * Math.cos(i), 3 * Math.sin(i));
+        dlight.position.set(0, 3 * Math.cos(i), 3 * Math.sin(i));
         //dlHelper.update();
     }
     animate();
