@@ -8,7 +8,7 @@ export default class Cell {
         } else {
             this.options = new Array(value).fill(0).map((_, i) => i);
         }
-        this.geometry = new THREE.PlaneGeometry(width, height, 10, 50);
+        this.geometry = new THREE.PlaneGeometry(width, height, 30, 30);
     
         this.material = new THREE.MeshBasicMaterial({
             side: THREE.DoubleSide,

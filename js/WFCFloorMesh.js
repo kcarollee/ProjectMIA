@@ -8,6 +8,7 @@ export default class WFCFloorMesh {
     constructor(
         dim,
         cellSize,
+        spawnProbablity,
         urlString,
         formatString,
         //default rulesets
@@ -43,6 +44,8 @@ export default class WFCFloorMesh {
         // array of selected cells
         this.selectedArr = [];
         this.wfcIterCount = 0;
+
+        this.spawnProbablity = spawnProbablity;
 
         this.sc1 = sc1Str;
         this.sc2 = sc2Str;
@@ -615,12 +618,12 @@ export default class WFCFloorMesh {
                     buildingPos[1],
                     buildingSpace[0],
                     buildingSpace[1],
-                    Math.random() < 0.6 ? true : false,
+                    Math.random() < this.spawnProbablity,
                     cellMaxHeight, cellMinHeight
                 ]);
             }
         }
-        console.log(buildingTransform);
+        //console.log(buildingTransform);
         return buildingTransform;
     }
 

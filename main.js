@@ -49,6 +49,8 @@ function main() {
     let dlight = new THREE.DirectionalLight(0xFFFFFF, 5);
     // let dlHelper = new THREE.DirectionalLightHelper(dlight, 0.5, 0x00ff00);
     // dlight.position.set(0,10,0);
+    // let dlHelper = new THREE.DirectionalLightHelper(dlight, 0.5, 0x00ff00);
+    // dlight.position.set(0,10,0);
 
 
     titleScene.add(alight);
@@ -58,9 +60,9 @@ function main() {
     let i = 0;
     function animate() {
         requestAnimationFrame(animate);
-        i += 0.001;
-        dlight.position.set(3 * Math.sin(i * 3), 10 * Math.sin(i), 10 * Math.cos(i));
-        // dlHelper.update();
+        i += 0.0025;
+        //dlight.position.set(0, 3 * Math.cos(i), 3 * Math.sin(i));
+        //dlHelper.update();
     }
     animate();
 
@@ -120,10 +122,10 @@ function main() {
     // mainGameScene.add(directionalLight);
 
     mainGameScene.add(dlight);
-    // mainGameScene.add(dlHelper);
+    //mainGameScene.add(dlHelper);
 
     // TIME LIMIT
-    const DEFAULT_TIME_LIMIT = 60;
+    const DEFAULT_TIME_LIMIT = 120;
     const playerTime = new THREE.Clock(false); // autostart: false
     playerTime.defaultTimeLimit = DEFAULT_TIME_LIMIT;
     const timeLimitElement = document.getElementById("timeLimit");
@@ -157,7 +159,7 @@ function main() {
     function toggleChapterSelectMenu() {
         const chapterSelectContainer =
             document.getElementById("chapterContainer");
-        console.log(chapterSelectContainer.style);
+        //console.log(chapterSelectContainer.style);
         chapterSelectContainer.style.display = "flex";
         chapterPannelArr.forEach(function (pannel) {
             pannel.toggle();
@@ -175,7 +177,7 @@ function main() {
 
     function toggleStageSelectMenu(chapterStagePannelArr) {
         const stageSelectContainer = document.getElementById("stageContainer");
-        console.log(stageSelectContainer.style);
+        //console.log(stageSelectContainer.style);
         stageSelectContainer.style.display = "flex";
         chapterStagePannelArr.forEach(function (pannel) {
             pannel.toggle();
@@ -272,9 +274,9 @@ function main() {
 
     const backToStagesButton = document.getElementById("backToStages");
 
-    const stats = new Stats();
-    stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild(stats.dom);
+    //const stats = new Stats();
+    //stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
+    //document.body.appendChild(stats.dom);
 
     const backToChaptersButton = document.getElementById("backToChapters");
     backToChaptersButton.addEventListener("click", () => {
@@ -295,7 +297,7 @@ function main() {
             if (child.type === "Mesh") {
                 if (child.material.map != undefined) {
                     child.material.map.dispose();
-                    //console.log("TEXTURE: ", child.material.map);
+                    ////console.log("TEXTURE: ", child.material.map);
                 }
 
                 child.material.dispose();
@@ -304,7 +306,7 @@ function main() {
         });
         // reset main game scene: delete the stage model
         sceneToRemoveFrom.remove(objectToRemove);
-        console.log("RENDER INFO: ", renderer.info);
+        //console.log("RENDER INFO: ", renderer.info);
         currentStageModelInstance = null;
     }
 
@@ -413,11 +415,7 @@ function main() {
                 (Math.sqrt(15) * playerTime.defaultTimeLimit)
             );
         }
-        console.log(
-            "click : ", calcClickScore(playerAnswerData.clickCnt),
-            "dist : ", calcDistScore(playerAnswerData.distance),
-            "time : ", + calcTimeScore(playerTime.elapsedTime),
-            );
+        
         return calcClickScore(playerAnswerData.clickCnt) + calcDistScore(playerAnswerData.distance) + calcTimeScore(playerTime.elapsedTime);
     }
 
@@ -425,7 +423,7 @@ function main() {
         let result = "";
         const cookieArr = document.cookie.split("; ");
 
-        console.log(cookieArr);
+        ////console.log(cookieArr);
 
         for(let i = 0; i < cookieArr.length; i++) {
             if(cookieArr[i][0] === " ") {
@@ -436,14 +434,14 @@ function main() {
                 result = cookieArr[i].slice(cookieKey.length, cookieArr[i].length);
                 result = JSON.parse(result);
 
-                console.log(result);
-                console.log(typeof result);
+                ////console.log(result);
+                ////console.log(typeof result);
 
                 return result;
             }
         }
-        console.log(result);
-        console.log(typeof result);
+        ////console.log(result);
+        ////console.log(typeof result);
 
         return result;
     }
@@ -467,7 +465,7 @@ function main() {
         let stageRankings = getStageRankingFromCookies(stage);
 
         if(stageRankings.includes(score)) return;
-        console.log("ST RANK", stageRankings);
+        //console.log("ST RANK", stageRankings);
         if(stageRankings === '') stageRankings = [];
 
         stageRankings.push(score);
@@ -492,8 +490,6 @@ function main() {
         let cookieKey = "stageUnlockInfo=";
         return getInfoFromCookies(cookieKey);
     }
-
-    
 
     // 매개변수 : 언락할 스테이지 번호
     // 스테이지 언락 하기
@@ -543,13 +539,13 @@ function main() {
                 // UNLOCK NEXT STAGE
                 const nextStagePannel =
                     stagePannelArr[StageSelectPannel.unlockedStagesNum];
-                console.log("STAGES UNLOCK INFO ", currentStageNum, StageSelectPannel.unlockedStagesNum);
+                //console.log("STAGES UNLOCK INFO ", currentStageNum, StageSelectPannel.unlockedStagesNum);
                 if (currentStageNum == StageSelectPannel.unlockedStagesNum) {
                     
                     nextStagePannel.changeStateToUnlocked();
                     StageSelectPannel.unlockedStagesNum++;
                     setStageUnlockInfoFromCookie(StageSelectPannel.unlockedStagesNum);
-                    console.log(getInfoFromCookies());
+                    //console.log(getInfoFromCookies());
                 }
 
                 checkIfChapterUnlocked();
@@ -557,16 +553,35 @@ function main() {
                 // SHOW RESULTS
 
                 let score = calcScore();
+                let previousScore = stagePannelArr[currentStageNum - 1].maxScore;
                 const resultsInfo = document.getElementById("resultsInfo");
-                resultsInfo.innerHTML =
+                //console.log(score, previousScore);
+                // NEW MAX SCORE
+                if (Math.floor(score) > Math.floor(previousScore)){
+                    resultsInfo.style.color = 'lightgreen';    
+                    resultsInfo.innerHTML =
                     "YOU WERE " +
                     playerAnswerData.distance.toFixed(2) +
                     " UNITS AWAY FROM THE ANSWER" +
-                    "<br>SCORE : " + score.toFixed(0);
+                    "<br>NEW HIGH SCORE : " + Math.floor(score);
+                }
+                else {
+                    resultsInfo.style.color = 'blue';
+                    resultsInfo.innerHTML =
+                    "YOU WERE " +
+                    playerAnswerData.distance.toFixed(2) +
+                    " UNITS AWAY FROM THE ANSWER" +
+                    "<br>CURRENT SCORE : " + Math.floor(score) + 
+                    "<br>HIGH SCORE : " + previousScore.toFixed(0);
+                }
+                
+                
                 toggleNearbyPannel();
-                console.log("getStageRankingFromCookies : ", getStageRankingFromCookies(currentStageNum));
-                console.log("getStageUnlockInfoFromCookies : ", getStageUnlockInfoFromCookie());
+                //console.log("getStageRankingFromCookies : ", getStageRankingFromCookies(currentStageNum));
+                //console.log("getStageUnlockInfoFromCookies : ", getStageUnlockInfoFromCookie());
                 setStageRankingToCookies(currentStageNum, Math.floor(score));
+                stagePannelArr[currentStageNum - 1].setCurrentMaxScoresFromCookies();
+                
             }
         }
     });
@@ -769,21 +784,21 @@ function main() {
 
     minimapCanvas.addEventListener("mouseover", () => {
         pointerIsInMiniMap = true;
-        console.log("MOUSE IN");
+        //console.log("MOUSE IN");
     });
 
     minimapCanvas.addEventListener("mouseout", () => {
         pointerIsInMiniMap = false;
-        console.log("MOUSE OUT");
+        //console.log("MOUSE OUT");
     });
 
     minimapCanvas.addEventListener("mousedown", () => {
         dragMode = false;
-        console.log("MOUSE DOWN");
+        //console.log("MOUSE DOWN");
     });
 
     minimapCanvas.addEventListener("mouseup", () => {
-        console.log("MOUSE UP");
+        //console.log("MOUSE UP");
     });
 
     minimapCanvas.addEventListener("mousemove", () => {
@@ -792,7 +807,7 @@ function main() {
 
     minimapCanvas.addEventListener("click", () => {
         if (!dragMode) {
-            console.log("CLICKED");
+            //console.log("CLICKED");
             const minimapIntersects = minimapRaycaster.intersectObjects(
                 currentScene.children
             );
@@ -813,7 +828,7 @@ function main() {
             )
 
             if (guiControls.debugMode) {
-                console.log(debugCylinderMesh.visible);
+                //console.log(debugCylinderMesh.visible);
                 debugCylinderMesh.position.set(
                     firstIntersect.x,
                     0,
@@ -838,16 +853,7 @@ function main() {
             playerAnswerData.playerPos = playerInitialPosCoord;
             playerAnswerData.distance = distance;
             playerAnswerData.clickCnt++;
-            console.log(
-                "selected point: ",
-                selectedPointCoord,
-                " player pos: ",
-                playerInitialPosCoord,
-                " distance: ",
-                distance,
-                " clickCnt",
-                playerAnswerData.clickCnt,
-            );
+            
             confirmModeEnabled = true;
             guessModeEnabled = true;
             document.getElementById("guessButton").style.color = "red";
@@ -886,17 +892,17 @@ function main() {
 
     // GUI FOR DEBUGMODE
 
-    const gui = new dat.GUI();
-    const guiControls = new (function () {
-        this.debugMode = false;
-    })();
+    // const gui = new dat.GUI();
+    // const guiControls = new (function () {
+    //     this.debugMode = false;
+    // })();
 
-    gui.add(guiControls, "debugMode").onChange((e) => {
-        console.log("DEBUG MODE: ", guiControls.debugMode);
-        debugCylinderMesh.visible = e;
-        debugCameraMesh.visible = e;
-        titleScreenModel.meshGroup.visible = e;
-    });
+    // gui.add(guiControls, "debugMode").onChange((e) => {
+    //     //console.log("DEBUG MODE: ", guiControls.debugMode);
+    //     debugCylinderMesh.visible = e;
+    //     debugCameraMesh.visible = e;
+    //     titleScreenModel.meshGroup.visible = e;
+    // });
 
     // CONTROLS
 
@@ -957,11 +963,11 @@ function main() {
             this.chapterContianer = document.getElementById("chapterContainer");
 
             this.divElem = document.createElement("div");
-            this.spanElem = document.createElement("span");
+            this.pannelNameElem = document.createElement("span");
 
-            this.spanElem.innerHTML = "STAGE" + this.stageNum;
+            this.pannelNameElem.innerHTML = "STAGE" + this.stageNum;
             this.divElem.className = "rectangle";
-            this.divElem.appendChild(this.spanElem);
+            this.divElem.appendChild(this.pannelNameElem);
             this.stageContainer.appendChild(this.divElem);
         }
     }
@@ -1001,11 +1007,14 @@ function main() {
         constructor(stageNum, stageUnlocked, isChapterPannel = false) {
             // this.stageContainer = document.getElementById("stageContainer");
             this.divElem = document.createElement("div");
-            this.spanElem = document.createElement("span");
+            this.pannelNameElem = document.createElement("span");
+            this.pannelScoreElem = document.createElement("span");
             this.imgElem = document.createElement("img");
             this.isChapterPannel = isChapterPannel;
             this.stageNum = stageNum;
             this.stageUnlocked = stageUnlocked;
+            this.maxScore = null;
+            this.setCurrentMaxScoresFromCookies();
             if (this.isChapterPannel) {
 
                 this.stageContainer =
@@ -1014,7 +1023,7 @@ function main() {
                 this.chapterNum = stageNum;
                 this.imgElem.src = './assets/chapterThumbnails/' + this.chapterNum + '.jpg';
 
-                this.spanElem.innerHTML = "CH." + this.stageNum;
+                this.pannelNameElem.innerHTML = "CH." + this.stageNum;
                 this.numberOfStages = 4;
                 this.connectedStagePannels = [];
             } else {
@@ -1022,17 +1031,19 @@ function main() {
                 this.imgElem.src = './assets/chapterThumbnails/' + this.chapterNum + '.jpg';
                 this.stageContainer = document.getElementById("stageContainer");
                 this.stageNum = stageNum;
-                this.spanElem.innerHTML = "STAGE" + ((this.stageNum - 1) % stageNumPerChapter + 1);
+                this.pannelNameElem.innerHTML = "STAGE" + ((this.stageNum - 1) % stageNumPerChapter + 1);
+                this.pannelScoreElem.innerHTML = this.maxScore;
             }
 
             this.divElem.className = "rectangle";
-            this.divElem.appendChild(this.spanElem);
-
+            this.divElem.appendChild(this.pannelNameElem);
+            
 
             //this.imgElem.style.objectFit = "fill";
             this.imgElem.style.width = "80%";
 
             this.divElem.appendChild(this.imgElem);
+            if (!this.isChapterPannel)this.divElem.appendChild(this.pannelScoreElem);
 
             this.stageContainer.appendChild(this.divElem);
 
@@ -1044,6 +1055,8 @@ function main() {
             this.divElem.addEventListener("click", () => {
                 this.onDivClick();
             });
+
+            
         }
 
         // FOR CHAPTER PANNLES ONLY
@@ -1075,6 +1088,14 @@ function main() {
             // untoggle divelements
         }
 
+        setCurrentMaxScoresFromCookies(){
+            let scoreArr = getStageRankingFromCookies(this.stageNum);
+            if (scoreArr.length == 0) this.maxScore = 0;
+            else this.maxScore = scoreArr[0];
+            this.pannelScoreElem.innerHTML = this.maxScore;
+            ////console.log("MAX SCORE OF STAGE " + this.stageNum + ": " + this.maxScore);
+        }
+
         changeStateToUnlocked() {
             this.stageUnlocked = true;
             this.divElem.style.backgroundColor = "#ccc";
@@ -1093,7 +1114,7 @@ function main() {
         }
 
         getSpanElement() {
-            return this.spanElem;
+            return this.pannelNameElem;
         }
     }
 
@@ -1108,7 +1129,7 @@ function main() {
 
     let chapterIndex = 0;
     let unlockedStatusArr = getStageUnlockInfoFromCookie();
-    //console.log(unlockedStatusArr === '');
+    
     // if no cookies
     if (unlockedStatusArr === ''){
         unlockedStatusArr = [
@@ -1126,7 +1147,7 @@ function main() {
                 StageSelectPannel.unlockedStagesNum++;
             }
         })
-        console.log("UNLOCKED STAGES NUM: ", StageSelectPannel.unlockedStagesNum);
+        //console.log("UNLOCKED STAGES NUM: ", StageSelectPannel.unlockedStagesNum);
     }
     
     for (let i = 0; i < stageNum; i++) {
@@ -1135,6 +1156,7 @@ function main() {
             i + 1,
             unlocked
         );
+        stageSelectPannel.setCurrentMaxScoresFromCookies();
         stagePannelArr.push(stageSelectPannel);
 
         if (i != 0 && i % stageNumPerChapter == 0) chapterIndex++;
@@ -1143,7 +1165,7 @@ function main() {
             stageSelectPannel
         );
 
-        //console.log(chapterPannelArr[chapterIndex].connectedStagePannels);
+        ////console.log(chapterPannelArr[chapterIndex].connectedStagePannels);
     }
 
     checkIfChapterUnlocked();
@@ -1157,12 +1179,12 @@ function main() {
     // SO GET THIS, TRY TO MAKE IT SO THAT "COMPLETEING A STAGE" UNLOCKS THE NEXT LEVEL, RATHER THAN JUST "PRESSING NEXT"
     function checkIfChapterUnlocked() {
         chapterPannelArr.forEach((chapter) => {
-            console.log(chapter.chapterNum);
+            //console.log(chapter.chapterNum);
             // if even ONE of the stages of the chapter is unlocked, then the whole chapter is unlocked
             const stages = chapter.connectedStagePannels;
             let chapterIsOpen = false;
             stages.forEach((stage) => {
-                console.log(stage.stageUnlocked);
+                //console.log(stage.stageUnlocked);
                 if (stage.stageUnlocked) chapterIsOpen = true;
             });
             if (chapterIsOpen) {
@@ -1248,10 +1270,10 @@ function main() {
     let playerIsInBuilding = false;
     let buildingAreaInfo = null;
     function render(time) {
-        stats.begin();
+        //stats.begin();
         time *= 0.001;
 
-        //console.log(gameMode)
+        ////console.log(gameMode)
         if (gameMode == "MAIN_GAME") {
             /*
       renderOntoRenderTarget(
@@ -1279,12 +1301,12 @@ function main() {
             topDownRenderer.render(currentScene, minimapCamera);
 
             // COLLISION
-            //console.log(camera.position, camera.prevPosition);
+            ////console.log(camera.position, camera.prevPosition);
             [playerIsInBuilding, buildingAreaInfo] = currentStageModelInstance.checkIfPlayerIsInBuilding(camera.position.x, camera.position.z);
 
             if (playerIsInBuilding){
-                //console.log(camera.position);
-                //console.log("INSIDE");
+                ////console.log(camera.position);
+                ////console.log("INSIDE");
                 let diffVec = new THREE.Vector3();
 
                 //orbitControls.enabled = false;
@@ -1300,14 +1322,14 @@ function main() {
             renderer.clear();
             renderer.render(currentScene, camera);
 
-            if (guiControls.debugMode) {
-                debugCameraMesh.position.set(
-                    camera.position.x,
-                    camera.position.y,
-                    camera.position.z
-                );
+            // if (guiControls.debugMode) {
+            //     debugCameraMesh.position.set(
+            //         camera.position.x,
+            //         camera.position.y,
+            //         camera.position.z
+            //     );
 
-            }
+            // }
             
             updateRaycaster();
         } else if (gameMode == "STAGE_SELECT") {
@@ -1343,7 +1365,7 @@ function main() {
                     titleBoxIndex++;
                 }
             }
-            //console.log("HERE")
+            ////console.log("HERE")
             renderer.setRenderTarget(null);
             renderer.clear();
             renderer.render(currentScene, camera);
@@ -1381,7 +1403,7 @@ function main() {
 
 
         updateMinimapCamera();
-        stats.end();
+        //stats.end();
     }
 
     function disableControls(){
@@ -1397,9 +1419,9 @@ function main() {
     }
 
     function updateMinimapCamera() {
-        //console.log(pointerIsInMiniMap, pointerDown);
+        ////console.log(pointerIsInMiniMap, pointerDown);
         if (dragMode && pointerDown && pointerIsInMiniMap) {
-            //console.log("HELLO");
+            ////console.log("HELLO");
             //if (!guessModeEnabled && !confirmModeEnabled) {
             let movingVelCoef = 8;
 
@@ -1438,13 +1460,13 @@ function main() {
         if (gameMode == "TITLE_SCREEN") {
             for (let i = 0; i < raycasterIntersects.length; i++) {
                 if (raycasterIntersects[i].object.name == "PLAY_MESH") {
-                    console.log("STAGE SELECT ACTIVATED");
+                    //console.log("STAGE SELECT ACTIVATED");
                     gameMode = "STAGE_SELECT";
 
                     currentScene = stageSelectScene;
 
                     toggleChapterSelectMenu();
-                    console.log("REMOVE MODEL FROM TITLE");
+                    //console.log("REMOVE MODEL FROM TITLE");
                     disposeStageModel(titleScene);
                     //toggleStageSelectMenu();
                     raycasterIntersects = [];
@@ -1457,8 +1479,8 @@ function main() {
     function generateStage(difficulty) {
         enableControls();
         // reset guess button color
-        document.getElementById("guessButton").style.color = "black";
-        console.log("CHAPTER ", difficulty[0]);
+        document.getElementById("guessButton").style.color = "white";
+        //console.log("CHAPTER ", difficulty[0]);
         setSceneBackground(mainGameScene, difficulty[0]);
         // reset guess marker
         guessMarkerCylinderMesh.visible = false;
@@ -1477,8 +1499,8 @@ function main() {
             camera.position.y,
             camera.position.z + 0.01
         );
-        console.log(camera.position);
-        //console.log(mainGameScene.children);
+        //console.log(camera.position);
+        ////console.log(mainGameScene.children);
     }
 
     function updateRaycaster() {
@@ -1496,7 +1518,7 @@ function main() {
     }
     */
 
-        //console.log(pointerIsInMiniMap);
+        ////console.log(pointerIsInMiniMap);
 
         // disable/enable orbitcontrolsonly during maingame
         if (gameMode == "MAIN_GAME") {
@@ -1506,7 +1528,6 @@ function main() {
             }
 
             // CHANGE CAMERA POSITION BASED ON TERRAIN HEIGHT
-            
             cameraToFloorRay.set(new THREE.Vector3(camera.position.x, 1, camera.position.z), new THREE.Vector3(0, -1, 0));
             let intersectObject = cameraToFloorRay.intersectObject(currentStageModelInstance.getMeshGroup())[0];
             if (intersectObject !== undefined){
@@ -1538,13 +1559,13 @@ function main() {
     function onMouseDown() {
         pointerDown = true;
 
-        //console.log(pointerDown);
+        ////console.log(pointerDown);
     }
 
     function onMouseUp() {
         pointerDown = false;
 
-        //console.log(pointerDown);
+        ////console.log(pointerDown);
     }
 
     window.addEventListener("pointermove", onPointerMove);

@@ -153,8 +153,9 @@ html, body {
   color: white;
   flex-direction: column;
   position:  fixed;
-  top: 12vw;
+  top: 14vw;
   left: 19vw;
+  
   border: none;
   z-index: 1; 
 }
@@ -176,10 +177,10 @@ html, body {
    align-items: center;
    justify-content: flex-start;
    width: 10vw;
-   height: 10vw;
+   height: 12vw;
    background-color: #ccc;
    
-   margin-right: 20px;
+   margin-right: 10px;
    margin-bottom: 20px; 
    font-size: 16px;
    
@@ -209,8 +210,8 @@ html, body {
    height: 40vh;
    background-color: none;
    display: none;
-justify-content: center;
-align-items: center;
+  justify-content: center;
+  align-items: center;
    z-index: 1;
    list-style: none;
  }
@@ -225,10 +226,18 @@ align-items: center;
 
  .blue-rectangle button{
    font-family: 'Custom Font';
+   background-color: transparent;
+   border: none;
+   color: white;
    font-size: 38px;
  }
 
- .time-limit {
+ .blue-rectangle button:hover{
+  color: blue;
+  cursor: pointer;
+}
+
+#timeLimit {
    font-family: 'Custom Font';
    font-size: 25px;
    color: crimson;

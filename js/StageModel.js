@@ -7,7 +7,7 @@ import VolumetricSculpture from "./VolumetricSculpture.js";
 export default class StageModel {
     constructor(difficulty) {
         this.difficulty = difficulty;
-        console.log(this.difficulty);
+        //console.log(this.difficulty);
         // TEMPORARY CITY MODELING
         this.meshGroup = new THREE.Group();
         this.meshGroup.name = "stageModel";
@@ -22,6 +22,7 @@ export default class StageModel {
         this.stageRoadMesh = new WFCFloorMesh(
             this.WFCDim,
             this.WFCFloorSize,
+            this.difficulty[5],
             "assets/tiles/set1/",
             ".png"
         );
@@ -71,7 +72,7 @@ export default class StageModel {
 
 
         Promise.all(this.WFC3D.promises).then(() => {
-            console.log("ASDF");
+            //console.log("ASDF");
             for (let i = 0; i < this.buildingNum; i++) {
                 // let dim = [
                 // 	Math.ceil(this.buildingTransform[i][2] * 8),
@@ -210,8 +211,8 @@ export default class StageModel {
         this.playerPosition = new THREE.Vector3(
             posXZ[0], 0.05, posXZ[1]
         );
-        console.log("계산완료");
-        console.log(this.playerPosition);
+        //console.log("계산완료");
+        //console.log(this.playerPosition);
     }
 
     map(value, min1, max1, min2, max2) {
@@ -281,151 +282,139 @@ export default class StageModel {
 
 
             if (this.buildingTransform[i][4]) continue;
+            let randomVal = Math.floor(Math.random() * 6);
+            let randomCubeNum;
+            switch(randomVal){
+                case 0:
+                    //structure 1: cube clusters
+                    randomCubeNum = Math.random() * 100;
+                    for (let i = 0; i < randomCubeNum; i++){
+                        let rangeScaleX = 0.5;
+                        let rangeScaleZ = 0.5;
+                        let randomX = this.map(Math.random(), 0, 1, buildingPosX - sizeX * 0.5 * rangeScaleX, buildingPosX + sizeX * 0.5 * rangeScaleX);
+                        let randomY = this.map(Math.random(), 0, 1, 0, 5);
+                        //console.log(randomY);
+                        let randomZ = this.map(Math.random(), 0, 1, buildingPosZ - sizeZ * 0.5 * rangeScaleZ, buildingPosZ + sizeZ * 0.5 * rangeScaleZ);
 
-            //structure 1: cube clusters
-            // {
-            //     let randomCubeNum = Math.random() * 100;
-            //     for (let i = 0; i < randomCubeNum; i++){
-            //         let rangeScaleX = 0.5;
-            //         let rangeScaleZ = 0.5;
-            //         let randomX = this.map(Math.random(), 0, 1, buildingPosX - sizeX * 0.5 * rangeScaleX, buildingPosX + sizeX * 0.5 * rangeScaleX);
-            //         let randomY = this.map(Math.random(), 0, 1, 0, 5);
-            //         //console.log(randomY);
-            //         let randomZ = this.map(Math.random(), 0, 1, buildingPosZ - sizeZ * 0.5 * rangeScaleZ, buildingPosZ + sizeZ * 0.5 * rangeScaleZ);
+                        let randomCubeMesh = new THREE.Mesh(randomCubeMeshGeom, randomCubeMeshMat);
+                        randomCubeMesh.position.set(randomX, randomY, randomZ);
+                        randomCubeMesh.rotateX(Math.random());
+                        randomCubeMesh.rotateZ(Math.random());
+                        this.meshGroup.add(randomCubeMesh);
+                    }
+                    break;
+                case 1:
+                    // structure 2: torus Knot 
+                    let radius = Math.min(sizeX, sizeZ) * this.map(Math.random(), 0, 1, 0.1, 0.5);
+                    let tube = this.map(Math.random(), 0, 1, 0.1, 0.5);
+                    let tubularSegNum = this.map(Math.random(), 0, 1, 32, 64);
+                    let radialSegNum = this.map(Math.random(), 0, 1, 3, 7);
+                    let p = this.map(Math.random(), 0, 1, 1, 5);
+                    let q = this.map(Math.random(), 0, 1, 1, 5);
+                    let torusKnotGeom = new THREE.TorusKnotGeometry(radius, tube, tubularSegNum, radialSegNum, p, q);
+                    let torusKnotMesh = new THREE.Mesh(torusKnotGeom, randomCubeMeshMat);
+                    torusKnotMesh.position.set(buildingPosX, radius + cellMinHeight, buildingPosZ);
+                    this.meshGroup.add(torusKnotMesh);
+                    break;    
+                case 2:
+                    // structure 3: box towers
+                    randomCubeNum = Math.random() * 100;
+                    for (let i = 0; i < randomCubeNum; i++){
+                        let rangeScaleX = 0.2;
+                        let rangeScaleZ = 0.2;
+                        let randomX = this.map(Math.random(), 0, 1, buildingPosX - sizeX * 0.5 * rangeScaleX, buildingPosX + sizeX * 0.5 * rangeScaleX);
+                        let randomY = this.map(Math.random(), 0, 1, 0, 5);
+                        //console.log(randomY);
+                        let randomZ = this.map(Math.random(), 0, 1, buildingPosZ - sizeZ * 0.5 * rangeScaleZ, buildingPosZ + sizeZ * 0.5 * rangeScaleZ);
 
-            //         let randomCubeMesh = new THREE.Mesh(randomCubeMeshGeom, randomCubeMeshMat);
-            //         randomCubeMesh.position.set(randomX, randomY, randomZ);
-            //         randomCubeMesh.rotateX(Math.random());
-            //         randomCubeMesh.rotateZ(Math.random());
-            //         this.meshGroup.add(randomCubeMesh);
-            //     }
-            // }
+                        let randomCubeMesh = new THREE.Mesh(randomCubeMeshGeom, randomCubeMeshMat);
+                        randomCubeMesh.position.set(randomX, randomY + cellMinHeight, randomZ);
+                        randomCubeMesh.scale.set(1, this.map(Math.random(), 0, 1, 4, 6), 1);
+                        this.meshGroup.add(randomCubeMesh);
+                    }
+                    break;
+                case 3:
+                    let buildingHeight = 1;
+                    let buildingGeom = new THREE.BoxGeometry(1, buildingHeight, 1);
 
-
-            // // structure 2: torus Knot 
-
-            // {   
-            //     let radius = Math.min(sizeX, sizeZ) * this.map(Math.random(), 0, 1, 0.1, 0.5);
-            //     let tube = this.map(Math.random(), 0, 1, 0.1, 0.5);
-            //     let tubularSegNum = this.map(Math.random(), 0, 1, 32, 64);
-            //     let radialSegNum = this.map(Math.random(), 0, 1, 3, 7);
-            //     let p = this.map(Math.random(), 0, 1, 1, 5);
-            //     let q = this.map(Math.random(), 0, 1, 1, 5);
-            //     let torusKnotGeom = new THREE.TorusKnotGeometry(radius, tube, tubularSegNum, radialSegNum, p, q);
-            //     let torusKnotMesh = new THREE.Mesh(torusKnotGeom, randomCubeMeshMat);
-            //     torusKnotMesh.position.set(buildingPosX, radius, buildingPosZ);
-            //     this.meshGroup.add(torusKnotMesh);
-            // }
-
-
-            // // structure 3: box towers
-            // {
-            //     let randomCubeNum = Math.random() * 100;
-            //     for (let i = 0; i < randomCubeNum; i++){
-            //         let rangeScaleX = 0.2;
-            //         let rangeScaleZ = 0.2;
-            //         let randomX = this.map(Math.random(), 0, 1, buildingPosX - sizeX * 0.5 * rangeScaleX, buildingPosX + sizeX * 0.5 * rangeScaleX);
-            //         let randomY = this.map(Math.random(), 0, 1, 0, 5);
-            //         //console.log(randomY);
-            //         let randomZ = this.map(Math.random(), 0, 1, buildingPosZ - sizeZ * 0.5 * rangeScaleZ, buildingPosZ + sizeZ * 0.5 * rangeScaleZ);
-
-            //         let randomCubeMesh = new THREE.Mesh(randomCubeMeshGeom, randomCubeMeshMat);
-            //         randomCubeMesh.position.set(randomX, randomY, randomZ);
-            //         randomCubeMesh.scale.set(1, this.map(Math.random(), 0, 1, 4, 6), 1);
-            //         this.meshGroup.add(randomCubeMesh);
-            //     }
-            // }
-
-
-            // structure 4: building
-            /*
-            {
-                let buildingHeight = 1;
-                let buildingGeom = new THREE.BoxGeometry(1, buildingHeight, 1);
-
-                let buildingSegNum = Math.random() * 5 + 5;
-                let yPos = buildingHeight * 0.5;
-                
-                for (let i = 0; i < buildingSegNum; i++){
-                    let buildingMesh = new THREE.Mesh(buildingGeom, randomCubeMeshMat);
+                    let buildingSegNum = Math.random() * 5 + 5;
+                    let yPos = buildingHeight * 0.5;
                     
-                    buildingMesh.position.set(buildingPosX, yPos, buildingPosZ);
-                    let scaleFactorX = this.map(Math.random(), 0, 1, 0.5, 0.9);
-                    let scaleFactorZ = this.map(Math.random(), 0, 1, 0.5, 0.9);
-                    buildingMesh.scale.set(sizeX * Math.pow(scaleFactorX, i), 1, sizeZ * Math.pow(scaleFactorZ, i));
+                    for (let i = 0; i < buildingSegNum; i++){
+                        let buildingMesh = new THREE.Mesh(buildingGeom, randomCubeMeshMat);
+                        
+                        buildingMesh.position.set(buildingPosX, yPos, buildingPosZ);
+                        let scaleFactorX = this.map(Math.random(), 0, 1, 0.5, 0.9);
+                        let scaleFactorZ = this.map(Math.random(), 0, 1, 0.5, 0.9);
+                        buildingMesh.scale.set(sizeX * Math.pow(scaleFactorX, i), 1, sizeZ * Math.pow(scaleFactorZ, i));
+                        
+                        yPos += buildingHeight * 0.5;
+                        buildingHeight = this.map(Math.random(), 0, 1, 0.5, 0.9);
+                        yPos += buildingHeight * 0.5;
+                        this.meshGroup.add(buildingMesh);
+                    }
+                    break;
+                case 4:
+                    // structure 5: Noise structure
+                    noise.seed(Math.random())
+                    let totalDim = Math.min(sizeX, sizeZ);
+                    let dimScale = 0.9;
+                    totalDim *= dimScale;
+
+                    let divNum = Math.floor(this.map(Math.random(), 0, 1, 5, 8));
+                    let cubeDim = totalDim / divNum;
                     
-                    yPos += buildingHeight * 0.5;
-                    buildingHeight = this.map(Math.random(), 0, 1, 0.5, 0.9);
-                    yPos += buildingHeight * 0.5;
-                    this.meshGroup.add(buildingMesh);
-                }
-                
+                    let startX = buildingPosX - sizeX * 0.5 + cubeDim;
+                    let startZ = buildingPosZ - sizeZ * 0.5 + cubeDim;
+                    let startY = cubeDim;
+
+                    let cubeGeom = new THREE.BoxGeometry(1, 1, 1);
+                    let dummy = new THREE.Object3D();
+                    let cubeGroup = new THREE.Group();
+                    let cubeInstancedMesh = new THREE.InstancedMesh(cubeGeom, randomCubeMeshMat, divNum * divNum * divNum);
+                    let index = 0;
+                    for (let yNum = 0; yNum < divNum; yNum++){
+                        for (let zNum = 0; zNum < divNum; zNum++){
+                            for (let xNum = 0; xNum < divNum; xNum++){
+                                let cubePosX = startX + cubeDim * xNum;
+                                let cubePosY = startY + cubeDim * yNum;
+                                let cubePosZ = startZ + cubeDim * zNum;
+                                //let cubeMesh = new THREE.Mesh(cubeGeom, randomCubeMeshMat);
+                                
+                                let noiseCoef = 2.0;
+                                let scale = noise.simplex3(cubePosX * noiseCoef, cubePosY * noiseCoef, cubePosZ * noiseCoef);
+                                //console.log(scale);
+                                scale = this.map(scale, -1, 1, 0, 0.25);
+                                
+                                dummy.position.set(cubePosX, cubePosY, cubePosZ);
+                                dummy.scale.set(scale, scale, scale);
+                                dummy.updateMatrix();
+                                cubeInstancedMesh.setMatrixAt(index++, dummy.matrix);
+                            }
+                        }
+                    }
+                    this.meshGroup.add(cubeInstancedMesh);
+                    break;
+                case 5:
+                    // structure 6: volumetric model 
+            
+                    let scaleY = 2.5 + Math.random() * 2.5;
+                    let tempVol = new VolumetricSculpture(
+                        this.playerPosition,
+                        new THREE.Vector3(buildingPosX, scaleY * 0.5 + cellMinHeight, buildingPosZ),
+                        new THREE.Vector3(sizeX, scaleY, sizeZ)
+                    );
+                    tempVol.addToGroup(this.meshGroup);
+                    this.volumeModels.push(tempVol);
+                    this.updateNedded = true;
+            
+                    break;        
             }
-            */
+             
+            
+            
 
-
-            // structure 5: Noise structure
-            // {
-            //     noise.seed(Math.random())
-            //     console.log(noise.simplex3(1.2, 1.4, 2.4));
-
-            //     let totalDim = Math.min(sizeX, sizeZ);
-            //     let dimScale = 0.9;
-            //     totalDim *= dimScale;
-
-            //     let divNum = Math.floor(this.map(Math.random(), 0, 1, 5, 8));
-            //     let cubeDim = totalDim / divNum;
-
-            //     let startX = buildingPosX - sizeX * 0.5 + cubeDim;
-            //     let startZ = buildingPosZ - sizeZ * 0.5 + cubeDim;
-            //     let startY = cubeDim;
-
-            //     let cubeGeom = new THREE.BoxGeometry(1, 1, 1);
-
-            //     let dummy = new THREE.Object3D();
-            //     let cubeGroup = new THREE.Group();
-            //     let cubeInstancedMesh = new THREE.InstancedMesh(cubeGeom, randomCubeMeshMat, divNum * divNum * divNum);
-            //     let index = 0;
-            //     for (let yNum = 0; yNum < divNum; yNum++){
-            //         for (let zNum = 0; zNum < divNum; zNum++){
-            //             for (let xNum = 0; xNum < divNum; xNum++){
-            //                 let cubePosX = startX + cubeDim * xNum;
-            //                 let cubePosY = startY + cubeDim * yNum;
-            //                 let cubePosZ = startZ + cubeDim * zNum;
-            //                 //let cubeMesh = new THREE.Mesh(cubeGeom, randomCubeMeshMat);
-
-            //                 let noiseCoef = 2.0;
-            //                 let scale = noise.simplex3(cubePosX * noiseCoef, cubePosY * noiseCoef, cubePosZ * noiseCoef);
-            //                 //console.log(scale);
-            //                 scale = this.map(scale, -1, 1, 0, 0.25);
-            //                 /*
-            //                 cubeMesh.scale.set(scale, scale, scale);
-            //                 cubeMesh.position.set(cubePosX, cubePosY, cubePosZ);
-            //                 cubeGroup.add(cubeMesh);
-            //                 */
-
-            //                 dummy.position.set(cubePosX, cubePosY, cubePosZ);
-            //                 dummy.scale.set(scale, scale, scale);
-            //                 dummy.updateMatrix();
-            //                 cubeInstancedMesh.setMatrixAt(index++, dummy.matrix);
-            //             }
-            //         }
-            //     }
-            //     this.meshGroup.add(cubeInstancedMesh);
-            // }
-
-            // structure 6: volumetric model 
-            {
-                let scaleY = 2.5 + Math.random() * 2.5;
-                let tempVol = new VolumetricSculpture(
-                    this.playerPosition,
-                    new THREE.Vector3(buildingPosX, scaleY * 0.5 + cellMinHeight, buildingPosZ),
-                    new THREE.Vector3(sizeX, scaleY, sizeZ)
-                );
-                tempVol.addToGroup(this.meshGroup);
-                this.volumeModels.push(tempVol);
-                this.updateNedded = true;
-            }
+            
 
             //console.log(this.meshGroup);
         }
