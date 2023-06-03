@@ -115,7 +115,7 @@ export default class VolumetricSculpture {
     addToGroup(group){
         if (group.type === 'Group'){
             group.add(this.mesh);
-            console.log("ADDED");
+            //console.log("ADDED");
             
         }
     }

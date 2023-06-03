@@ -399,7 +399,7 @@ export default class WFC3D {
         }
         // console.log(selectedArr);
 
-        console.log(failCnt);
+        //console.log(failCnt);
         // return selectedArr;
 
         return this.makeBuildingMesh(grid, size);
