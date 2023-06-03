@@ -432,20 +432,71 @@ export default class WFC3D {
     }
 
     setMaterials(chapterNumber) {
+
+        function colorRandom(color, strength = 256) {
+            const clampNumber = (num, a, b) =>
+                Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
+
+            return Math.floor(
+                Math.floor(clampNumber(color / 0x10000 + (Math.random() - 0.5) * strength, 0, 0xff)) * 0x10000 +
+                Math.floor(clampNumber((color / 0x100) % 0x100 + (Math.random() - 0.5) * strength, 0, 0xff)) * 0x100 +
+                Math.floor(clampNumber(color % 0x100 + (Math.random() - 0.5) * strength, 0, 0xff))
+            );
+        }
+
         this.buildingMatsParams = [
             {
-                color: materialInfo[chapterNumber - 1][0],
+                color: materialInfo[chapterNumber - 1][0][0],
+                opacity : materialInfo[chapterNumber - 1][0][1],
+                metalness : materialInfo[chapterNumber - 1][0][2],
+                roughness : materialInfo[chapterNumber - 1][0][3],
             },
             {
-                color: materialInfo[chapterNumber - 1][1],
+                color: materialInfo[chapterNumber - 1][1][0],
+                opacity : materialInfo[chapterNumber - 1][1][1],
+                metalness : materialInfo[chapterNumber - 1][1][2],
+                roughness : materialInfo[chapterNumber - 1][1][3],
             },
             {
-                color: materialInfo[chapterNumber - 1][2],
+                color: materialInfo[chapterNumber - 1][2][0],
+                opacity : materialInfo[chapterNumber - 1][2][1],
+                metalness : materialInfo[chapterNumber - 1][2][2],
+                roughness : materialInfo[chapterNumber - 1][2][3],
             },
             {
-                color: materialInfo[chapterNumber - 1][3],
+                color: materialInfo[chapterNumber - 1][3][0],
+                opacity : materialInfo[chapterNumber - 1][3][1],
+                metalness : materialInfo[chapterNumber - 1][3][2],
+                roughness : materialInfo[chapterNumber - 1][3][3],
             },
         ]
+
+        this.buildingMat = [
+            new THREE.MeshStandardMaterial({
+                side: THREE.DoubleSide,
+                color: colorRandom(this.buildingMatsParams[0].color, 100),
+                metalness : this.buildingMatsParams[0].metalness,
+                roughness : this.buildingMatsParams[0].roughness,
+            }),
+            new THREE.MeshStandardMaterial({
+                side: THREE.DoubleSide,
+                color: colorRandom(this.buildingMatsParams[1].color, 100),
+                metalness : this.buildingMatsParams[1].metalness,
+                roughness : this.buildingMatsParams[1].roughness,
+            }),
+            new THREE.MeshStandardMaterial({
+                side: THREE.DoubleSide,
+                color: colorRandom(this.buildingMatsParams[2].color, 100),
+                metalness : this.buildingMatsParams[2].metalness,
+                roughness : this.buildingMatsParams[2].roughness,
+            }),
+            new THREE.MeshStandardMaterial({
+                side: THREE.DoubleSide,
+                color: colorRandom(this.buildingMatsParams[3].color, 100),
+                metalness : this.buildingMatsParams[3].metalness,
+                roughness : this.buildingMatsParams[3].roughness,
+            }),
+        ];
     }
 
     makeBuildingMesh(grid, size) {
@@ -467,7 +518,7 @@ export default class WFC3D {
             // console.log("Start");
             // console.log(grid);
 
-            // let buildingMat = [
+            // this.buildingMat = [
             //     new THREE.MeshPhongMaterial({
             //         side: THREE.DoubleSide, color: 0xFFFFFF * Math.random()
             //     }),
@@ -476,36 +527,42 @@ export default class WFC3D {
             //     }),
             // ];
 
-            let buildingMat = [
+            this.buildingMat = [
                 new THREE.MeshStandardMaterial({
                     side: THREE.DoubleSide,
                     color: colorRandom(this.buildingMatsParams[0].color, 100),
                     transparent : true,
-                    opacity : 0.5,
-                    metalness : 0.5,
-                    roughness : 0.5,
+                    opacity : (Math.random() + 0.5) * this.buildingMatsParams[0].opacity,
+                    metalness : (Math.random() + 0.5) * this.buildingMatsParams[0].metalness,
+                    roughness : (Math.random() + 0.5) * this.buildingMatsParams[0].roughness,
                 }),
                 new THREE.MeshStandardMaterial({
                     side: THREE.DoubleSide,
                     color: colorRandom(this.buildingMatsParams[1].color, 100),
-                    metalness : 0.5,
-                    roughness : 0.5,
+                    transparent : true,
+                    opacity : (Math.random() + 0.5) * this.buildingMatsParams[1].opacity,
+                    metalness : (Math.random() + 0.5) * this.buildingMatsParams[1].metalness,
+                    roughness : (Math.random() + 0.5) * this.buildingMatsParams[1].roughness,
                 }),
                 new THREE.MeshStandardMaterial({
                     side: THREE.DoubleSide,
                     color: colorRandom(this.buildingMatsParams[2].color, 100),
-                    metalness : 0.5,
-                    roughness : 0.5,
+                    transparent : true,
+                    opacity : (Math.random() + 0.5) * this.buildingMatsParams[2].opacity,
+                    metalness : (Math.random() + 0.5) * this.buildingMatsParams[2].metalness,
+                    roughness : (Math.random() + 0.5) * this.buildingMatsParams[2].roughness,
                 }),
                 new THREE.MeshStandardMaterial({
                     side: THREE.DoubleSide,
+                    transparent : true,
                     color: colorRandom(this.buildingMatsParams[3].color, 100),
-                    metalness : 0.5,
-                    roughness : 0.5,
+                    opacity : (Math.random() + 0.5) * this.buildingMatsParams[3].opacity,
+                    metalness : (Math.random() + 0.5) * this.buildingMatsParams[3].metalness,
+                    roughness : (Math.random() + 0.5) * this.buildingMatsParams[3].roughness,
                 }),
             ];
 
-            // console.log(buildingMat[1].color);
+            // console.log(this.buildingMat[1].color);
 
             this.isFloating(grid);
 
@@ -546,7 +603,7 @@ export default class WFC3D {
                                         side: THREE.DoubleSide,
                                     });
                                 */
-                                curMesh.children[i].material = buildingMat[i];
+                                curMesh.children[i].material = this.buildingMat[i];
                             }
                         } else {
                             /*
@@ -554,7 +611,7 @@ export default class WFC3D {
                                 side: THREE.DoubleSide,
                             });
                             */
-                            curMesh.material = buildingMat[0];
+                            curMesh.material = this.buildingMat[0];
                         }
 
                         tileMeshGroup.add(curMesh);

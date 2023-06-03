@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 import WFCFloorMesh from "./WFCFloorMesh.js";
 import WFC3D from "./WFC3D.js";
 import VolumetricSculpture from "./VolumetricSculpture.js";
@@ -26,11 +27,11 @@ export default class StageModel {
         );
 
         this.stageRoadMesh.createFloor();
-        this.stageRoadMesh.buildMesh();    
+        this.stageRoadMesh.buildMesh();
         this.buildingTransform = this.stageRoadMesh.calcBuildingTransform();
 
         this.buildingSpace = [];
-        for(let i = 0; i < this.buildingTransform.length; i++) {
+        for (let i = 0; i < this.buildingTransform.length; i++) {
             this.buildingSpace.push([
                 -(this.WFCDim - 2) * this.WFCFloorSize[0] * 0.5 + this.buildingTransform[i][0] - this.buildingTransform[i][2] * 0.5,
                 -(this.WFCDim - 2) * this.WFCFloorSize[0] * 0.5 + this.buildingTransform[i][0] + this.buildingTransform[i][2] * 0.5,
@@ -43,10 +44,9 @@ export default class StageModel {
         );
         this.setPlayerPos(this.buildingSpace);
 
-        
+
         this.meshGroup.add(this.stageRoadMesh.getMeshGroup());
 
-        
 
         this.buildingNum = this.buildingTransform.length;
 
@@ -69,9 +69,7 @@ export default class StageModel {
 
         this.WFC3D.setMaterials(this.difficulty[0]);
 
-        
 
-        
         Promise.all(this.WFC3D.promises).then(() => {
             console.log("ASDF");
             for (let i = 0; i < this.buildingNum; i++) {
@@ -95,10 +93,10 @@ export default class StageModel {
                 let cellMinHeight = this.buildingTransform[i][6];
                 buildingMesh.position.set(
                     -(this.WFCDim - 2) * this.WFCFloorSize[0] * 0.5 +
-                        this.buildingTransform[i][0],
+                    this.buildingTransform[i][0],
                     cellMinHeight,
                     -(this.WFCDim - 2) * this.WFCFloorSize[1] * 0.5 +
-                        this.buildingTransform[i][1]
+                    this.buildingTransform[i][1]
                 );
 
                 this.meshGroup.add(buildingMesh);
@@ -125,7 +123,7 @@ export default class StageModel {
             //this.meshGroup.scale.set(0.75 * this.WFCFloorSize[0] ,0.75 * this.WFCFloorSize[0], 0.75 * this.WFCFloorSize[1]);
             //this.meshGroup.updateWorldMatrix();
         });
-        
+
 
         this.stageState = {
             score: 0,
@@ -133,7 +131,7 @@ export default class StageModel {
             unlocked: false,
         };
 
-        
+
         // sea mesh
         this.seaGeometry = new THREE.PlaneGeometry(100, 100, 10, 10);
         this.seaMaterial = new THREE.MeshBasicMaterial({color: 0x0000CC, transparent: true, opacity: 0.25});
@@ -141,19 +139,48 @@ export default class StageModel {
         this.seaMesh.rotateX(-Math.PI * 0.5);
         this.seaMesh.position.set(0, -0.05, 0);
         this.meshGroup.add(this.seaMesh);
-        
+
+        // this.makeStreetLamp(10);
     }
 
-    getMeshGroup(){
+    getMeshGroup() {
         return this.meshGroup;
     }
 
-    setPlayerPos(buildingSpaces){
-        function isInBuilding(posXZ){
+    makeStreetLamp(num) {
+        const loader = new GLTFLoader();
+        let posXZ = this.getRandomPosNotInBuilding(this.buildingSpace, num);
+        loader.load(
+            'assets/Props/lamp.glb',
+            (gltf) => {
+                console.log(gltf.scene.children[0]);
+                console.log(this.WFC3D.buildingMat);
+                let lampMats = this.WFC3D.buildingMat;
+                for (let i = 0; i < num; i++) {
+                    let gltfClone = gltf.scene.clone();
+                    gltfClone.position.set(posXZ[i][0], 0, posXZ[i][1]);
+                    gltfClone.scale.set(0.2, 0.2, 0.2)
+                    for (let j = 0; j < 4; j++) {
+                        gltf.scene.children[0].children[j].material = lampMats[j];
+                    }
+                    console.log(posXZ[i]);
+                    this.meshGroup.add(gltfClone);
+                }
+            },
+            undefined,
+            function (error) {
+                console.log(error);
+            }
+        );
+
+    }
+
+    getRandomPosNotInBuilding(buildingSpaces, length = 1) {
+        function isInBuilding(posXZ) {
             let isIn = false;
-            for(let i = 0; i < buildingSpaces.length; i++){
-                if(posXZ[0] > buildingSpaces[i][0] && posXZ[0] < buildingSpaces[i][1] &&
-                   posXZ[1] > buildingSpaces[i][2] && posXZ[1] < buildingSpaces[i][3]) {
+            for (let i = 0; i < buildingSpaces.length; i++) {
+                if (posXZ[0] > buildingSpaces[i][0] && posXZ[0] < buildingSpaces[i][1] &&
+                    posXZ[1] > buildingSpaces[i][2] && posXZ[1] < buildingSpaces[i][3]) {
                     isIn = true;
                     break;
                 }
@@ -161,15 +188,24 @@ export default class StageModel {
             return isIn;
         }
 
-        let posXZ;
-
-        do{
-            posXZ = [
+        let posXZ = [];
+        let i = 0;
+        do {
+            posXZ[i] = [
                 this.difficulty[1] * this.difficulty[2] * (Math.random() - 0.5),
                 this.difficulty[1] * this.difficulty[2] * (Math.random() - 0.5)
             ];
-            console.log(posXZ);
-        }while (isInBuilding(posXZ))
+            if (!isInBuilding(posXZ[i]) && i < length) {
+                i++;
+            }
+        } while (i < length);
+        if (length === 1)
+            posXZ = posXZ[0];
+        return posXZ;
+    }
+
+    setPlayerPos(buildingSpaces) {
+        let posXZ = this.getRandomPosNotInBuilding(buildingSpaces);
 
         this.playerPosition = new THREE.Vector3(
             posXZ[0], 0.05, posXZ[1]
@@ -178,29 +214,26 @@ export default class StageModel {
         console.log(this.playerPosition);
     }
 
-    map(value,  min1,  max1,  min2,  max2) {
+    map(value, min1, max1, min2, max2) {
         return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
     }
 
-    placeRandomStructures(){
+    placeRandomStructures() {
         //console.log(playerPosX, playerPosZ, this.buildingTransform);
 
         // structure 0: grass
         let grassDummy = new THREE.Object3D();
         let grassGeom = new THREE.PlaneGeometry(0.05, 1, 1, 4);
-        
-        
-        
+
+
         // structure 1: cube clusters
         let randomCubeMeshMat = new THREE.MeshNormalMaterial({side: THREE.DoubleSide});
         let randomCubeMeshGeom = new THREE.BoxGeometry(0.2, 0.2, 0.2);
 
-        
 
-        
-        for(let i = 0; i < this.buildingTransform.length; i++){
+        for (let i = 0; i < this.buildingTransform.length; i++) {
             let buildingAreaInfo = this.buildingTransform[i];
-            
+
             let buildingPosX = -(this.WFCDim - 2) * this.WFCFloorSize[0] * 0.5 + buildingAreaInfo[0];
             let buildingPosZ = -(this.WFCDim - 2) * this.WFCFloorSize[1] * 0.5 + buildingAreaInfo[1];
 
@@ -246,9 +279,9 @@ export default class StageModel {
             }
             */
 
-            
+
             if (this.buildingTransform[i][4]) continue;
-            
+
             //structure 1: cube clusters
             // {
             //     let randomCubeNum = Math.random() * 100;
@@ -270,7 +303,7 @@ export default class StageModel {
 
 
             // // structure 2: torus Knot 
-            
+
             // {   
             //     let radius = Math.min(sizeX, sizeZ) * this.map(Math.random(), 0, 1, 0.1, 0.5);
             //     let tube = this.map(Math.random(), 0, 1, 0.1, 0.5);
@@ -283,7 +316,7 @@ export default class StageModel {
             //     torusKnotMesh.position.set(buildingPosX, radius, buildingPosZ);
             //     this.meshGroup.add(torusKnotMesh);
             // }
-            
+
 
             // // structure 3: box towers
             // {
@@ -303,7 +336,7 @@ export default class StageModel {
             //     }
             // }
 
-            
+
             // structure 4: building
             /*
             {
@@ -329,9 +362,8 @@ export default class StageModel {
                 
             }
             */
-            
-            
-            
+
+
             // structure 5: Noise structure
             // {
             //     noise.seed(Math.random())
@@ -343,7 +375,7 @@ export default class StageModel {
 
             //     let divNum = Math.floor(this.map(Math.random(), 0, 1, 5, 8));
             //     let cubeDim = totalDim / divNum;
-                
+
             //     let startX = buildingPosX - sizeX * 0.5 + cubeDim;
             //     let startZ = buildingPosZ - sizeZ * 0.5 + cubeDim;
             //     let startY = cubeDim;
@@ -361,7 +393,7 @@ export default class StageModel {
             //                 let cubePosY = startY + cubeDim * yNum;
             //                 let cubePosZ = startZ + cubeDim * zNum;
             //                 //let cubeMesh = new THREE.Mesh(cubeGeom, randomCubeMeshMat);
-                            
+
             //                 let noiseCoef = 2.0;
             //                 let scale = noise.simplex3(cubePosX * noiseCoef, cubePosY * noiseCoef, cubePosZ * noiseCoef);
             //                 //console.log(scale);
@@ -397,22 +429,22 @@ export default class StageModel {
 
             //console.log(this.meshGroup);
         }
-        
+
         //console.log(playerPosX, playerPosZ, newBuildingTransformArr);
     }
 
-    update(camPos){
-        if (this.updateNedded){
+    update(camPos) {
+        if (this.updateNedded) {
             this.volumeModels.forEach((volumeModel) => {
                 volumeModel.updateUniforms(camPos);
             });
         }
     }
 
-    checkIfPlayerIsInBuilding(playerPosX, playerPosZ){
+    checkIfPlayerIsInBuilding(playerPosX, playerPosZ) {
         //console.log(playerPosX, playerPosZ, this.buildingTransform);
         let newBuildingTransformArr = [];
-        for(let i = 0; i < this.buildingTransform.length; i++){
+        for (let i = 0; i < this.buildingTransform.length; i++) {
             let buildingAreaInfo = this.buildingTransform[i];
 
             let buildingPosX = -(this.WFCDim - 2) * this.WFCFloorSize[0] * 0.5 + buildingAreaInfo[0];
@@ -422,16 +454,14 @@ export default class StageModel {
             let sizeZ = buildingAreaInfo[3];
 
             newBuildingTransformArr.push([buildingPosX, buildingPosZ, sizeX, sizeZ]);
-            
-            if (Math.abs(playerPosX - buildingPosX) < sizeX * 0.5){
-                if (Math.abs(playerPosZ - buildingPosZ) < sizeZ * 0.5){
+
+            if (Math.abs(playerPosX - buildingPosX) < sizeX * 0.5) {
+                if (Math.abs(playerPosZ - buildingPosZ) < sizeZ * 0.5) {
                     //console.log("HIT");
                     return [true, [buildingPosX, buildingPosZ, sizeX, sizeZ]];
-                }
-                else continue;
-            }
-            else continue;
-            
+                } else continue;
+            } else continue;
+
         }
         return [false, null];
         //console.log(playerPosX, playerPosZ, newBuildingTransformArr);

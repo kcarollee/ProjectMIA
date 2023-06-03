@@ -4,10 +4,10 @@ import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 
-import { mix, range, normalWorld, oscSine, timerLocal } from 'three/nodes';
 
-import WebGPU from 'three/addons/capabilities/WebGPU.js';
-import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
+// import { mix, range, normalWorld, oscSine, timerLocal } from 'three/nodes';
+// import WebGPU from 'three/addons/capabilities/WebGPU.js';
+// import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
 
 import StageModel from "./js/StageModel.js";
 
@@ -47,8 +47,8 @@ function main() {
 
     let alight = new THREE.AmbientLight(0xFFFFFF, 0.2);
     let dlight = new THREE.DirectionalLight(0xFFFFFF, 5);
-    let dlHelper = new THREE.DirectionalLightHelper(dlight, 0.5, 0x00ff00);
-    dlight.position.set(0,10,0);
+    // let dlHelper = new THREE.DirectionalLightHelper(dlight, 0.5, 0x00ff00);
+    // dlight.position.set(0,10,0);
 
 
     titleScene.add(alight);
@@ -58,9 +58,9 @@ function main() {
     let i = 0;
     function animate() {
         requestAnimationFrame(animate);
-        i += 0.0025;
-        dlight.position.set(0, 3 * Math.cos(i), 3 * Math.sin(i));
-        dlHelper.update();
+        i += 0.001;
+        dlight.position.set(3 * Math.sin(i * 3), 10 * Math.sin(i), 10 * Math.cos(i));
+        // dlHelper.update();
     }
     animate();
 
@@ -113,13 +113,14 @@ function main() {
     // LIGHT
 
     const ambientLight = new THREE.AmbientLight({color: 0xFFFFFF, intensity: 100});
-    const directionalLight = new THREE.DirectionalLight({color: 0xFFFFFF, intensity: 100});
-    directionalLight.position.set(1, 1, 1);
+    // const directionalLight = new THREE.DirectionalLight({color: 0xFFFFFF, intensity: 100});
+    // directionalLight.position.set(1, 1, 1);
+
     mainGameScene.add(ambientLight);
-    mainGameScene.add(directionalLight);
+    // mainGameScene.add(directionalLight);
 
     mainGameScene.add(dlight);
-    mainGameScene.add(dlHelper);
+    // mainGameScene.add(dlHelper);
 
     // TIME LIMIT
     const DEFAULT_TIME_LIMIT = 60;
@@ -370,15 +371,16 @@ function main() {
     })
 
     const calcScore = () => {
-        const maxClickScore = 1000;
-        const maxDistanceScore = 1000;
-        const maxTimeScore = 1000;
+        const maxClickScore = 500;
+        const maxDistanceScore = 3000;
+        const maxTimeScore = 1500;
         const min = (a, b) => {
             return a <= b ? a : b;
         }
         const max = (a, b) => {
             return a >= b ? a : b;
         }
+        // 아무데나 찍어도 1000점이니까 이걸 거리나 특정 매개변수에 비례해서 깎아야하고
         const calcClickScore = (clickCnt) => {
             if(clickCnt === 1)
                 return maxClickScore;
@@ -389,6 +391,7 @@ function main() {
                 return max(0, maxClickScore * (0.85 - 0.1 * (clickCnt - 4)));
             }
         }
+
         const calcDistScore = (distance) => {
             let cellWidth = currentStageModelInstance.difficulty[2];
             if(distance < 0.25 * cellWidth){
@@ -398,10 +401,7 @@ function main() {
                 return maxDistanceScore * (1 - 0.5 * (distance - 0.25 * cellWidth) / (0.75 * cellWidth));
             }
             else if(distance < 2 * cellWidth){
-                return maxDistanceScore * (0.5 - 0.25 * (distance - cellWidth) / (cellWidth));
-            }
-            else if(distance < 4 * cellWidth){
-                return maxDistanceScore * (0.25 - 0.25 * (distance - 2 * cellWidth) / (2 * cellWidth));
+                return maxDistanceScore * (0.5 - 0.5 * (distance - cellWidth) / (cellWidth));
             }
             else
                 return 0;

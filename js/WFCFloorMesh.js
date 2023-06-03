@@ -583,12 +583,16 @@ export default class WFCFloorMesh {
                             .buildingSpace[2];
                 }
 
+                let cellMaxHeight = this.grid[index].maxHeight;
+                let cellMinHeight = this.grid[index].minHeight;
                 if (gridCnt[0] > 0 || gridCnt[1] > 0) {
                     let iMax = Math.max(1, gridCnt[0]);
                     let jMax = Math.max(1, gridCnt[1]);
                     for (let jj = 0; jj < jMax; jj++) {
                         for (let ii = 0; ii < iMax; ii++) {
                             visited[i + ii + (j + jj) * this.DIM] = true;
+                            cellMaxHeight = Math.max(cellMaxHeight,this.grid[i + ii + (j + jj) * this.DIM].maxHeight);
+                            cellMinHeight = Math.min(cellMinHeight,this.grid[i + ii + (j + jj) * this.DIM].minHeight);
                         }
                     }
                     buildingPos = [
@@ -605,9 +609,7 @@ export default class WFCFloorMesh {
                         (j - 0.5) * this.cellSize[1],
                     ];
                 }
-                
-                let cellMaxHeight = this.grid[index].maxHeight;
-                let cellMinHeight = this.grid[index].minHeight
+
                 buildingTransform.push([
                     buildingPos[0],
                     buildingPos[1],
