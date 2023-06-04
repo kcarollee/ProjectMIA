@@ -575,13 +575,11 @@ function main() {
                     "<br>HIGH SCORE : " + previousScore.toFixed(0);
                 }
                 
-                
                 toggleNearbyPannel();
                 //console.log("getStageRankingFromCookies : ", getStageRankingFromCookies(currentStageNum));
                 //console.log("getStageUnlockInfoFromCookies : ", getStageUnlockInfoFromCookie());
                 setStageRankingToCookies(currentStageNum, Math.floor(score));
                 stagePannelArr[currentStageNum - 1].setCurrentMaxScoresFromCookies();
-                
             }
         }
     });
@@ -827,14 +825,14 @@ function main() {
                 currentStageModelInstance.playerPosition.z
             )
 
-            if (guiControls.debugMode) {
-                //console.log(debugCylinderMesh.visible);
-                debugCylinderMesh.position.set(
-                    firstIntersect.x,
-                    0,
-                    firstIntersect.z
-                );
-            }
+            // if (guiControls.debugMode) {
+            //     //console.log(debugCylinderMesh.visible);
+            //     debugCylinderMesh.position.set(
+            //         firstIntersect.x,
+            //         0,
+            //         firstIntersect.z
+            //     );
+            // }
 
             if (!guessMarkerCylinderMesh.clickedFirst) {
                 guessMarkerCylinderMesh.visible = true;
@@ -1300,21 +1298,7 @@ function main() {
             currentStageModelInstance.update(minimapCamera.position);
             topDownRenderer.render(currentScene, minimapCamera);
 
-            // COLLISION
-            ////console.log(camera.position, camera.prevPosition);
-            [playerIsInBuilding, buildingAreaInfo] = currentStageModelInstance.checkIfPlayerIsInBuilding(camera.position.x, camera.position.z);
-
-            if (playerIsInBuilding){
-                ////console.log(camera.position);
-                ////console.log("INSIDE");
-                let diffVec = new THREE.Vector3();
-
-                //orbitControls.enabled = false;
-                orbitControls.insideBuilding = true;
-                //orbitControls.dispose();
-
-            }
-            else orbitControls.insideBuilding = false;
+            
             
 
             currentStageModelInstance.update(camera.position);
@@ -1479,7 +1463,7 @@ function main() {
     function generateStage(difficulty) {
         enableControls();
         // reset guess button color
-        document.getElementById("guessButton").style.color = "white";
+        document.getElementById("guessButton").style.color = "aqua";
         //console.log("CHAPTER ", difficulty[0]);
         setSceneBackground(mainGameScene, difficulty[0]);
         // reset guess marker
