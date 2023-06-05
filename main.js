@@ -533,7 +533,7 @@ function main() {
 
             // RESULTS TRIGGER EVENT
             let threshold = difficultyInfo[currentStageNum - 1][2];
-            if (playerAnswerData.distance > threshold * 1000){
+            if (playerAnswerData.distance > threshold){
                 toggleFarawayPannel();
             } else {
                 // UNLOCK NEXT STAGE
