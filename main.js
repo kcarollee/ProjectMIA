@@ -533,10 +533,11 @@ function main() {
 
             // RESULTS TRIGGER EVENT
             let threshold = difficultyInfo[currentStageNum - 1][2];
-            if (playerAnswerData.distance > threshold){
+            if (playerAnswerData.distance > threshold * 1000){
                 toggleFarawayPannel();
             } else {
                 // UNLOCK NEXT STAGE
+                if (StageSelectPannel.unlockedStagesNum > 15)StageSelectPannel.unlockedStagesNum = 15;
                 const nextStagePannel =
                     stagePannelArr[StageSelectPannel.unlockedStagesNum];
                 //console.log("STAGES UNLOCK INFO ", currentStageNum, StageSelectPannel.unlockedStagesNum);
@@ -696,6 +697,7 @@ function main() {
     let currentStageNum;
     nextFromNearbyButton.addEventListener("click", () => {
         currentStageNum++;
+        if (currentStageNum > 16) currentStageNum = 16;
         let difficulty = difficultyInfo[currentStageNum - 1];
         // reset main game scene: delete the stage model
         untoggleNearbyPannel();
