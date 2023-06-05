@@ -29,6 +29,19 @@ html, body {
    font-size: 48px;
 }
 
+#tutorial {
+  font-family: 'Custom Font';
+  position: absolute;
+  text-align: center;
+  z-index: 999;
+  top: 25px;
+  width: 100%;
+  color: orange;
+  cursor: pointer;
+  line-height: 150%;
+  font-size: 1.75vw;
+}
+
 #menu-screen {
    font-family: 'Custom Font';
    z-index: 999;

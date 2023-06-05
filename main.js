@@ -38,7 +38,8 @@ function main() {
 
     // SCENES AND GAME MODES
     let currentScene;
-    let gameMode = "TITLE_SCREEN"; // TITLE_SCREEN, STAGE_SELECT, MAIN_GAME
+    let gameMode = "TITLE_SCREEN"; // TITLE_SCREEN, STAGE_SELECT, MAIN_GAME, TUTORIAL
+    
     const titleScene = new THREE.Scene();
     const stageSelectScene = new THREE.Scene();
     // const backgroundColor = 0x000000;
@@ -51,6 +52,8 @@ function main() {
     // dlight.position.set(0,10,0);
     // let dlHelper = new THREE.DirectionalLightHelper(dlight, 0.5, 0x00ff00);
     // dlight.position.set(0,10,0);
+
+    
 
 
     titleScene.add(alight);
@@ -370,6 +373,11 @@ function main() {
             camera.position.y,
             camera.position.z + 0.01
         );
+
+        if (tutorialMode && !homeButtonTriggered){
+            homeButtonTriggered = true;
+            tutorialElement.innerHTML = tutorialTextArr[3];
+        }
     })
 
     const calcScore = () => {
@@ -526,6 +534,12 @@ function main() {
         }
         */
 
+        if (tutorialMode){
+            tutorialMode = false;
+            resetTutorial();
+        }
+
+
         // guessing is only allowed IF the player guessed at least ONCE
         if (guessMarkerCylinderMesh.clickedFirst) {
             // timer must stop
@@ -533,7 +547,7 @@ function main() {
 
             // RESULTS TRIGGER EVENT
             let threshold = difficultyInfo[currentStageNum - 1][2];
-            if (playerAnswerData.distance > threshold * 1000){
+            if (playerAnswerData.distance > threshold){
                 toggleFarawayPannel();
             } else {
                 // UNLOCK NEXT STAGE
@@ -630,6 +644,7 @@ function main() {
     retryFromTimeoutButton.addEventListener("click", () => {
         // reset main game scene: delete the stage model
         let difficulty = difficultyInfo[currentStageNum - 1];
+        if (currentStageNum == 1) tutorialMode = true;
         untoggleTimeoutPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
@@ -662,6 +677,7 @@ function main() {
     retryFromFarawayButton.addEventListener("click", () => {
         // reset main game scene: delete the stage model
         let difficulty = difficultyInfo[currentStageNum - 1];
+        if (currentStageNum == 1) tutorialMode = true;
         untoggleFarawayPannel();
         untoggleConfirmSubPannel();
         toggleDefaultSubPannel();
@@ -727,6 +743,7 @@ function main() {
 
     retryFromNearbyButton.addEventListener("click", () => {
         let difficulty = difficultyInfo[currentStageNum - 1];
+        if (currentStageNum == 1) tutorialMode = true;
         // reset main game scene: delete the stage model
         untoggleNearbyPannel();
         untoggleConfirmSubPannel();
@@ -794,7 +811,11 @@ function main() {
 
     minimapCanvas.addEventListener("mousedown", () => {
         dragMode = false;
-        //console.log("MOUSE DOWN");
+        if (tutorialMode && !minimapClickedTriggered){
+            tutorialElement.innerHTML = tutorialTextArr[4];
+            minimapClickedTriggered = true;
+        }
+        
     });
 
     minimapCanvas.addEventListener("mouseup", () => {
@@ -808,6 +829,10 @@ function main() {
     minimapCanvas.addEventListener("click", () => {
         if (!dragMode) {
             //console.log("CLICKED");
+            if (tutorialMode && !minimapDraggedTriggered){
+                minimapDraggedTriggered = true;
+                tutorialElement.innerHTML = tutorialTextArr[5];
+            }
             const minimapIntersects = minimapRaycaster.intersectObjects(
                 currentScene.children
             );
@@ -1071,6 +1096,7 @@ function main() {
                     toggleStageSelectMenu(this.connectedStagePannels);
                 } else {
                     currentStageNum = this.stageNum;
+                    if (currentStageNum == 1) tutorialMode = true;
                     currentScene = mainGameScene;
                     //camera.add(minimapMesh);
                     orbitControls.enabled = true;
@@ -1269,6 +1295,37 @@ function main() {
 
     let playerIsInBuilding = false;
     let buildingAreaInfo = null;
+
+    // TUTORIAL
+    let tutorialMode = false;
+    const tutorialElement = document.getElementById("tutorial");
+    tutorialElement.style.display = 'none';
+    const tutorialTextArr = [
+        "DRAG YOUR MOUSE TO LOOK AROUND",
+        "MOVE USING WASD KEYS",
+        "PRESS H TO GO BACK TO YOUR<br>STARTING POINT",
+        "DRAG THE MINIMAP TO SEARCH AROUND",
+        "CLICK YOUR GUESS OF THE<br>STARTING LOCATION ON THE MINIMAP",
+        "PRESS THE GUESS BUTTON<br>TO SEE YOUR RESULTS!"
+    ];
+    let tutorialTextIndex = 0;
+    
+    let mouseDragTriggered = false;
+    let wasdMovementTriggered = false;
+    let homeButtonTriggered = false;
+    let minimapDraggedTriggered = false;
+    let minimapClickedTriggered = false;
+    tutorialElement.innerHTML = tutorialTextArr[0];
+
+    function resetTutorial(){
+        mouseDragTriggered = false;
+        wasdMovementTriggered = false;
+        homeButtonTriggered = false;
+        minimapDraggedTriggered = false;
+        minimapClickedTriggered = false;
+        tutorialElement.innerHTML = tutorialTextArr[0];
+        tutorialElement.style.display = 'none';
+    }
     function render(time) {
         //stats.begin();
         time *= 0.001;
@@ -1284,6 +1341,9 @@ function main() {
       );
       */
             //playerTime.defaultTimeLimit;
+            if (tutorialMode){
+                tutorialElement.style.display = "block";
+            }
 
             timeLeft = Math.floor(
                 playerTime.defaultTimeLimit - playerTime.getElapsedTime()
@@ -1544,8 +1604,11 @@ function main() {
 
     function onMouseDown() {
         pointerDown = true;
-
-        ////console.log(pointerDown);
+        if (tutorialMode && !mouseDragTriggered){
+            mouseDragTriggered = true;
+            tutorialElement.innerHTML = tutorialTextArr[1];
+        }
+        
     }
 
     function onMouseUp() {
@@ -1558,6 +1621,14 @@ function main() {
     window.addEventListener("click", onPointerClick);
     window.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("keydown", (event) => {
+        if (tutorialMode && !wasdMovementTriggered){
+            if (event.key == "w" || event.key == "a" || event.key == "s" || event.key == "d"){
+                wasdMovementTriggered = true;
+                tutorialElement.innerHTML = tutorialTextArr[2];
+            }
+        }
+    })
     requestAnimationFrame(render);
 }
 
