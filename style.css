@@ -36,13 +36,13 @@ html, body {
   position: absolute;
   text-align: center;
   z-index: 999;
-  top: 25px;
+  top: 80vh;
   width: 100%;
   color: orange;
-  cursor: pointer;
   line-height: 150%;
   font-size: 1.75vw;
 }
+
 
 #menu-screen {
    font-family: 'Custom Font';
