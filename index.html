@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-   
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
     <script src="https://cdn.rawgit.com/mrdoob/stats.js/r17/build/stats.min.js"></script>
     <script src="js/rulebook.js"></script>
@@ -28,6 +28,47 @@
         <button id="backToStages">Back to Stages</button>
       </div>
     </div>
+
+    <div id="helper">
+      <strong>?</strong>
+    </div>
+
+    <div id="helper-screen">
+      <div id="helper-options">
+        <div id="helper-body">
+          <div>
+            <div id="howtoplay-title" style="font-size: 30px;">
+              How To Play <br> <br>
+            </div>
+            THE OBJECTIVE OF THIS GAME IS TO <strong>GUESS YOUR STARTING LOCATION</strong>
+            ON THE MINIMAP BY LOOKING AROUND YOUR SURROUNDINGS. <br> <br>
+
+            KEEP IN MIND THAT YOU ARE SUPPOSED TO GUESS YOUR
+            <span style="color: Blue;"><strong>"STARTING"</strong></span> LOCATION,
+            AND NOT YOUR <strong>"CURRENT"</strong> POSITION! <br> <br>
+
+            GOOD LUCK AND HAVE FUN! <br> <br>
+
+            ---------------------------------------<br> <br>
+
+            <div id="controls-title" style="font-size: 30px;">
+              Controls <br> <br>
+            </div>
+
+            <span style="color: Blue;"><strong>Move</strong></span> : WASD <br>
+            <span style="color: Blue;"><strong>Look Around</strong></span> : Drag <br>
+            <span style="color: Blue;"><strong>FOV Control</strong></span> : Wheel Up/Down <br>
+            <span style="color: Blue;"><strong>Map Zoom In/Out</strong></span> : Wheel Up/Down On Map <br>
+            <span style="color: Blue;"><strong>Change Map Size</strong></span> : Click <strong>+/-</strong> Button <br>
+            <span style="color: Blue;"><strong>Guess Your Born Place </strong></span>: Click Map <br>
+            <span style="color: Blue;"><strong>Confirm Your</strong></span> : Click <strong>Guess</strong> Button <br>
+            <span style="color: Blue;"><strong>Back To Born Place</strong></span> : Click <strong>H</strong> Button <br>
+          </div>
+        </div>
+        <button id="backToGame2">Back to Game</button>
+      </div>
+    </div>
+
     <div id="settings-screen">
       <div id="menu-options">
         <button id="volume">Volume</button>
@@ -67,13 +108,13 @@
       </div>
     </div>
 
-    
+
     <div class="container" id="chapterContainer"></div>
     <div class="container" id="stageContainer">
       <button id="backToChapters">BACK</button>
     </div>
 
-    
+
 
     <canvas id="c"></canvas>
     <div class="blue-rectangle" id="minimap">

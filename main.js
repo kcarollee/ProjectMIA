@@ -137,9 +137,24 @@ function main() {
         toggleMenu();
     });
 
+    const helperButton = document.getElementById("helper");
+    let helperActive = false;
+    helperButton.addEventListener("click", () => {
+        toggleHelper();
+    })
+
+    menuButton.addEventListener("click", () => {
+        toggleMenu();
+    });
+
     const backToGameButton = document.getElementById("backToGame");
     backToGameButton.addEventListener("click", () => {
         untoggleMenu();
+    });
+
+    const backToGameButton2 = document.getElementById("backToGame2");
+    backToGameButton2.addEventListener("click", () => {
+        untoggleHelper();
     });
 
     function toggleMenu() {
@@ -154,6 +169,20 @@ function main() {
         enableControls();
         menuScreen.style.display = "none";
         menuActive = false;
+    }
+
+    function toggleHelper() {
+        const helperScreen = document.getElementById("helper-screen");
+        disableControls();
+        helperScreen.style.display = "flex";
+        helperActive = true;
+    }
+
+    function untoggleHelper() {
+        const helperScreen = document.getElementById("helper-screen");
+        enableControls();
+        helperScreen.style.display = "none";
+        helperActive = false;
     }
 
     function toggleChapterSelectMenu() {
