@@ -306,14 +306,20 @@ html, body {
 
  .blue-rectangle button{
    font-family: 'Custom Font';
-   background-color: transparent;
-   border: none;
+   background: rgba(255, 255, 255, 0.5);
+   border-style: solid;
+   border-color: black;
+   
    color: aqua;
    font-size: 38px;
+   padding: 0px;
+   padding-left: 5px;
+   padding-top: 5px;
  }
 
  .blue-rectangle button:hover{
   color: blue;
+  background: rgba(255, 255, 255, 1.0);
   cursor: pointer;
 }
 
@@ -321,6 +327,8 @@ html, body {
    font-family: 'Custom Font';
    font-size: 25px;
    color: crimson;
+   padding-top: 5px;
+   padding-left: 5px;
  }
 
  
