@@ -574,6 +574,14 @@ function main() {
             // timer must stop
             playerTime.stop();
 
+            // SHOW CORRECT ANSWER
+            //console.log(playerAnswerData.playerPos);
+            answerMarkerCylinderMesh.position.set(playerAnswerData.playerPos.x, 1, playerAnswerData.playerPos.y);
+            answerMarkerCylinderMesh.visible = true;
+            minimapCamera.position.set(0, 10, 0);
+            minimapCamera.zoom = 0.5;
+            minimapCamera.updateProjectionMatrix();
+            
             // RESULTS TRIGGER EVENT
             let threshold = difficultyInfo[currentStageNum - 1][2];
             if (playerAnswerData.distance > threshold){
@@ -808,7 +816,7 @@ function main() {
     debugCylinderMesh.visible = false;
     mainGameScene.add(debugCylinderMesh);
 
-    const guessMarkerCylinderGeom = new THREE.BoxGeometry(1, 1, 1);
+    const guessMarkerCylinderGeom = new THREE.TorusGeometry(0.5, 0.1);
     const guessMarkerCylinderMat = new THREE.MeshBasicMaterial({
         color: 0x00ff00,
     });
@@ -817,9 +825,24 @@ function main() {
         guessMarkerCylinderMat
     );
     mainGameScene.add(guessMarkerCylinderMesh);
+    guessMarkerCylinderMesh.rotateX(Math.PI * 0.5);
     guessMarkerCylinderMesh.visible = false;
     guessMarkerCylinderMesh.clickedFirst = false;
     guessMarkerCylinderMesh.layers.set(1);
+
+    const answerMarkerCylinderGeom = new THREE.TorusGeometry(0.5, 0.1);;
+    const answerMarkerCylinderMat = new THREE.MeshBasicMaterial({
+        color: 0xff0000,
+    });
+    const answerMarkerCylinderMesh = new THREE.Mesh(
+        answerMarkerCylinderGeom,
+        answerMarkerCylinderMat
+    );
+    mainGameScene.add(answerMarkerCylinderMesh);
+    answerMarkerCylinderMesh.rotateX(Math.PI * 0.5);
+    answerMarkerCylinderMesh.visible = false;
+    answerMarkerCylinderMesh.clickedFirst = false;
+    answerMarkerCylinderMesh.layers.set(1);
 
     const boxGeom = new THREE.BoxGeometry(1, 1, 1);
     const boxMat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
@@ -922,6 +945,7 @@ function main() {
     minimapCamera.layers.enable(1); // for the GUESS MARKER
 
     function minimapCameraReset() {
+        answerMarkerCylinderMesh.visible = false;
         minimapCamera.zoom = 1;
         minimapCamera.position.set(0, 10, 0);
         minimapCamera.lookAt(0, 0, 0);
@@ -1381,6 +1405,14 @@ function main() {
 
             // TRIGGER TIMEOUT EVENT
             if (timeLeft <= 0) {
+                // SHOW CORRECT ANSWER
+                //console.log(playerAnswerData.playerPos);
+                answerMarkerCylinderMesh.position.set(playerAnswerData.playerPos.x, 1, playerAnswerData.playerPos.y);
+                answerMarkerCylinderMesh.visible = true;
+                minimapCamera.position.set(0, 10, 0);
+                minimapCamera.zoom = 0.5;
+                minimapCamera.updateProjectionMatrix();
+                
                 toggleTimeoutPannel();
                 if (guessModeEnabled) guessModeEnabled = false;
                 if (confirmModeEnabled) confirmModeEnabled = false;

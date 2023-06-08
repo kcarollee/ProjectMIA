@@ -305,16 +305,25 @@ export default class StageModel {
                     break;
                 case 1:
                     // structure 2: torus Knot 
-                    let radius = Math.min(sizeX, sizeZ) * this.map(Math.random(), 0, 1, 0.1, 0.5);
-                    let tube = this.map(Math.random(), 0, 1, 0.1, 0.5);
-                    let tubularSegNum = this.map(Math.random(), 0, 1, 32, 64);
-                    let radialSegNum = this.map(Math.random(), 0, 1, 3, 7);
-                    let p = this.map(Math.random(), 0, 1, 1, 5);
-                    let q = this.map(Math.random(), 0, 1, 1, 5);
-                    let torusKnotGeom = new THREE.TorusKnotGeometry(radius, tube, tubularSegNum, radialSegNum, p, q);
-                    let torusKnotMesh = new THREE.Mesh(torusKnotGeom, randomCubeMeshMat);
-                    torusKnotMesh.position.set(buildingPosX, radius + cellMinHeight, buildingPosZ);
-                    this.meshGroup.add(torusKnotMesh);
+                    
+
+                    let torusNum = Math.floor(this.map(Math.random(), 0, 1, 10, 15));
+                    let radiusMax = Math.min(sizeX, sizeZ) * 0.5;
+                    let tubeThickness = this.map(Math.random(), 0, 1, 0.01, 0.1);
+                    let radialSegmentsNum = 3;
+                    let tubularSegmentsNum = 4;
+                    noise.seed(Math.random());
+
+                    for (let i = 0; i < torusNum; i++){
+                        let radius = radiusMax - this.map(noise.simplex2(i * 0.1, 0), -1, 1, 0, radiusMax);
+                        let torusGeom = new THREE.TorusGeometry(radius, tubeThickness, radialSegmentsNum, tubularSegmentsNum);
+                        let torusMesh = new THREE.Mesh(torusGeom, randomCubeMeshMat);
+                        torusMesh.position.set(buildingPosX, i * tubeThickness * 2, buildingPosZ);
+                        torusMesh.rotateX(Math.PI * 0.5);
+                        torusMesh.rotateZ(Math.PI * 0.25 + noise.simplex2(i * 0.1, 0));
+
+                        this.meshGroup.add(torusMesh);
+                    }
                     break;    
                 case 2:
                     // structure 3: box towers
@@ -370,7 +379,7 @@ export default class StageModel {
 
                     let cubeGeom = new THREE.BoxGeometry(1, 1, 1);
                     let dummy = new THREE.Object3D();
-                    let cubeGroup = new THREE.Group();
+                    
                     let cubeInstancedMesh = new THREE.InstancedMesh(cubeGeom, randomCubeMeshMat, divNum * divNum * divNum);
                     let index = 0;
                     for (let yNum = 0; yNum < divNum; yNum++){
