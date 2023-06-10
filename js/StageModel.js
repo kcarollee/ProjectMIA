@@ -63,7 +63,7 @@ export default class StageModel {
 
         this.WFC3D = new WFC3D(
             this.rulebook,
-            "assets/3Dtiles/Building/",
+            "assets/3Dtiles/BuildingBackUp/",
             ".glb"
         );
 
