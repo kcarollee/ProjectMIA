@@ -353,7 +353,8 @@ function main() {
         untoggleMiniMap();
         currentScene = stageSelectScene;
         gameMode = "STAGE_SELECT";
-
+        tutorialMode = false;
+        resetTutorial();
         // reset main game scene: delete the stage model
         disposeStageModel(mainGameScene);
 
@@ -377,8 +378,12 @@ function main() {
         minimapCamera.updateProjectionMatrix();
         */
         const minimapElem = document.querySelector(".top-down-canvas");
-        topDownCanvasDefaultSize.width += 10;
-        topDownCanvasDefaultSize.height += 10;
+        if (topDownCanvasDefaultSize.width < 40){
+            topDownCanvasDefaultSize.width += 5;
+            topDownCanvasDefaultSize.height += 5;
+        }
+        
+        
         minimapElem.style.width = topDownCanvasDefaultSize.width + "vh";
         minimapElem.style.height = topDownCanvasDefaultSize.height + "vh";
     });
@@ -389,8 +394,11 @@ function main() {
         minimapCamera.updateProjectionMatrix();
         */
         const minimapElem = document.querySelector(".top-down-canvas");
-        topDownCanvasDefaultSize.width -= 10;
-        topDownCanvasDefaultSize.height -= 10;
+        if (topDownCanvasDefaultSize.width > 25){
+            topDownCanvasDefaultSize.width -= 5;
+            topDownCanvasDefaultSize.height -= 5;
+        }
+        
         minimapElem.style.width = topDownCanvasDefaultSize.width + "vh";
         minimapElem.style.height = topDownCanvasDefaultSize.height + "vh";
     });

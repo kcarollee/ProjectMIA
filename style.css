@@ -35,7 +35,7 @@ html, body {
   font-family: 'Custom Font';
   position: absolute;
   text-align: center;
-  z-index: 999;
+  z-index: 2;
   top: 80vh;
   width: 100%;
   color: orange;
@@ -183,16 +183,21 @@ html, body {
     align-items: center;
     height: 50%;
     width: 50%;
+    block-size: fit-content;
 }
+
+
 #helper-options button {
-    font-family: 'Custom Font';
-    background: none;
-    z-index: 999;
-    margin: 10px;
-    font-size: 30px;
-    cursor: pointer;
-    border: none;
+  font-family: 'Custom Font';
+  background: none;
+  z-index: 999;
+  margin: 10px;
+  font-size: 30px;
+  cursor: pointer;
+  border: none;
 }
+
+
 
 #helper-body {
     background-color: rgba(255, 255, 255, 0.5);
@@ -204,6 +209,7 @@ html, body {
     align-items: center;
     height: 100%;
     width: 100%;
+    block-size: fit-content;
 }
 
 #helper-body div {
@@ -300,7 +306,7 @@ html, body {
  .top-down-canvas {
    position: relative;
    width: 30vh;
-   height:30vh;
+   height: 30vh;
    z-index: 2;
  }
 
