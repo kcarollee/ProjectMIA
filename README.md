@@ -1,6 +1,8 @@
 # ProjectMIA
 CS Capstone 2023
 
+https://kcarollee.github.io/ProjectMIA/
+
 # 프로젝트 미아
 
 프로젝트 미아는 플레이어가 가상의 3D 공간에서 자신의 **시작 위치**를 지도에서 찾는 웹 게임이다.
