@@ -1,7 +1,7 @@
 # ProjectMIA
 CS Capstone 2023
 
-https://kcarollee.github.io/ProjectMIA/
+플레이 링크: https://kcarollee.github.io/ProjectMIA/
 
 # 프로젝트 미아
 
